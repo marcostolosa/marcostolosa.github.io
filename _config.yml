@@ -3,7 +3,7 @@ description: "A Blog for Hackers"
 author:
   name: "Marcos Tolosa"
   email: "marcostolosa@protonmail.com"
-  url: "https://mindsecurity.org/"
+  url: "https://mindsecurity.org"
 
 baseurl: /
 

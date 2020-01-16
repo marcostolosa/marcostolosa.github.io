@@ -3,7 +3,7 @@ description: "A Blog for Hackers"
 author:
   name: "Marcos Tolosa"
   email: "marcostolosa@protonmail.com"
-  url: "https://mindsecurity.org/blog/"
+  url: "https://mindsecurity.org/"
 
 baseurl: /
 
@@ -28,6 +28,6 @@ plugins:
   - jekyll-sitemap
 
 # Custom variables
-owner : "Tolosa"
+owner : "root"
 year : "2020"
 google_analytics: "UA-130228112-1"

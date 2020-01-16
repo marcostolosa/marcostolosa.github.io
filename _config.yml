@@ -30,3 +30,4 @@ plugins:
 # Custom variables
 owner : "Tolosa"
 year : "2020"
+google_analytics: "UA-130228112-1"

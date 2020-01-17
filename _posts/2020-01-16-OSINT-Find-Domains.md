@@ -47,6 +47,50 @@ The Subject Alternate Name (SAN) of SSL/TLS certificates can be used to extract 
 
 ## The best terminal-based subdomain scanner tools to find subdomains
 
+### Aquatone
+AQUATONE is a set of tools for performing reconnaissance on domain names. It can discover subdomains on a given domain by using open sources as well as the more common subdomain dictionary brute force approach. After subdomain discovery, AQUATONE can then scan the hosts for common web ports and HTTP headers, HTMLbodies and screenshots can be gathered and consolidated into a report for easy analysis of the attack surface.
+
+##### Dependencies
+AQUATONE depends on [Node.js] and [NPM] package manager for its web page screenshotting capabilities. Follow [this guide] for Installation instructions.
+
+You will also need a newer version of Ruby installed. If you plan to use AQUATONE in [Kali] Linux, you are already set up with this. If not, it is recommended to install Ruby with [RVM].
+
+Finally, the tool itself can be installed with the following command in a terminal:
+```
+$ gem install aquatone
+```
+
+#### Usage
+*   Discovery
+
+> The first stage of an AQUATONE assessment is the discovery stage where subdomains are discovered on the target domain using open sources, services and the more common dictionary brute force approach:
+```
+$ aquatone-discover --domain example.com
+```
+
+`aquatone-discover` will find the target's nameservers and shuffle DNS lookups between them. Should a lookup fail on the target domain's nameservers, aquatone-discover will fall back to using Google's public DNS servers to maximize discovery. The fallback DNS servers can be changed with the `--fallback-nameservers` option:
+```
+$ aquatone-discover --domain example.com --fallback-nameservers 87.98.175.85,5.9.49.12
+```
+
+*   Tuning
+
+> `aquatone-discover` will use 5 threads as default for concurrently performing DNS lookups. This provides reasonable performance but can be tuned to be more or less aggressive with the `--threads` option:
+```
+$ aquatone-discover --domain example.com --threads 25
+```
+
+*   API Keys
+
+> Some of the passive collectors will require API keys or similar credentials in order to work. Setting these values can be done with the `--set-key` option:
+```
+$ aquatone-discover --set-key shodan o1hyw8pv59vSVjrZU3Qaz6ZQqgM91ihQ
+```
+All keys will be saved in `~/aquatone/.keys.yml`.
+
+
+* * *
+
 ### AMASS
 Written by Jeff Foley, [Amass](https://github.com/OWASP/Amass) is one of our favorite tools when it comes to subdomain discovery. It’s one of the most powerful terminal-based commands there is for gathering and accumulating large amounts of subdomain data.
 

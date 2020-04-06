@@ -10,6 +10,10 @@ title: About
   - Penetration Tester
   - Red Teamer
 
+- **_Igor Deorsi_**
+  - Full Stack Software Developer
+  - JavaScript, React and Node Magician
+  - Clean Code
 
 
 <a href="http://truestop76245ujf.onion/">truestop76245ujf.onion/</a><br>

@@ -1,9 +1,17 @@
 ---
 title: OSINT - Finding Domains
-published: true
+description: "Descrição teste"
+picture: blog1.jpg
+
+label_default: "alice"
+label_primary: "story"
+label_success: "blog"
+label_info: "personal"
+label_warning: "warning"
+label_danger: "danger"
 ---
 
-> The art of finding subdomains has evolved a lot in the past few years. Finding subdomains manually would take an eternity. Fortunately, we don’t have to. 
+> The art of finding subdomains has evolved a lot in the past few years. Finding subdomains manually would take an eternity. Fortunately, we don’t have to.
 
 Subdomain scanner utilities let you explore the full domain infrastructure of any company in the world. But what are today’s most popular uses of these subdomain enumeration toolkits? Let’s find out.
 
@@ -132,6 +140,3 @@ $ pacman -S findomain
 ```
 
 ![](assets/findomain.png)
-
-
-

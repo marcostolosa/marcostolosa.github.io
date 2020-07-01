@@ -1,6 +1,14 @@
 ---
 title: Yet Another Sample Page
-published: true
+description: "Descrição teste"
+picture: blog1.jpg
+
+label_default: "alice"
+label_primary: "story"
+label_success: "blog"
+label_info: "personal"
+label_warning: "warning"
+label_danger: "danger"
 ---
 
 Text can be **bold**, _italic_, ~~strikethrough~~ or `keyword`.

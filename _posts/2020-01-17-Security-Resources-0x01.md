@@ -1,6 +1,14 @@
 ---
 title: Cyber Security Resources 0x01
-published: true
+description: "Descrição teste"
+picture: blog1.jpg
+
+label_default: "alice"
+label_primary: "story"
+label_success: "blog"
+label_info: "personal"
+label_warning: "warning"
+label_danger: "danger"
 ---
 
 # <left><font color="red">All you need, when you need</font></left>

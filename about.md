@@ -1,6 +1,6 @@
 ---
-layout: page
-title: About
+layout: default_style
+permalink: /about
 ---
 
 ## Our Team
@@ -18,4 +18,3 @@ title: About
 
 <a href="http://truestop76245ujf.onion/">truestop76245ujf.onion/</a><br>
 <a href="https://www.hackthebox.eu/profile/44238">hackthebox.eu/profile/44238</a>
-

@@ -9,13 +9,12 @@ title: About
   - Ethical Hacker
   - Penetration Tester
   - Red Teamer
-
-- **_Igor Deorsi_**
-  - Full Stack Software Developer
-  - JavaScript, React and Node Magician
-  - Clean Code
+  - AppSec Engineer
+  - DevSecOps
 
 
 <a href="http://truestop76245ujf.onion/">truestop76245ujf.onion/</a><br>
 <a href="https://www.hackthebox.eu/profile/44238">hackthebox.eu/profile/44238</a>
+
+<script src="https://www.hackthebox.eu/badge/44238"></script>
 

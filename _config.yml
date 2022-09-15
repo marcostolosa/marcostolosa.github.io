@@ -2,7 +2,7 @@ title: Mind Security - A Home for Hackers
 description: "Everything related to Cyber Security"
 author:
   name: "Marcos Tolosa"
-  email: "marcostolosa@protonmail.com"
+  email: "marcos.tolosa@owasp.org"
   url: "https://mindsecurity.org"
 
 baseurl: /
@@ -29,5 +29,5 @@ plugins:
 
 # Custom variables
 owner : "root"
-year : "2020"
+year : "2017"
 google_analytics: "UA-130228112-1"

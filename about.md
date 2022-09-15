@@ -6,11 +6,13 @@ title: About
 ## Our Team
 
 - **_Marcos Tolosa_**
-  - Ethical Hacker
-  - Penetration Tester
+  - Hacker
+  - Pentester
   - Red Teamer
-  - AppSec Engineer
-  - DevSecOps
+  - DevSecOps Engineer
+
+  ## Contact
+  - Email: _marcos.tolosa@owasp.org_
 
 
 <a href="http://truestop76245ujf.onion/">truestop76245ujf.onion/</a><br>

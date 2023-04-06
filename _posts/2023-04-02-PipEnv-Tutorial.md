@@ -40,7 +40,7 @@ $ pipenv install requests
 
 * Run your Python scripts within the virtual environment, ensuring they use the installed packages:
 ```
-$ python my_script.py
+$ pipenv run ./my_script.py
 ```
 
 * When you're done, deactivate the virtual environment with:

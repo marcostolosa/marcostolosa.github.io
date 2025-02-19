@@ -32,7 +32,7 @@ plugins:
 # Custom variables
 owner : "root"
 year : "2017"
-google_analytics: "UA-130228112-1"
+google_analytics: "G-B8KRFD08NL"
 remote_theme: pages-themes/hacker@v0.2.0
 
 algolia:

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0xHaze | Red Team Engineer & AI Security Specialist</title>
+
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/105365519?v=4">
+
+  <!-- SEO básico -->
+  <meta name="description" content="Red Team Engineer, Offensive Security Specialist, Reverse Engineer, and AI Offensive Automation Expert.">
+  <meta property="og:title" content="0xHaze | Red Team Engineer & AI Security Specialist">
+  <meta property="og:description" content="Especialista em Red Team, Engenharia Reversa e Automação de Segurança com IA.">
+  <meta property="og:image" content="https://avatars.githubusercontent.com/u/105365519?v=4">
+  <meta property="og:url" content="https://marcostolosa.github.io/">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fira+Code:wght@400;700&display=swap');
+    :root {
+      --primary: #3b82f6;
+      --secondary: #10b981;
+      --dark: #0f172a;
+      --darker: #020617;
+      --terminal: #1e293b;
+    }
+    body {
+      font-family: 'Space Mono', monospace;
+      background-color: var(--darker);
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+    }
+    .terminal-bg {
+      background-color: var(--terminal);
+      border: 1px solid #334155;
+    }
+    .typewriter {
+      border-right: 3px solid var(--primary);
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary) }
+    }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .glow:hover { box-shadow: 0 0 15px rgba(59,130,246,0.5); }
+    .command-line::before { content: \"$ \"; color: var(--secondary); }
+    .tool-icon { transition: all 0.3s ease; }
+    .tool-icon:hover { transform: translateY(-5px); filter: drop-shadow(0 5px 5px rgba(59,130,246,0.5)); }
+  </style>
+</head>
+<body class="gradient-bg">
+
+  <!-- Header/Navbar -->
+  <header class="fixed w-full z-50 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+    <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <span class="text-blue-400">0x</span><span class="text-green-400">Haze</span>
+      </div>
+      <nav class="hidden md:flex space-x-8">
+        <a href="#home" class="hover:text-blue-400">Home</a>
+        <a href="#about" class="hover:text-blue-400">About</a>
+        <a href="#expertise" class="hover:text-blue-400">Expertise</a>
+        <a href="#projects" class="hover:text-blue-400">Projects</a>
+        <a href="#contact" class="hover:text-blue-400">Contact</a>
+      </nav>
+      <div class="md:hidden">
+        <button id="menu-toggle" class="text-white focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Hero Section -->
+  <section id="home" class="pt-32 pb-20 relative overflow-hidden">
+    <div class="absolute inset-0 bg-cover opacity-10"
+      style="background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTVzdGozMzYzYnBlcWJpMWRlc2JmMmVxNjlpdjQxOG1ldGphY2NsYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/zXmbOaTpbY6mA/giphy.gif');">
+    </div>
+  
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2">
+          <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            <span class="text-blue-400">$ whoami</span><br>
+            <span class="text-green-400">0xHaze</span>
+          </h1>
+          <h2 class="text-2xl md:text-3xl mb-6 typewriter">Red Team Engineer</h2>
+          <div class="terminal-bg p-6 rounded-lg mb-8">
+            <p class="command-line">echo \"Transforming complex into knowledge\"</p>
+            <p class="command-line">cat about.txt | grep \"Neurodivergent\"</p>
+            <p class="command-line">ls -la /skills/ | grep \"AI\"</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href=\"#projects\" class=\"bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700\">Ver Projetos</a>
+            <a href="https://app.hackthebox.eu/public/profile/44238" target=\"_blank\" class=\"border-2 border-green-400 text-green-400 px-6 py-3 rounded-lg hover:bg-green-400 hover:text-gray-900\">HTB Profile</a>
+          </div>
+        </div>
+  
+        <div class="md:w-1/2 flex justify-center">
+          <img src="https://avatars.githubusercontent.com/u/105365519?v=4" alt="0xHaze" class="w-64 h-64 rounded-full border-4 border-blue-400 shadow-xl pulse">
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- About Section -->
+<section id="about" class="py-20 terminal-bg">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-16">
+      <span class="text-blue-400">$ cat</span> <span class="text-green-400">about.txt</span>
+    </h2>
+
+    <div class="flex flex-col md:flex-row items-center">
+      <div class="md:w-1/3 mb-8 md:mb-0 flex justify-center">
+        <div class="relative">
+          <div class="absolute -inset-2 bg-blue-400 rounded-full opacity-75 blur-lg"></div>
+          <img src="https://avatars.githubusercontent.com/u/105365519?v=4" alt="0xHaze" class="relative w-64 h-64 rounded-full object-cover border-4 border-blue-400 shadow-lg">
+        </div>
+      </div>
+
+      <div class="md:w-2/3 md:pl-12">
+        <div class="terminal-bg p-6 rounded-lg mb-6">
+          <p class="text-gray-300 mb-4">
+            <span class="text-blue-400">$</span> <span class="text-green-400">whois</span> 0xHaze
+          </p>
+          <p class="text-gray-300 ml-4 mb-2">
+            > <span class="text-blue-400">Name:</span> Marcos Tolosa (0xHaze)
+          </p>
+          <p class="text-gray-300 ml-4 mb-2">
+            > <span class="text-blue-400">Role:</span> Red Team Engineer | Prompt Architect
+          </p>
+          <p class="text-gray-300 ml-4 mb-2">
+            > <span class="text-blue-400">Specialties:</span> AI x Offensive Security | DevSecOps | MLOps
+          </p>
+          <p class="text-gray-300 ml-4 mb-2">
+            > <span class="text-blue-400">Neurotype:</span> TEA Nível 1 (Superpower: Hyperfocus)
+          </p>
+          <p class="text-gray-300 ml-4">
+            > <span class="text-blue-400">Years:</span> 10+ in Offensive Security
+          </p>
+        </div>
+
+        <div class="terminal-bg p-6 rounded-lg">
+          <p class="text-gray-300 mb-4">
+            <span class="text-blue-400">$</span> <span class="text-green-400">cat</span> bio.txt
+          </p>
+          <p class="text-gray-300 ml-4">
+            Specialized in Offensive Security with extensive experience in Red Team operations, reverse engineering,
+            and AI-powered attack automation. Currently exploring autonomous AI, GDB with LLMs (MCP), and automated code analysis. 
+            Active Hack The Box community member and open-source maintainer.
+          </p>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a href="https://github.com/marcostolosa" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded flex items-center">
+            <i class="fab fa-github mr-2"></i> GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+            <i class="fab fa-linkedin-in mr-2"></i> LinkedIn
+          </a>
+          <a href="mailto:marcos.tolosa@owasp.org" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center">
+            <i class="fas fa-envelope mr-2"></i> Email
+          </a>
+          <a href="https://app.hackthebox.eu/profile/44238" target="_blank" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded flex items-center">
+            <i class="fas fa-shield-alt mr-2"></i> HackTheBox
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Expertise Section -->
+<section id="expertise" class="py-20 gradient-bg">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-16">
+      <span class="text-blue-400">$ ls</span> <span class="text-green-400">/expertise/</span>
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      
+      <!-- Red Teaming -->
+      <div class="terminal-bg p-6 rounded-lg glow hover:border-blue-400 border border-gray-800 transition">
+        <div class="flex items-center mb-4">
+          <div class="bg-red-500 p-2 rounded-full mr-4">
+            <i class="fas fa-user-secret text-white"></i>
+          </div>
+          <h3 class="text-xl font-bold text-red-400">Red Teaming & APT Emulation</h3>
+        </div>
+        <ul class="list-disc list-inside text-gray-300 space-y-2">
+          <li>Simulação realista de ameaças avançadas</li>
+          <li>Desenvolvimento de TTPs customizadas</li>
+          <li>Lateral movement e evasion techniques</li>
+          <li>Chains de exploração e C2s stealth</li>
+        </ul>
+      </div>
+
+      <!-- Reverse Engineering -->
+      <div class="terminal-bg p-6 rounded-lg glow hover:border-blue-400 border border-gray-800 transition">
+        <div class="flex items-center mb-4">
+          <div class="bg-purple-500 p-2 rounded-full mr-4">
+            <i class="fas fa-bug text-white"></i>
+          </div>
+          <h3 class="text-xl font-bold text-purple-400">Engenharia Reversa Profunda</h3>
+        </div>
+        <ul class="list-disc list-inside text-gray-300 space-y-2">
+          <li>Desenvolvimento de exploits personalizados</li>
+          <li>ROP/JOP chains e shellcode crafting</li>
+          <li>Análise estática/dinâmica com Frida/Ghidra</li>
+          <li>Bypass de EDR/AV</li>
+        </ul>
+      </div>
+
+      <!-- AI Security -->
+      <div class="terminal-bg p-6 rounded-lg glow hover:border-blue-400 border border-gray-800 transition">
+        <div class="flex items-center mb-4">
+          <div class="bg-blue-500 p-2 rounded-full mr-4">
+            <i class="fas fa-robot text-white"></i>
+          </div>
+          <h3 class="text-xl font-bold text-blue-400">AI/ML Aplicados à Segurança</h3>
+        </div>
+        <ul class="list-disc list-inside text-gray-300 space-y-2">
+          <li>Assistentes ofensivos com LLMs (LangChain, Ollama)</li>
+          <li>Automação de pentests e RE com IA</li>
+          <li>Engenharia de prompts tática</li>
+          <li>Integração com GDB para análise assistida</li>
+        </ul>
+      </div>
+
+      <!-- DevSecOps -->
+      <div class="terminal-bg p-6 rounded-lg glow hover:border-blue-400 border border-gray-800 transition">
+        <div class="flex items-center mb-4">
+          <div class="bg-green-500 p-2 rounded-full mr-4">
+            <i class="fas fa-code-branch text-white"></i>
+          </div>
+          <h3 class="text-xl font-bold text-green-400">AppSec & DevSecOps Avançado</h3>
+        </div>
+        <ul class="list-disc list-inside text-gray-300 space-y-2">
+          <li>SAST, DAST e revisão de código</li>
+          <li>Threat Modeling (STRIDE, CVSS)</li>
+          <li>Segurança em containers e Kubernetes</li>
+          <li>Pipelines GitHub Actions e Terraform</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Tools Section -->
+    <div class="mt-16">
+      <h3 class="text-xl font-semibold mb-8 text-center">
+        <span class="text-blue-400">$ ls</span> <span class="text-green-400">/tools/</span>
+      </h3>
+
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+        
+        <!-- Tool: Python -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" class="w-12 h-12">
+          <span class="text-xs mt-2">Python</span>
+        </div>
+
+        <!-- Tool: Bash -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="Bash" class="w-12 h-12">
+          <span class="text-xs mt-2">Bash</span>
+        </div>
+
+        <!-- Tool: PowerShell -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/powershell/powershell-original.svg" alt="PowerShell" class="w-12 h-12">
+          <span class="text-xs mt-2">PowerShell</span>
+        </div>
+
+        <!-- Tool: Golang -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" alt="Go" class="w-12 h-12">
+          <span class="text-xs mt-2">Golang</span>
+        </div>
+
+        <!-- Tool: Linux -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="Linux" class="w-12 h-12">
+          <span class="text-xs mt-2">Linux</span>
+        </div>
+
+        <!-- Tool: Docker -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" class="w-12 h-12">
+          <span class="text-xs mt-2">Docker</span>
+        </div>
+
+        <!-- Tool: Kubernetes -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" alt="K8s" class="w-12 h-12">
+          <span class="text-xs mt-2">Kubernetes</span>
+        </div>
+
+        <!-- Tool: Terraform -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" class="w-12 h-12">
+          <span class="text-xs mt-2">Terraform</span>
+        </div>
+
+        <!-- Tool: AWS -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" alt="AWS" class="w-12 h-12">
+          <span class="text-xs mt-2">AWS</span>
+        </div>
+
+        <!-- Tool: Azure -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" alt="Azure" class="w-12 h-12">
+          <span class="text-xs mt-2">Azure</span>
+        </div>
+
+        <!-- Tool: GCP -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="GCP" class="w-12 h-12">
+          <span class="text-xs mt-2">GCP</span>
+        </div>
+
+        <!-- Tool: TensorFlow -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow" class="w-12 h-12">
+          <span class="text-xs mt-2">TensorFlow</span>
+        </div>
+
+        <!-- Tool: PyTorch -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="PyTorch" class="w-12 h-12">
+          <span class="text-xs mt-2">PyTorch</span>
+        </div>
+
+        <!-- Tool: FastAPI -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="FastAPI" class="w-12 h-12">
+          <span class="text-xs mt-2">FastAPI</span>
+        </div>
+
+        <!-- Tool: Flask -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg" alt="Flask" class="w-12 h-12">
+          <span class="text-xs mt-2">Flask</span>
+        </div>
+
+        <!-- Tool: Ghidra -->
+        <div class="tool-icon flex flex-col items-center p-4 terminal-bg rounded-lg">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ghidra/ghidra-original.svg" alt="Ghidra" class="w-12 h-12">
+          <span class="text-xs mt-2">Ghidra</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- Projects Section -->
+<section id="projects" class="py-20 terminal-bg">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-16">
+      <span class="text-blue-400">$ cd</span> <span class="text-green-400">~/projects</span>
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Project 1 -->
+      <div class="bg-gray-900 rounded-xl overflow-hidden shadow-xl glow border border-gray-800">
+        <div class="h-48 bg-gradient-to-r from-blue-900 to-blue-800 flex items-center justify-center">
+          <i class="fas fa-robot text-blue-300 text-6xl"></i>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2 text-blue-400">riskIA-service</h3>
+          <p class="text-gray-300 mb-4">
+            Assistente de IA para avaliação de risco automatizada em operações de Red Team, integrando LLMs com frameworks de segurança.
+          </p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs">Python</span>
+            <span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs">LangChain</span>
+            <span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs">Ollama</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <a href="https://github.com/marcostolosa" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
+              <i class="fab fa-github mr-1"></i> View on GitHub
+            </a>
+            <span class="text-xs text-gray-500">Private Repository</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="bg-gray-900 rounded-xl overflow-hidden shadow-xl glow border border-gray-800">
+        <div class="h-48 bg-gradient-to-r from-purple-900 to-purple-800 flex items-center justify-center">
+          <i class="fas fa-shield-alt text-purple-300 text-6xl"></i>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2 text-purple-400">OSCP Insights</h3>
+          <p class="text-gray-300 mb-4">
+            Ferramenta de análise automatizada para exames OSCP, usando IA para gerar relatórios técnicos e recomendações de hardening.
+          </p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-purple-900 text-purple-300 px-2 py-1 rounded text-xs">Python</span>
+            <span class="bg-purple-900 text-purple-300 px-2 py-1 rounded text-xs">GPT-4</span>
+            <span class="bg-purple-900 text-purple-300 px-2 py-1 rounded text-xs">Nmap</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <a href="https://github.com/marcostolosa" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm font-medium">
+              <i class="fab fa-github mr-1"></i> View on GitHub
+            </a>
+            <span class="text-xs text-gray-500">Private Repository</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="bg-gray-900 rounded-xl overflow-hidden shadow-xl glow border border-gray-800">
+        <div class="h-48 bg-gradient-to-r from-red-900 to-red-800 flex items-center justify-center">
+          <i class="fas fa-bug text-red-300 text-6xl"></i>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2 text-red-400">GDB-LLM Integration</h3>
+          <p class="text-gray-300 mb-4">
+            Integração de LLMs com GDB para análise assistida de binários, automatizando tarefas de engenharia reversa.
+          </p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs">Python</span>
+            <span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs">GDB</span>
+            <span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs">LLM</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <a href="https://github.com/marcostolosa" target="_blank" class="text-red-400 hover:text-red-300 text-sm font-medium">
+              <i class="fab fa-github mr-1"></i> View on GitHub
+            </a>
+            <span class="text-xs text-gray-500">Private Repository</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 4 -->
+      <div class="bg-gray-900 rounded-xl overflow-hidden shadow-xl glow border border-gray-800">
+        <div class="h-48 bg-gradient-to-r from-green-900 to-green-800 flex items-center justify-center">
+          <i class="fas fa-code text-green-300 text-6xl"></i>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2 text-green-400">Red Team Toolkit</h3>
+          <p class="text-gray-300 mb-4">
+            Coleção de scripts e ferramentas customizadas para operações de Red Team, incluindo C2s, lateral movement e evasion.
+          </p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs">Python</span>
+            <span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs">PowerShell</span>
+            <span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs">Bash</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <a href="https://github.com/marcostolosa" target="_blank" class="text-green-400 hover:text-green-300 text-sm font-medium">
+              <i class="fab fa-github mr-1"></i> View on GitHub
+            </a>
+            <span class="text-xs text-gray-500">Private Repository</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- View all projects -->
+    <div class="text-center mt-12">
+      <a href="https://github.com/marcostolosa?tab=repositories" target="_blank" class="inline-flex items-center px-6 py-3 border border-blue-400 text-blue-400 rounded-lg hover:bg-blue-400 hover:text-gray-900 transition duration-300">
+        <i class="fab fa-github mr-2"></i>
+        Explore All Projects on GitHub
+      </a>
+    </div>
+  </div>
+</section>
+<!-- Achievements Section -->
+<section class="py-16 gradient-bg">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">
+      <span class="text-blue-400">$ cat</span> <span class="text-green-400">achievements.txt</span>
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Achievement 1 -->
+      <div class="terminal-bg p-8 rounded-lg text-center glow border border-green-800">
+        <div class="text-5xl text-green-400 mb-4">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <h3 class="text-xl font-bold text-green-400 mb-2">Top 1 Brasil</h3>
+        <p class="text-gray-300">Hack The Box</p>
+      </div>
+
+      <!-- Achievement 2 -->
+      <div class="terminal-bg p-8 rounded-lg text-center glow border border-blue-800">
+        <div class="text-5xl text-blue-400 mb-4">
+          <i class="fas fa-globe"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-400 mb-2">Top 100 Global</h3>
+        <p class="text-gray-300">HackTheBox Hall of Fame</p>
+      </div>
+
+      <!-- Achievement 3 -->
+      <div class="terminal-bg p-8 rounded-lg text-center glow border border-purple-800">
+        <div class="text-5xl text-purple-400 mb-4">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <h3 class="text-xl font-bold text-purple-400 mb-2">OWASP Contributor</h3>
+        <p class="text-gray-300">Security Research</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- Contact Section -->
+<section id="contact" class="py-20 terminal-bg">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-16">
+      <span class="text-blue-400">$ echo</span> <span class="text-green-400">\"Let's Connect\"</span>
+    </h2>
+
+    <div class="flex flex-col lg:flex-row gap-12">
+      
+      <!-- Contact Information -->
+      <div class="lg:w-1/2">
+        <h3 class="text-2xl font-semibold mb-6 text-blue-400">Contact Information</h3>
+
+        <div class="space-y-6">
+          <div class="flex items-start">
+            <div class="bg-blue-600 p-3 rounded-full mr-4">
+              <i class="fas fa-envelope text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">Email</h4>
+              <a href="mailto:marcos.tolosa@owasp.org" class="text-gray-300 hover:text-blue-400">marcos.tolosa@owasp.org</a>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <div class="bg-gray-700 p-3 rounded-full mr-4">
+              <i class="fab fa-github text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">GitHub</h4>
+              <a href="https://github.com/marcostolosa" target="_blank" class="text-gray-300 hover:text-blue-400">github.com/marcostolosa</a>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <div class="bg-blue-700 p-3 rounded-full mr-4">
+              <i class="fab fa-linkedin-in text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">LinkedIn</h4>
+              <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-gray-300 hover:text-blue-400">linkedin.com/in/marcos-tolosa</a>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <div class="bg-purple-600 p-3 rounded-full mr-4">
+              <i class="fas fa-shield-alt text-white"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">HackTheBox</h4>
+              <a href="https://app.hackthebox.eu/profile/44238" target="_blank" class="text-gray-300 hover:text-blue-400">HTB Profile</a>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-10">
+          <h4 class="text-xl font-medium mb-4 text-blue-400">Follow Me</h4>
+          <div class="flex space-x-4">
+            <a href="https://github.com/marcostolosa" target="_blank" aria-label="GitHub" class="bg-gray-800 w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-gray-700 transition">
+              <i class="fab fa-github text-xl"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" aria-label="LinkedIn" class="bg-blue-700 w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
+              <i class="fab fa-linkedin-in text-xl"></i>
+            </a>
+            <a href="https://app.hackthebox.eu/profile/44238" target="_blank" aria-label="HackTheBox" class="bg-purple-600 w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-purple-500 transition">
+              <i class="fas fa-shield-alt text-xl"></i>
+            </a>
+            <a href="#" aria-label="Twitter" class="bg-blue-400 w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-blue-300 transition">
+              <i class="fab fa-twitter text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="lg:w-1/2">
+        <form action="https://formspree.io/f/{seu_id_aqui}" method="POST" class="bg-gray-900 rounded-xl shadow-xl p-8 border border-gray-800">
+          <h3 class="text-2xl font-semibold mb-6 text-blue-400">Send Me a Message</h3>
+
+          <div class="mb-6">
+            <label for="name" class="block text-gray-300 font-medium mb-2">Name</label>
+            <input type="text" name="name" id="name" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+          </div>
+
+          <div class="mb-6">
+            <label for="email" class="block text-gray-300 font-medium mb-2">Email</label>
+            <input type="email" name="email" id="email" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+          </div>
+
+          <div class="mb-6">
+            <label for="subject" class="block text-gray-300 font-medium mb-2">Subject</label>
+            <input type="text" name="subject" id="subject" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+          </div>
+
+          <div class="mb-6">
+            <label for="message" class="block text-gray-300 font-medium mb-2">Message</label>
+            <textarea name="message" id="message" rows="5" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition flex items-center justify-center">
+            <i class="fas fa-paper-plane mr-2"></i> Send Message
+          </button>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- Footer -->
+<footer class="bg-black/80 py-12 border-t border-gray-800">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center">
+      <div class="mb-6 md:mb-0">
+        <div class="text-2xl font-bold">
+          <span class="text-blue-400">0x</span><span class="text-green-400">Haze</span>
+        </div>
+        <p class="mt-2 text-gray-400">Red Team Engineer & AI Security Specialist</p>
+      </div>
+
+      <div class="flex flex-col items-center md:items-end">
+        <div class="flex space-x-6 mb-4">
+          <a href="https://github.com/marcostolosa" target="_blank" class="text-gray-400 hover:text-white transition" aria-label="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-gray-400 hover:text-white transition" aria-label="LinkedIn">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+          <a href="https://app.hackthebox.eu/profile/44238" target="_blank" class="text-gray-400 hover:text-white transition" aria-label="HackTheBox">
+            <i class="fas fa-shield-alt"></i>
+          </a>
+          <a href="mailto:marcos.tolosa@owasp.org" class="text-gray-400 hover:text-white transition" aria-label="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+        <p class="text-gray-400 text-sm">
+          &copy; 2025 Marcos Tolosa (0xHaze). All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top Button -->
+<button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<!-- Scripts -->
+<script>
+  // Mobile Menu Toggle
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  if (menuToggle && mobileMenu) {
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Back to Top Button
+  const backToTopButton = document.getElementById('back-to-top');
+
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+      backToTopButton.classList.remove('opacity-0', 'invisible');
+      backToTopButton.classList.add('opacity-100', 'visible');
+    } else {
+      backToTopButton.classList.remove('opacity-100', 'visible');
+      backToTopButton.classList.add('opacity-0', 'invisible');
+    }
+  });
+
+  backToTopButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        window.scrollTo({
+          top: target.offsetTop - 80,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+
+  // Typing animation for terminal text
+  const terminalElements = document.querySelectorAll('.command-line');
+  terminalElements.forEach((element, index) => {
+    setTimeout(() => {
+      element.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite';
+    }, index * 1000);
+  });
+</script>
+
+</body>
+</html>
+  

@@ -108,7 +108,7 @@
                 <div class="md:w-1/2 mb-12 md:mb-0">
                     <div class="htb-bg p-6 rounded-lg mb-8">
                         <div class="mb-2 text-sm text-htb-secondary font-terminal">root@0xhaze:~#</div>
-                        <div id="terminal" class="h-64 rounded"></div>
+                        <div id="terminal" class="h-64 rounded terminal-scroll"></div>
                     </div>
                     
                     <div class="flex items-center mb-8">
@@ -468,10 +468,9 @@
                     <div class="relative">
                         <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
                             <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">HARD</div>
-                            <i class="fas fa-lock-open text-htb-primary text-6xl relative z-10"></i>
                             
-                            <!-- Overlay com detalhes da máquina -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4 machine-overlay opacity-0 transition-opacity duration-300">
+                            <!-- Vetores de ataque sempre visíveis -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
                                 <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
                                 <ul class="text-sm text-htb-secondary">
                                     <li>• Buffer Overflow em Serviço Customizado</li>
@@ -506,10 +505,9 @@
                     <div class="relative">
                         <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
                             <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">MEDIUM</div>
-                            <i class="fas fa-lock-open text-htb-primary text-6xl relative z-10"></i>
                             
-                            <!-- Overlay com detalhes da máquina -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4 machine-overlay opacity-0 transition-opacity duration-300">
+                            <!-- Vetores de ataque sempre visíveis -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
                                 <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
                                 <ul class="text-sm text-htb-secondary">
                                     <li>• Configuração incorreta de OAuth</li>
@@ -544,10 +542,9 @@
                     <div class="relative">
                         <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
                             <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">INSANE</div>
-                            <i class="fas fa-lock text-htb-accent text-6xl relative z-10"></i>
                             
-                            <!-- Overlay com detalhes da máquina -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4 machine-overlay opacity-0 transition-opacity duration-300">
+                            <!-- Progresso de ataque sempre visível -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
                                 <h4 class="text-htb-primary text-lg font-bold mb-2">Progresso do Ataque:</h4>
                                 <ul class="text-sm text-htb-secondary">
                                     <li>• Initial Foothold ✓</li>

@@ -456,46 +456,32 @@ body {
 }
 
 /* Terminal interativo */
-.terminal-window {
-    background-color: var(--htb-terminal);
-    border: 1px solid var(--htb-highlight);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    border-radius: 6px;
-    overflow: hidden;
+.terminal-scroll {
+    overflow-y: auto !important;
+    max-height: 400px !important;
+    height: 400px !important;
 }
 
-.terminal-header {
-    background-color: var(--htb-highlight);
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
+.terminal, .cmd {
+    font-family: 'Courier New', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
 }
 
-.terminal-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 6px;
+.terminal-output {
+    overflow-y: auto !important;
 }
 
-.terminal-dot-red {
-    background-color: #ff5f56;
+/* Modificações para tornar o terminal estilo HTB */
+.terminal {
+    background-color: var(--htb-terminal) !important;
+    color: var(--htb-secondary) !important;
+    border: 1px solid var(--htb-highlight) !important;
+    padding: 10px !important;
 }
 
-.terminal-dot-yellow {
-    background-color: #ffbd2e;
-}
-
-.terminal-dot-green {
-    background-color: #27c93f;
-}
-
-.terminal-body {
-    padding: 12px;
-    font-family: 'Courier New', monospace;
-    color: var(--htb-secondary);
-    height: 300px;
-    overflow-y: auto;
+.cmd .prompt {
+    color: var(--htb-primary) !important;
 }
 
 /* Adicionando atributos de print-only para economia de tinta */

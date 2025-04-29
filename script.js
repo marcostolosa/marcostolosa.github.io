@@ -1,12 +1,14 @@
 /**
  * Script principal para o site 0xHaze
  * Inclui todas as funcionalidades interativas e animações
+ * Otimizado para carregamento rápido e desempenho
  */
 
 // Carregar scripts adicionais dinamicamente após carregar a página
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar se elemento está visível no viewport
     function isInViewport(element) {
+        if (!element) return false;
         const rect = element.getBoundingClientRect();
         return (
             rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
@@ -14,12 +16,17 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
     
-    // Carregar recursos quando visíveis
+    // Carregar recursos quando visíveis - Lazy loading
     function loadResourcesWhenVisible() {
         // Carregar gráfico de skills quando visível
         const skillsSection = document.getElementById('skills-graph');
         if (skillsSection && isInViewport(skillsSection) && !skillsSection.getAttribute('data-loaded')) {
             skillsSection.setAttribute('data-loaded', 'true');
+            // Remover indicador de carregamento
+            const loadingIndicator = skillsSection.querySelector('.loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
             initSkillsGraph();
         }
         
@@ -27,15 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const achievementsChart = document.getElementById('htb-achievements-chart');
         if (achievementsChart && isInViewport(achievementsChart) && !achievementsChart.getAttribute('data-loaded')) {
             achievementsChart.setAttribute('data-loaded', 'true');
+            // Remover indicador de carregamento do container
+            const container = achievementsChart.closest('.loading-container');
+            if (container) {
+                const loadingIndicator = container.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+            }
             initAchievementsChart();
         }
     }
     
     // Iniciar observação de scroll para carregar recursos
-    window.addEventListener('scroll', loadResourcesWhenVisible);
+    window.addEventListener('scroll', debounce(loadResourcesWhenVisible, 200));
     
     // Verificar recursos visíveis quando a página carrega
-    setTimeout(loadResourcesWhenVisible, 1000);
+    setTimeout(loadResourcesWhenVisible, 500);
     
     // Mobile Menu Toggle
     const menuToggle = document.getElementById('menu-toggle');
@@ -120,8 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar simulador de ataque ao LLM
     initLLMAttackSimulator();
     
-    // Inicializar terminal interativo se jQuery estiver carregado
-    checkJQueryAndInitTerminal();
+    // Inicializar terminal interativo
+    initTerminal();
     
     // Easter egg: Konami Code
     initKonamiCode();
@@ -137,17 +152,14 @@ function debounce(func, wait) {
     };
 }
 
-// Verifica se jQuery está carregado e inicializa o terminal
-function checkJQueryAndInitTerminal() {
-    if (window.jQuery) {
-        initTerminal();
-    } else {
-        setTimeout(checkJQueryAndInitTerminal, 100);
-    }
-}
-
-// Inicializar Terminal Interativo
+// Inicializar Terminal Interativo com limpeza entre comandos
 function initTerminal() {
+    if (!window.jQuery || !$.terminal) {
+        console.error('jQuery Terminal não carregado ainda');
+        setTimeout(initTerminal, 500);
+        return;
+    }
+    
     const securityCommands = [
         "whoami",
         "cat /etc/passwd | grep hacker",
@@ -214,7 +226,7 @@ PORT    STATE SERVICE  VERSION
         greetings: 'Terminal de Segurança HTB v1.0 - Digite "help" para comandos',
         prompt: '[[;#9FEF00;]root@0xhaze:~#] ',
         name: 'htb_terminal',
-        height: 240,
+        height: '100%',
         scrollOnEcho: true,
         completion: securityCommands
     });
@@ -228,6 +240,11 @@ PORT    STATE SERVICE  VERSION
             return;
         }
         
+        // Limpar terminal para o próximo comando
+        if (currentCmdIndex > 0) {
+            terminalObj.clear();
+        }
+        
         const cmd = securityCommands[currentCmdIndex];
         let i = 0;
         
@@ -235,12 +252,14 @@ PORT    STATE SERVICE  VERSION
             if (i < cmd.length) {
                 terminalObj.insert(cmd.charAt(i));
                 i++;
-                setTimeout(typeChar, 50 + Math.random() * 50);
+                setTimeout(typeChar, 50 + Math.random() * 30);
             } else {
                 setTimeout(() => {
                     terminalObj.exec(cmd);
                     currentCmdIndex++;
-                    setTimeout(typeNextCommand, 2000);
+                    
+                    // Pausa maior antes de limpar e executar o próximo comando
+                    setTimeout(typeNextCommand, 3000);
                 }, 500);
             }
         }
@@ -290,6 +309,8 @@ function initSkillsGraph() {
     d3.select("#skills-graph").selectAll("*").remove();
     
     const container = document.getElementById('skills-graph');
+    if (!container) return;
+    
     const width = container.clientWidth;
     const height = 400;
 
@@ -432,7 +453,7 @@ function initSkillsGraph() {
     
     // Ajustar o gráfico ao redimensionar a janela
     window.addEventListener('resize', debounce(() => {
-        if (isInViewport(container)) {
+        if (container && isInViewport(container)) {
             initSkillsGraph();
         }
     }, 250));
@@ -447,7 +468,8 @@ function initAchievementsChart() {
         return;
     }
     
-    const ctx = document.getElementById('htb-achievements-chart').getContext('2d');
+    const ctx = document.getElementById('htb-achievements-chart');
+    if (!ctx) return;
     
     // Dados de conquistas por categoria
     const htbData = {
@@ -709,9 +731,17 @@ function initGlitchEffect() {
     
     headings.forEach(heading => {
         const text = heading.innerText || heading.textContent;
-        if (heading.getAttribute('data-text') === null) {
+        if (!heading.getAttribute('data-text')) {
             heading.setAttribute('data-text', text);
         }
+        
+        // Adicionar efeito de glitch ao passar o mouse
+        heading.addEventListener('mouseenter', function() {
+            this.classList.add('glitching');
+            setTimeout(() => {
+                this.classList.remove('glitching');
+            }, 1000);
+        });
     });
 }
 
@@ -799,4 +829,14 @@ function activateHackerMode() {
             terminal.remove();
         }
     }, 10000);
+}
+
+// Verificar se um elemento está visível
+function isInViewport(element) {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.bottom >= 0
+    );
 }

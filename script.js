@@ -240,6 +240,11 @@ PORT    STATE SERVICE  VERSION
             return;
         }
         
+       // Limpar terminal para o próximo comando
+       if (currentCmdIndex > 0) {
+        terminalObj.clear();
+       }
+
         const cmd = securityCommands[currentCmdIndex];
         let i = 0;
         
@@ -255,6 +260,9 @@ PORT    STATE SERVICE  VERSION
                     
                     // Incrementar o índice do comando atual
                     currentCmdIndex++;
+                    
+                    // Pausa maior antes de limpar e executar o próximo comando
+                    setTimeout(typeNextCommand, 3000);
                     
                     // Limpar apenas o comando, mas manter o resultado na tela
                     setTimeout(() => {

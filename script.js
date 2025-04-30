@@ -1,157 +1,150 @@
-/**
- * Script principal para o site 0xHaze
- * Inclui todas as funcionalidades interativas e animações
- * Otimizado para carregamento rápido e desempenho
+/* Script principal otimizado para o site 0xHaze
+ * - Lazy loading via IntersectionObserver
+ * - Smooth scroll por CSS nativo
+ * - Matrix effect usando requestAnimationFrame
+ * - Code splitting dinâmico para D3.js e Chart.js
+ * - Acessibilidade ARIA aprimorada
  */
 
-// Carregar scripts adicionais dinamicamente após carregar a página
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se elemento está visível no viewport
-    function isInViewport(element) {
-        if (!element) return false;
-        const rect = element.getBoundingClientRect();
-        return (
-            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.bottom >= 0
-        );
-    }
-    
-    // Carregar recursos quando visíveis - Lazy loading
-    function loadResourcesWhenVisible() {
-        // Carregar gráfico de skills quando visível
-        const skillsSection = document.getElementById('skills-graph');
-        if (skillsSection && isInViewport(skillsSection) && !skillsSection.getAttribute('data-loaded')) {
-            skillsSection.setAttribute('data-loaded', 'true');
-            // Remover indicador de carregamento
-            const loadingIndicator = skillsSection.querySelector('.loading-indicator');
-            if (loadingIndicator) {
-                loadingIndicator.remove();
-            }
-            initSkillsGraph();
-        }
-        
-        // Carregar gráfico de conquistas quando visível
-        const achievementsChart = document.getElementById('htb-achievements-chart');
-        if (achievementsChart && isInViewport(achievementsChart) && !achievementsChart.getAttribute('data-loaded')) {
-            achievementsChart.setAttribute('data-loaded', 'true');
-            // Remover indicador de carregamento do container
-            const container = achievementsChart.closest('.loading-container');
-            if (container) {
-                const loadingIndicator = container.querySelector('.loading-indicator');
-                if (loadingIndicator) {
-                    loadingIndicator.remove();
-                }
-            }
-            initAchievementsChart();
-        }
-    }
-    
-    // Iniciar observação de scroll para carregar recursos
-    window.addEventListener('scroll', debounce(loadResourcesWhenVisible, 200));
-    
-    // Verificar recursos visíveis quando a página carrega
-    setTimeout(loadResourcesWhenVisible, 500);
-    
-    // Mobile Menu Toggle
+document.addEventListener('DOMContentLoaded', () => {
+    // Lazy load Skills Graph e Achievements via IntersectionObserver
+    const lazyLoadSections = [
+      { id: 'skills-graph', init: initSkillsGraph },
+      { id: 'htb-achievements-chart', init: initAchievementsChart }
+    ];
+  
+    lazyLoadSections.forEach(section => {
+      const el = document.getElementById(section.id);
+      if (!el) return;
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !el.dataset.loaded) {
+            el.dataset.loaded = 'true';
+            section.init();
+            obs.unobserve(el);
+          }
+        });
+      }, { threshold: 0.1 });
+      observer.observe(el);
+    });
+  
+    // Menu mobile toggle com ARIA
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    
     if (menuToggle && mobileMenu) {
-        menuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
+      menuToggle.addEventListener('click', () => {
+        const expanded = mobileMenu.classList.toggle('hidden');
+        menuToggle.setAttribute('aria-expanded', (!expanded).toString());
+      });
     }
-    
+  
     // Back to Top Button
-    const backToTopButton = document.getElementById('back-to-top');
-    
-    if (backToTopButton) {
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTopButton.classList.remove('opacity-0', 'invisible');
-                backToTopButton.classList.add('opacity-100', 'visible');
-            } else {
-                backToTopButton.classList.remove('opacity-100', 'visible');
-                backToTopButton.classList.add('opacity-0', 'invisible');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+    const backToTop = document.getElementById('back-to-top');
+    if (backToTop) {
+      backToTop.setAttribute('aria-hidden', 'true');
+      window.addEventListener('scroll', () => {
+        const visible = window.pageYOffset > 300;
+        backToTop.classList.toggle('opacity-100', visible);
+        backToTop.classList.toggle('visible', visible);
+        backToTop.classList.toggle('opacity-0', !visible);
+        backToTop.classList.toggle('invisible', !visible);
+        backToTop.setAttribute('aria-hidden', (!visible).toString());
+      });
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
-    
-    // Smooth scrolling para links de navegação
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-                
-                // Fechar menu mobile se aberto
-                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                }
-            }
-        });
-    });
-    
-    // Form submission
-    const contactForm = document.querySelector('.contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Simular envio de formulário com animação
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Enviando...';
-            
-            setTimeout(() => {
-                // Aqui você enviaria os dados do formulário para um servidor
-                alert('Mensagem enviada! Retornarei em breve.');
-                this.reset();
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            }, 1500);
-        });
-    }
-    
-    // Efeito de Matrix no background (com otimização para mobile)
+  
+    // Import dinâmico de D3.js e Chart.js
+    importScripts();
+  
+    // Configurações gerais
+    setupAnchorLinks();   // (removido, pois usamos CSS para smooth scroll)
+    setupContactForm();
+  
+    // Efeitos e easter eggs
     initMatrixEffect();
-    
-    // Adicionar efeito de glitch aos títulos principais
     initGlitchEffect();
-    
-    // Inicializar simulador de ataque ao LLM
     initLLMAttackSimulator();
-    
-    // Inicializar terminal interativo
     initTerminal();
-    
-    // Easter egg: Konami Code
     initKonamiCode();
-});
-
-// Função de debounce para otimização
-function debounce(func, wait) {
-    let timeout;
-    return function() {
-        const context = this, args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
+  });
+  
+  // Import dinâmico de libs via ES Modules
+  async function importScripts() {
+    window.d3 = (await import('https://unpkg.com/d3@7?module')).default;
+    window.Chart = (await import('https://cdn.jsdelivr.net/npm/chart.js')).Chart;
+  }
+  
+  // Placeholder para links âncora (agora no CSS: html { scroll-behavior: smooth; })
+  function setupAnchorLinks() {}
+  
+  // Formulário de contato
+  function setupContactForm() {
+    const form = document.querySelector('.contact-form');
+    if (!form) return;
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type=submit]');
+      const txt = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Enviando...';
+      setTimeout(() => {
+        alert('Mensagem enviada! Retornarei em breve.');
+        form.reset();
+        btn.innerHTML = txt;
+        btn.disabled = false;
+      }, 1500);
+    });
+  }
+  
+  // Debounce utilitário
+  function debounce(fn, wait) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
     };
-}
-
+  }
+  
+  // Matrix effect otimizado com requestAnimationFrame
+  let matrixId;
+  function initMatrixEffect() {
+    const canvas = document.getElementById('matrix-canvas');
+    if (!canvas || window.innerWidth < 768) return;
+    const ctx = canvas.getContext('2d');
+    const fontSize = 14;
+    let columns, drops;
+  
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.ceil(canvas.width / fontSize);
+      drops = Array(columns).fill(0).map(() => Math.random() * -100);
+    }
+    resize();
+    window.addEventListener('resize', debounce(resize, 200));
+  
+    function draw() {
+      ctx.fillStyle = 'rgba(10,10,10,0.04)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `${fontSize}px monospace`;
+      drops.forEach((y, i) => {
+        const text = characters.charAt(Math.random() * characters.length);
+        const x = i * fontSize;
+        ctx.fillStyle = `rgba(159,239,0,${Math.min(0.8, y / canvas.height * 1.5)})`;
+        if (y > 0 && y < canvas.height) ctx.fillText(text, x, y);
+        drops[i] = y > canvas.height || Math.random() > 0.99 ? 0 : y + fontSize;
+      });
+      matrixId = requestAnimationFrame(draw);
+    }
+    draw();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(matrixId);
+      else draw();
+    });
+  }
+  
 // Inicializar Terminal Interativo com limpeza entre comandos
 function initTerminal() {
     if (!window.jQuery || !$.terminal) {

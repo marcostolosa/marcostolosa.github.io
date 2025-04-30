@@ -101,11 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Debounce utilitário
   function debounce(fn, wait) {
     let t;
-    return (...args) => {
+    return function(...args) {
       clearTimeout(t);
       t = setTimeout(() => fn.apply(this, args), wait);
     };
-  }
+  }  
   
   // Matrix effect otimizado com requestAnimationFrame
   let matrixId;
@@ -300,21 +300,7 @@ function initSkillsGraph() {
             { source: "DevSecOps", target: "Cloud Security", value: 3 },
             { source: "Red Teaming", target: "DevSecOps", value: 2 }
         ]
-    }; id: "ML Security", group: 2, level: 75 },
-            { id: "DevSecOps", group: 3, level: 70 },
-            { id: "Cloud Security", group: 3, level: 65 }
-        ],
-        links: [
-            { source: "Red Teaming", target: "APT Emulation", value: 5 },
-            { source: "Red Teaming", target: "Offensive AI", value: 4 },
-            { source: "Offensive AI", target: "LLM Prompt Engineering", value: 5 },
-            { source: "Binary Exploitation", target: "Reverse Engineering", value: 4 },
-            { source: "Red Teaming", target: "Binary Exploitation", value: 3 },
-            { source: "Offensive AI", target: "ML Security", value: 4 },
-            { source: "DevSecOps", target: "Cloud Security", value: 3 },
-            { source: "Red Teaming", target: "DevSecOps", value: 2 }
-        ]
-    };
+    }; 
     
     // Limpar qualquer gráfico existente
     d3.select("#skills-graph").selectAll("*").remove();
@@ -478,175 +464,7 @@ function initSkillsGraph() {
     for (let i = 0; i < 300; i++) {
         simulation.tick();
     }
-} id: "ML Security", group: 2, level: 75 },
-            { id: "DevSecOps", group: 3, level: 70 },
-            { id: "Cloud Security", group: 3, level: 65 }
-        ],
-        links: [
-            { source: "Red Teaming", target: "APT Emulation", value: 5 },
-            { source: "Red Teaming", target: "Offensive AI", value: 4 },
-            { source: "Offensive AI", target: "LLM Prompt Engineering", value: 5 },
-            { source: "Binary Exploitation", target: "Reverse Engineering", value: 4 },
-            { source: "Red Teaming", target: "Binary Exploitation", value: 3 },
-            { source: "Offensive AI", target: "ML Security", value: 4 },
-            { source: "DevSecOps", target: "Cloud Security", value: 3 },
-            { source: "Red Teaming", target: "DevSecOps", value: 2 }
-        ]
-    };
-    
-    // Limpar qualquer gráfico existente
-    d3.select("#skills-graph").selectAll("*").remove();
-    
-    const container = document.getElementById('skills-graph');
-    if (!container) return;
-    
-    const width = container.clientWidth;
-    const height = 400;
-
-    // Criar o SVG
-    const svg = d3.select("#skills-graph")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
-    // Adicionar efeito de "glow" para as conexões
-    const defs = svg.append("defs");
-    const filter = defs.append("filter")
-        .attr("id", "glow")
-        .attr("x", "-20%")
-        .attr("y", "-20%")
-        .attr("width", "140%")
-        .attr("height", "140%");
-    
-    filter.append("feGaussianBlur")
-        .attr("stdDeviation", "2")
-        .attr("result", "coloredBlur");
-        
-    const feMerge = filter.append("feMerge");
-    feMerge.append("feMergeNode")
-        .attr("in", "coloredBlur");
-    feMerge.append("feMergeNode")
-        .attr("in", "SourceGraphic");
-
-    // Criar a simulação
-    const simulation = d3.forceSimulation(skillsData.nodes)
-        .force("link", d3.forceLink(skillsData.links).id(d => d.id).distance(100))
-        .force("charge", d3.forceManyBody().strength(-300))
-        .force("center", d3.forceCenter(width / 2, height / 2));
-
-    // Adicionar os links
-    const link = svg.append("g")
-        .selectAll("line")
-        .data(skillsData.links)
-        .enter().append("line")
-        .attr("stroke", "#1A2332")
-        .attr("stroke-width", d => Math.sqrt(d.value))
-        .attr("opacity", 0.7)
-        .style("filter", "url(#glow)");
-
-    // Adicionar os nós
-    const node = svg.append("g")
-        .selectAll("g")
-        .data(skillsData.nodes)
-        .enter().append("g")
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
-
-    // Círculos dos nós com raio baseado no nível de habilidade
-    node.append("circle")
-        .attr("r", d => d.level / 10 + 5)
-        .attr("fill", d => {
-            if (d.group === 1) return "#9FEF00"; // Red Team - verde
-            if (d.group === 2) return "#FF6B00"; // AI/ML - laranja
-            return "#3C78E0";                    // DevSecOps - azul
-        })
-        .attr("stroke", "#0A0A0A")
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.9)
-        .style("filter", "url(#glow)")
-        .on("mouseover", function(event, d) {
-            d3.select(this)
-                .attr("r", d.level / 8 + 8)
-                .attr("opacity", 1);
-                
-            // Destacar apenas os links conectados a este nó
-            link.attr("opacity", l => 
-                l.source.id === d.id || l.target.id === d.id ? 1 : 0.1
-            );
-            
-            // Mostrar texto de nível de habilidade
-            svg.append("text")
-                .attr("id", "skill-info")
-                .attr("x", width / 2)
-                .attr("y", 30)
-                .attr("text-anchor", "middle")
-                .attr("font-size", "16px")
-                .attr("fill", "#9FEF00")
-                .attr("font-weight", "bold")
-                .text(`${d.id}: ${d.level}%`);
-        })
-        .on("mouseout", function(event, d) {
-            d3.select(this)
-                .attr("r", d.level / 10 + 5)
-                .attr("opacity", 0.9);
-                
-            // Restaurar opacidade dos links
-            link.attr("opacity", 0.7);
-            
-            // Remover texto de informação
-            svg.select("#skill-info").remove();
-        });
-
-    // Adicionar rótulos
-    node.append("text")
-        .attr("dy", 4)
-        .attr("dx", d => d.level / 10 + 8) // Posiciona o texto ao lado do círculo
-        .attr("text-anchor", "start")
-        .text(d => d.id)
-        .attr("fill", "#A4B1CD")
-        .attr("font-size", "11px")
-        .attr("font-weight", "bold")
-        .attr("pointer-events", "none");
-
-    // Atualizar posições a cada tick
-    simulation.on("tick", () => {
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-        node
-            .attr("transform", d => `translate(${d.x},${d.y})`);
-    });
-
-    // Funções de arrastar
-    function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-
-    function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-    
-    // Ajustar o gráfico ao redimensionar a janela
-    window.addEventListener('resize', debounce(() => {
-        if (container && isInViewport(container)) {
-            initSkillsGraph();
-        }
-    }, 250));
-}
+}   
 
 // Inicializar gráfico de conquistas HTB
 function initAchievementsChart() {
@@ -826,94 +644,6 @@ function initLLMAttackSimulator() {
     });
 }
 
-// Efeito Matrix no background
-function initMatrixEffect() {
-    const canvas = document.getElementById('matrix-canvas');
-    if (!canvas) {
-        return;
-    }
-    
-    // Não rodar em dispositivos móveis para economizar recursos
-    if (window.innerWidth < 768) {
-        canvas.style.opacity = '0.05';
-        return;
-    }
-    
-    const ctx = canvas.getContext('2d');
-    
-    // Definir tamanho do canvas
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    
-    resizeCanvas();
-    window.addEventListener('resize', debounce(resizeCanvas, 200));
-    
-    // Caracteres do código Matrix
-    const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz><*-+.,;:!#&%$@';
-    
-    // Configurar propriedades do efeito Matrix
-    const fontSize = 14;
-    const columns = Math.ceil(canvas.width / fontSize);
-    const drops = [];
-    
-    // Inicializar gotas
-    for (let i = 0; i < columns; i++) {
-        drops[i] = Math.floor(Math.random() * -100); // Início escalonado
-    }
-    
-    // Desenhar efeito Matrix
-    function drawMatrix() {
-        // Fundo semi-transparente para criar efeito de rastro
-        ctx.fillStyle = 'rgba(10, 10, 10, 0.04)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Propriedades do texto
-        ctx.fillStyle = '#9FEF00';
-        ctx.font = `${fontSize}px 'Courier New', monospace`;
-        
-        // Desenhar caracteres
-        for (let i = 0; i < drops.length; i++) {
-            // Caractere aleatório
-            const char = characters.charAt(Math.floor(Math.random() * characters.length));
-            
-            // Desenhar o caractere
-            const x = i * fontSize;
-            const y = drops[i] * fontSize;
-            
-            // Ajustar opacidade com base na posição
-            const opacity = (y / canvas.height);
-            ctx.fillStyle = `rgba(159, 239, 0, ${Math.min(0.8, opacity * 1.5)})`;
-            
-            // Desenhar apenas se estiver dentro do viewport
-            if (y > 0 && y < canvas.height) {
-                ctx.fillText(char, x, y);
-            }
-            
-            // Incrementar posição y
-            drops[i]++;
-            
-            // Reiniciar posição com chance aleatória pequena ou quando atingir o fundo
-            if (drops[i] * fontSize > canvas.height || Math.random() > 0.99) {
-                drops[i] = Math.floor(Math.random() * -10);
-            }
-        }
-    }
-    
-    // Definir intervalo de atualização - mais lento para melhor desempenho
-    const matrixInterval = setInterval(drawMatrix, 50);
-    
-    // Pausar matrix quando a página não estiver visível para economizar recursos
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            clearInterval(matrixInterval);
-        } else {
-            setInterval(drawMatrix, 50);
-        }
-    });
-}
-
 // Adicionar efeito de glitch aos títulos
 function initGlitchEffect() {
     const headings = document.querySelectorAll('h2');
@@ -933,6 +663,9 @@ function initGlitchEffect() {
         });
     });
 }
+
+// Caracteres do código Matrix
+const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz><*-+.,;:!#&%$@';
 
 // Easter egg: Konami Code
 function initKonamiCode() {
@@ -1020,12 +753,3 @@ function activateHackerMode() {
     }, 10000);
 }
 
-// Verificar se um elemento está visível
-function isInViewport(element) {
-    if (!element) return false;
-    const rect = element.getBoundingClientRect();
-    return (
-        rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.bottom >= 0
-    );
-}

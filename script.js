@@ -307,6 +307,198 @@ function initSkillsGraph() {
             { source: "DevSecOps", target: "Cloud Security", value: 3 },
             { source: "Red Teaming", target: "DevSecOps", value: 2 }
         ]
+    }; id: "ML Security", group: 2, level: 75 },
+            { id: "DevSecOps", group: 3, level: 70 },
+            { id: "Cloud Security", group: 3, level: 65 }
+        ],
+        links: [
+            { source: "Red Teaming", target: "APT Emulation", value: 5 },
+            { source: "Red Teaming", target: "Offensive AI", value: 4 },
+            { source: "Offensive AI", target: "LLM Prompt Engineering", value: 5 },
+            { source: "Binary Exploitation", target: "Reverse Engineering", value: 4 },
+            { source: "Red Teaming", target: "Binary Exploitation", value: 3 },
+            { source: "Offensive AI", target: "ML Security", value: 4 },
+            { source: "DevSecOps", target: "Cloud Security", value: 3 },
+            { source: "Red Teaming", target: "DevSecOps", value: 2 }
+        ]
+    };
+    
+    // Limpar qualquer gráfico existente
+    d3.select("#skills-graph").selectAll("*").remove();
+    
+    const container = document.getElementById('skills-graph');
+    if (!container) return;
+    
+    const width = container.clientWidth;
+    const height = 400;
+
+    // Criar o SVG
+    const svg = d3.select("#skills-graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Adicionar efeito de "glow" para as conexões
+    const defs = svg.append("defs");
+    const filter = defs.append("filter")
+        .attr("id", "glow")
+        .attr("x", "-20%")
+        .attr("y", "-20%")
+        .attr("width", "140%")
+        .attr("height", "140%");
+    
+    filter.append("feGaussianBlur")
+        .attr("stdDeviation", "2")
+        .attr("result", "coloredBlur");
+        
+    const feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode")
+        .attr("in", "coloredBlur");
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
+
+    // Criar a simulação
+    const simulation = d3.forceSimulation(skillsData.nodes)
+        .force("link", d3.forceLink(skillsData.links).id(d => d.id).distance(80)) // Reduzir a distância entre os nós
+        .force("charge", d3.forceManyBody().strength(-200)) // Força de repulsão mais fraca
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius(d => d.level / 10 + 20)); // Adicionar força de colisão para evitar sobreposição
+
+    // Adicionar os links
+    const link = svg.append("g")
+        .selectAll("line")
+        .data(skillsData.links)
+        .enter().append("line")
+        .attr("stroke", "#1A2332")
+        .attr("stroke-width", d => Math.sqrt(d.value))
+        .attr("opacity", 0.7)
+        .style("filter", "url(#glow)");
+
+    // Adicionar os nós
+    const node = svg.append("g")
+        .selectAll("g")
+        .data(skillsData.nodes)
+        .enter().append("g")
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+    // Círculos dos nós com raio baseado no nível de habilidade
+    node.append("circle")
+        .attr("r", d => d.level / 10 + 5)
+        .attr("fill", d => {
+            if (d.group === 1) return "#9FEF00"; // Red Team - verde
+            if (d.group === 2) return "#FF6B00"; // AI/ML - laranja
+            return "#3C78E0";                    // DevSecOps - azul
+        })
+        .attr("stroke", "#0A0A0A")
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.9)
+        .style("filter", "url(#glow)")
+        .on("mouseover", function(event, d) {
+            d3.select(this)
+                .attr("r", d.level / 8 + 8)
+                .attr("opacity", 1);
+                
+            // Destacar apenas os links conectados a este nó
+            link.attr("opacity", l => 
+                l.source.id === d.id || l.target.id === d.id ? 1 : 0.1
+            );
+            
+            // Mostrar texto de nível de habilidade
+            svg.append("text")
+                .attr("id", "skill-info")
+                .attr("x", width / 2)
+                .attr("y", 30)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .attr("fill", "#9FEF00")
+                .attr("font-weight", "bold")
+                .text(`${d.id}: ${d.level}%`);
+        })
+        .on("mouseout", function(event, d) {
+            d3.select(this)
+                .attr("r", d.level / 10 + 5)
+                .attr("opacity", 0.9);
+                
+            // Restaurar opacidade dos links
+            link.attr("opacity", 0.7);
+            
+            // Remover texto de informação
+            svg.select("#skill-info").remove();
+        });
+
+    // Adicionar rótulos menores e mais próximos aos nós
+    node.append("text")
+        .attr("dy", 0) // Centralizado verticalmente
+        .attr("dx", 0) // Centralizado horizontalmente
+        .attr("text-anchor", "middle") // Texto centralizado no nó
+        .text(d => d.id)
+        .attr("fill", "#111111") // Texto mais escuro para contraste
+        .attr("font-size", "9px") // Texto menor
+        .attr("font-weight", "bold")
+        .attr("pointer-events", "none");
+
+    // Limitar posições para garantir que os nós fiquem dentro do SVG
+    simulation.on("tick", () => {
+        // Limitar posições para garantir que os nós fiquem dentro do SVG
+        node.attr("transform", d => {
+            d.x = Math.max(d.level / 10 + 10, Math.min(width - d.level / 10 - 10, d.x));
+            d.y = Math.max(d.level / 10 + 10, Math.min(height - d.level / 10 - 10, d.y));
+            return `translate(${d.x},${d.y})`;
+        });
+        
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+    });
+
+    // Funções de arrastar
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+    
+    // Ajustar o gráfico ao redimensionar a janela
+    window.addEventListener('resize', debounce(() => {
+        if (container && isInViewport(container)) {
+            initSkillsGraph();
+        }
+    }, 250));
+    
+    // Executar algumas iterações para estabilizar o gráfico antes de renderizar
+    for (let i = 0; i < 300; i++) {
+        simulation.tick();
+    }
+} id: "ML Security", group: 2, level: 75 },
+            { id: "DevSecOps", group: 3, level: 70 },
+            { id: "Cloud Security", group: 3, level: 65 }
+        ],
+        links: [
+            { source: "Red Teaming", target: "APT Emulation", value: 5 },
+            { source: "Red Teaming", target: "Offensive AI", value: 4 },
+            { source: "Offensive AI", target: "LLM Prompt Engineering", value: 5 },
+            { source: "Binary Exploitation", target: "Reverse Engineering", value: 4 },
+            { source: "Red Teaming", target: "Binary Exploitation", value: 3 },
+            { source: "Offensive AI", target: "ML Security", value: 4 },
+            { source: "DevSecOps", target: "Cloud Security", value: 3 },
+            { source: "Red Teaming", target: "DevSecOps", value: 2 }
+        ]
     };
     
     // Limpar qualquer gráfico existente

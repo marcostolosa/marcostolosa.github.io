@@ -55,9 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   
-    // Caracteres do código Matrix
-    const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz><*-+.,;:!#&%$@';
-
     // Import dinâmico de D3.js e Chart.js
     importScripts();
   
@@ -667,6 +664,9 @@ function initGlitchEffect() {
     });
 }
 
+// Caracteres do código Matrix
+const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz><*-+.,;:!#&%$@';
+
 // Easter egg: Konami Code
 function initKonamiCode() {
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
@@ -753,5 +753,3 @@ function activateHackerMode() {
     }, 10000);
 }
 
-// Caracteres do código Matrix
-const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz><*-+.,;:!#&%$@';

@@ -113,7 +113,7 @@
                     
                     <div class="flex items-center mb-8">
                         <div class="mr-4">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD6x-O3YnqGuCErEhpLJNneGcpITEeYs6kbQ&s" alt="HTB" class="w-16 h-16 rank-icon" loading="lazy">
+                            <img src="https://www.hackthebox.com/images/htb-flag.svg" alt="HTB" class="w-16 h-16 rank-icon" loading="lazy">
                         </div>
                         <div>
                             <div class="flex items-center mb-1">
@@ -218,144 +218,162 @@
         </div>
     </section>
 
-<!-- Skills Section -->
-<section id="skills" class="py-20 htb-gradient scanner-effect">
-    <div class="container mx-auto px-6">
-        <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SKILLS & TECNOLOGIAS">
-            <span class="text-htb-primary">SKILLS</span> & TECNOLOGIAS
-        </h2>
-        
-        <div class="mb-16">
-            <div class="htb-card p-6 rounded-lg">
-                <h3 class="text-xl font-bold text-htb-primary mb-6">Mapa de Competências</h3>
-                <canvas id="skills-radar-chart" class="w-full h-96"></canvas>
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 htb-gradient scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SKILLS & TECNOLOGIAS">
+                <span class="text-htb-primary">SKILLS</span> & TECNOLOGIAS
+            </h2>
+            
+            <div class="mb-16">
+                <div class="htb-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-htb-primary mb-6">Mapa de Competências</h3>
+                    <div id="skills-graph" class="w-full h-96 loading-container">
+                        <div class="loading-indicator"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Red Teaming -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-primary p-2 rounded-full mr-4">
+                            <i class="fas fa-user-secret text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-primary">Red Teaming & APT Emulation</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Simulação realista de ameaças avançadas</li>
+                        <li>Desenvolvimento de TTPs customizadas</li>
+                        <li>Lateral movement e evasion techniques</li>
+                        <li>Chains de exploração e C2s stealth</li>
+                    </ul>
+                </div>
+                
+                <!-- Reverse Engineering -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-accent p-2 rounded-full mr-4">
+                            <i class="fas fa-bug text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-accent">Engenharia Reversa Profunda</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Desenvolvimento de exploits personalizados</li>
+                        <li>ROP/JOP chains e shellcode crafting</li>
+                        <li>Análise estática/dinâmica com Frida/Ghidra</li>
+                        <li>Bypass de EDR/AV</li>
+                    </ul>
+                </div>
+                
+                <!-- AI Security -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-primary p-2 rounded-full mr-4">
+                            <i class="fas fa-robot text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-primary">AI/ML Aplicados à Segurança</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Assistentes ofensivos com LLMs (LangChain, Ollama)</li>
+                        <li>Automação de pentests e RE com IA</li>
+                        <li>Engenharia de prompts tática</li>
+                        <li>Integração com GDB para análise assistida</li>
+                    </ul>
+                </div>
+                
+                <!-- DevSecOps -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-accent p-2 rounded-full mr-4">
+                            <i class="fas fa-code-branch text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-accent">AppSec & DevSecOps Avançado</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>SAST, DAST e revisão de código</li>
+                        <li>Threat Modeling (STRIDE, CVSS)</li>
+                        <li>Segurança em containers e Kubernetes</li>
+                        <li>Pipelines GitHub Actions e Terraform</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tools & Technologies -->
+            <div class="mt-16">
+                <h3 class="text-xl font-semibold mb-8 text-center glow-text">
+                    <span class="text-htb-primary">TOOLS</span> & TECHNOLOGIES
+                </h3>
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Python</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="Bash" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Bash</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/powershell/powershell-original.svg" alt="PowerShell" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">PowerShell</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" alt="Go" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Golang</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="Linux" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Linux</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Docker</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" alt="Kubernetes" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">K8s</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Terraform</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" alt="AWS" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">AWS</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" alt="Azure" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Azure</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="GCP" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">GCP</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">TensorFlow</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="PyTorch" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">PyTorch</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="FastAPI" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">FastAPI</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg" alt="Flask" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Flask</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ghidra/ghidra-original.svg" alt="Ghidra" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Ghidra</span>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Red Teaming -->
-            <div class="htb-card p-6 rounded-lg">
-                <div class="flex items-center mb-4">
-                    <div class="bg-htb-primary p-2 rounded-full mr-4">
-                        <i class="fas fa-user-secret text-htb-darker"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-htb-primary">Red Teaming & APT Emulation</h3>
-                </div>
-                <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                    <li>Simulação realista de ameaças avançadas</li>
-                    <li>Desenvolvimento de TTPs customizadas</li>
-                    <li>Lateral movement e evasion techniques</li>
-                    <li>Chains de exploração e C2s stealth</li>
-                </ul>
-            </div>
-            
-            <!-- Reverse Engineering -->
-            <div class="htb-card p-6 rounded-lg">
-                <div class="flex items-center mb-4">
-                    <div class="bg-htb-accent p-2 rounded-full mr-4">
-                        <i class="fas fa-bug text-htb-darker"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-htb-accent">Engenharia Reversa Profunda</h3>
-                </div>
-                <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                    <li>Desenvolvimento de exploits personalizados</li>
-                    <li>ROP/JOP chains e shellcode crafting</li>
-                    <li>Análise estática/dinâmica com Frida/Ghidra</li>
-                    <li>Bypass de EDR/AV</li>
-                </ul>
-            </div>
-            
-            <!-- AI Security -->
-            <div class="htb-card p-6 rounded-lg">
-                <div class="flex items-center mb-4">
-                    <div class="bg-htb-primary p-2 rounded-full mr-4">
-                        <i class="fas fa-robot text-htb-darker"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-htb-primary">AI/ML Aplicados à Segurança</h3>
-                </div>
-                <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                    <li>Assistentes ofensivos com LLMs (LangChain, Ollama)</li>
-                    <li>Automação de pentests e RE com IA</li>
-                    <li>Engenharia de prompts tática</li>
-                    <li>Integração com GDB para análise assistida</li>
-                </ul>
-            </div>
-            
-            <!-- DevSecOps -->
-            <div class="htb-card p-6 rounded-lg">
-                <div class="flex items-center mb-4">
-                    <div class="bg-htb-accent p-2 rounded-full mr-4">
-                        <i class="fas fa-code-branch text-htb-darker"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-htb-accent">AppSec & DevSecOps Avançado</h3>
-                </div>
-                <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                    <li>SAST, DAST e revisão de código</li>
-                    <li>Threat Modeling (STRIDE, CVSS)</li>
-                    <li>Segurança em containers e Kubernetes</li>
-                    <li>Pipelines GitHub Actions e Terraform</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-
-<script>
-    // Inicializar gráfico radar de habilidades
-    function initSkillsRadarChart() {
-        const ctx = document.getElementById('skills-radar-chart').getContext('2d');
-        const skillsData = {
-            labels: ['Red Teaming', 'LLM Prompt Engineering', 'Offensive AI', 'Binary Exploitation', 'Reverse Engineering', 'APT Emulation', 'ML Security', 'DevSecOps', 'Cloud Security'],
-            datasets: [{
-                label: 'Nível de Habilidade (%)',
-                data: [95, 90, 85, 80, 85, 88, 75, 70, 65],
-                backgroundColor: 'rgba(159, 239, 0, 0.6)',
-                borderColor: 'rgba(159, 239, 0, 1)',
-                borderWidth: 1,
-                pointBackgroundColor: 'rgba(159, 239, 0, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(159, 239, 0, 1)',
-            }]
-        };
-
-        const config = {
-            type: 'radar',
-            data: skillsData,
-            options: {
-                scales: {
-                    r: {
-                        angleLines: {
-                            color: 'rgba(26, 35, 50, 0.8)'
-                        },
-                        grid: {
-                            color: 'rgba(26, 35, 50, 0.8)'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true
-                    }
-                },
-                animation: {
-                    duration: 2000
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        };
-
-        new Chart(ctx, config);
-    }
-
-    // Chamar a função para inicializar o gráfico após o carregamento do DOM
-    document.addEventListener('DOMContentLoaded', initSkillsRadarChart);
-</script>
+    </section>
 
     <!-- AI Security Section -->
     <section id="ai-security" class="py-20 htb-gradient scanner-effect">

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xHaze | Especialista em Red Team & Segurança de IA</title>
+    <meta name="description" content="Marcos Tolosa (0xHaze) - Red Team Engineer e especialista em segurança de IA. Top 1 Brasil no Hack The Box.">
+    <meta name="keywords" content="red team, hacking ético, segurança ofensiva, segurança em IA, Marcos Tolosa, 0xHaze, Hack The Box">
+    
+    <!-- Preconnect para domínios externos -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Tailwind CSS - carregamento otimizado com defer -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    
+    <!-- Font Awesome - apenas ícones essenciais -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Google Fonts - com preload -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    
+    <!-- Estilos CSS externos -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Configuração do Tailwind inline para evitar carregamento adicional -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        htb: {
+                            dark: '#0A0A0A',
+                            darker: '#050505',
+                            primary: '#9FEF00',
+                            secondary: '#A4B1CD',
+                            accent: '#FF6B00',
+                            terminal: '#111111',
+                            highlight: '#1A2332'
+                        }
+                    },
+                    fontFamily: {
+                        'terminal': ['Courier New', 'monospace'],
+                        'htb': ['Rajdhani', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'blink': 'blink 1s step-end infinite'
+                    },
+                    keyframes: {
+                        blink: {
+                            '0%, 100%': { 'border-color': 'transparent' },
+                            '50%': { 'border-color': '#9FEF00' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="htb-gradient" id="top">
+    <!-- Header/Navigation -->
+    <header class="fixed w-full z-50 htb-header">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-htb-primary rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-terminal text-htb-darker"></i>
+                    </div>
+                    <div class="text-xl font-bold terminal glow-text">
+                        <span class="text-htb-primary">0x</span><span>Haze</span>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-htb-secondary hover:text-htb-primary transition nav-link">HOME</a>
+                    <a href="#about" class="text-htb-secondary hover:text-htb-primary transition nav-link">SOBRE</a>
+                    <a href="#skills" class="text-htb-secondary hover:text-htb-primary transition nav-link">SKILLS</a>
+                    <a href="#ai-security" class="text-htb-secondary hover:text-htb-primary transition nav-link">AI SECURITY</a>
+                    <a href="#machines" class="text-htb-secondary hover:text-htb-primary transition nav-link">MÁQUINAS</a>
+                    <a href="#contact" class="text-htb-secondary hover:text-htb-primary transition nav-link">CONTATO</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="text-htb-secondary focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 htb-bg rounded-lg">
+                <a href="#home" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">HOME</a>
+                <a href="#about" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">SOBRE</a>
+                <a href="#skills" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">SKILLS</a>
+                <a href="#ai-security" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">AI SECURITY</a>
+                <a href="#machines" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">MÁQUINAS</a>
+                <a href="#contact" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">CONTATO</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-32 pb-20 relative overflow-hidden">
+        <div class="matrix-bg"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-12 md:mb-0">
+                    <div class="htb-bg p-6 rounded-lg mb-8">
+                        <div class="mb-2 text-sm text-htb-secondary font-terminal">root@0xhaze:~#</div>
+                        <div id="terminal" class="h-64 rounded terminal-scroll"></div>
+                    </div>
+                    
+                    <div class="flex items-center mb-8">
+                        <div class="mr-4">
+                            <img src="https://www.hackthebox.com/images/htb-flag.svg" alt="HTB" class="w-16 h-16 rank-icon" loading="lazy">
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-1">
+                                <span class="text-htb-primary font-bold mr-2">HACK THE BOX</span>
+                                <span class="badge px-2 py-1 rounded text-xs">TOP 1 BR</span>
+                            </div>
+                            <div class="w-full bg-htb-terminal rounded-full h-1.5">
+                                <div class="progress-bar h-1.5 rounded-full" style="width: 92%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-htb-secondary mt-1">
+                                <span>Elite Hacker</span>
+                                <span>60,52%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap space-x-4">
+                        <a href="#machines" class="htb-btn px-6 py-3 rounded-lg flex items-center mb-2">
+                            <i class="fas fa-server mr-2"></i> EXPLORAR MÁQUINAS
+                        </a>
+                        <a href="https://app.hackthebox.com/profile/" target="_blank" class="border-2 border-htb-primary text-htb-primary px-6 py-3 rounded-lg font-medium hover:bg-htb-primary hover:text-htb-darker transition duration-300 flex items-center mb-2">
+                            <i class="fas fa-user-secret mr-2"></i> PERFIL HTB
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative w-64 h-64 md:w-80 md:h-80">
+                        <div class="absolute inset-0 bg-htb-primary rounded-full opacity-20 blur-xl"></div>
+                        <img src="https://avatars.githubusercontent.com/u/36050676?v=4" alt="0xHaze" 
+                             class="relative w-full h-full rounded-full object-cover border-4 border-htb-primary shadow-xl htb-pulse" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 htb-bg scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SOBRE MIM">
+                <span class="text-htb-primary">SOBRE</span> MIM
+            </h2>
+            
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/3 mb-8 md:mb-0 flex justify-center">
+                    <div class="relative">
+                        <div class="absolute -inset-2 bg-htb-primary rounded-full opacity-15 blur-lg"></div>
+                        <img src="https://avatars.githubusercontent.com/u/36050676?v=4" alt="0xHaze" 
+                             class="relative w-64 h-64 rounded-full object-cover border-4 border-htb-primary shadow-lg" loading="lazy">
+                    </div>
+                </div>
+                <div class="md:w-2/3 md:pl-12">
+                    <div class="htb-bg p-6 rounded-lg mb-6">
+                        <p class="text-htb-secondary mb-4">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-accent font-bold">whois</span> 0xHaze
+                        </p>
+                        <p class="text-htb-secondary ml-4 mb-2">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Nome:</span> Marcos Tolosa (0xHaze)
+                        </p>
+                        <p class="text-htb-secondary ml-4 mb-2">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Função:</span> Red Team Engineer | Prompt Architect
+                        </p>
+                        <p class="text-htb-secondary ml-4 mb-2">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Especialidades:</span> AI x Offensive Security | DevSecOps | MLOps
+                        </p>
+                        <p class="text-htb-secondary ml-4 mb-2">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Experiência:</span> 10+ anos em segurança ofensiva
+                        </p>
+                        <p class="text-htb-secondary ml-4">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">HTB:</span> Top 1 Brasil | Top 100 Global
+                        </p>
+                    </div>
+                    
+                    <div class="htb-bg p-6 rounded-lg mb-8">
+                        <p class="text-htb-secondary mb-4">
+                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-accent font-bold">cat</span> bio.txt
+                        </p>
+                        <p class="text-htb-secondary ml-4">
+                            Especialista em Segurança Ofensiva com +10 anos de experiência prática em Red Team, 
+                            engenharia reversa, automação de ataques com LLMs e integração de IA com segurança cibernética. 
+                            Atualmente explorando IA autônoma, GDB com LLMs (MCP) e análise de código automática. 
+                            Participante ativo da comunidade Hack The Box e mantenedor de projetos open source.
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <a href="https://github.com/marcostolosa" target="_blank" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
+                            <i class="fab fa-github mr-2"></i> GITHUB
+                        </a>
+                        <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
+                            <i class="fab fa-linkedin-in mr-2"></i> LINKEDIN
+                        </a>
+                        <a href="mailto:marcos.tolosa@owasp.org" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
+                            <i class="fas fa-envelope mr-2"></i> EMAIL
+                        </a>
+                        <a href="https://app.hackthebox.com/profile/" target="_blank" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
+                            <i class="fas fa-user-secret mr-2"></i> HTB
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 htb-gradient scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SKILLS & TECNOLOGIAS">
+                <span class="text-htb-primary">SKILLS</span> & TECNOLOGIAS
+            </h2>
+            
+            <div class="mb-16">
+                <div class="htb-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-htb-primary mb-6">Mapa de Competências</h3>
+                    <div id="skills-graph" class="w-full h-96 loading-container">
+                        <div class="loading-indicator"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Red Teaming -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-primary p-2 rounded-full mr-4">
+                            <i class="fas fa-user-secret text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-primary">Red Teaming & APT Emulation</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Simulação realista de ameaças avançadas</li>
+                        <li>Desenvolvimento de TTPs customizadas</li>
+                        <li>Lateral movement e evasion techniques</li>
+                        <li>Chains de exploração e C2s stealth</li>
+                    </ul>
+                </div>
+                
+                <!-- Reverse Engineering -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-accent p-2 rounded-full mr-4">
+                            <i class="fas fa-bug text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-accent">Engenharia Reversa Profunda</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Desenvolvimento de exploits personalizados</li>
+                        <li>ROP/JOP chains e shellcode crafting</li>
+                        <li>Análise estática/dinâmica com Frida/Ghidra</li>
+                        <li>Bypass de EDR/AV</li>
+                    </ul>
+                </div>
+                
+                <!-- AI Security -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-primary p-2 rounded-full mr-4">
+                            <i class="fas fa-robot text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-primary">AI/ML Aplicados à Segurança</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>Assistentes ofensivos com LLMs (LangChain, Ollama)</li>
+                        <li>Automação de pentests e RE com IA</li>
+                        <li>Engenharia de prompts tática</li>
+                        <li>Integração com GDB para análise assistida</li>
+                    </ul>
+                </div>
+                
+                <!-- DevSecOps -->
+                <div class="htb-card p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-htb-accent p-2 rounded-full mr-4">
+                            <i class="fas fa-code-branch text-htb-darker"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-htb-accent">AppSec & DevSecOps Avançado</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
+                        <li>SAST, DAST e revisão de código</li>
+                        <li>Threat Modeling (STRIDE, CVSS)</li>
+                        <li>Segurança em containers e Kubernetes</li>
+                        <li>Pipelines GitHub Actions e Terraform</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tools & Technologies -->
+            <div class="mt-16">
+                <h3 class="text-xl font-semibold mb-8 text-center glow-text">
+                    <span class="text-htb-primary">TOOLS</span> & TECHNOLOGIES
+                </h3>
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Python</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="Bash" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Bash</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/powershell/powershell-original.svg" alt="PowerShell" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">PowerShell</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" alt="Go" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Golang</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="Linux" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Linux</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Docker</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" alt="Kubernetes" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">K8s</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Terraform</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" alt="AWS" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">AWS</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" alt="Azure" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Azure</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="GCP" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">GCP</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">TensorFlow</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="PyTorch" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">PyTorch</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="FastAPI" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">FastAPI</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg" alt="Flask" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Flask</span>
+                    </div>
+                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ghidra/ghidra-original.svg" alt="Ghidra" class="w-12 h-12" loading="lazy">
+                        <span class="text-xs mt-2 text-htb-secondary">Ghidra</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Security Section -->
+    <section id="ai-security" class="py-20 htb-gradient scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="AI x SECURITY">
+                <span class="text-htb-primary">AI</span> x <span class="text-htb-accent">SECURITY</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Lado esquerdo: Projetos de AI Security -->
+                <div>
+                    <div class="htb-card p-6 rounded-lg mb-8">
+                        <h3 class="text-xl font-bold text-htb-primary mb-4">Projetos Recentes</h3>
+                        
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-htb-accent">LLM-powered Vulnerability Scanner</h4>
+                            <p class="text-htb-secondary mb-2">Framework de automação que combina ferramentas tradicionais de pentest com LLMs para interpretação e análise de resultados em tempo real.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">LangChain</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">GPT-4</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Nuclei</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-htb-accent">AIJacking Protection System</h4>
+                            <p class="text-htb-secondary mb-2">Sistema de defesa contra prompt injection e data leakage em aplicações que utilizam LLMs, com monitoramento contínuo e alertas.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">RAG</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Prompt Security</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Vector DB</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold text-htb-accent">GDB-LLM Assistant</h4>
+                            <p class="text-htb-secondary mb-2">Ferramenta que integra LLMs com GDB para análise assistida de binários e descoberta acelerada de vulnerabilidades.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">LLDB</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Ollama</span>
+                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Analysis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lado direito: Demo Interativo de LLM -->
+                <div>
+                    <div class="htb-card p-6 rounded-lg h-full">
+                        <h3 class="text-xl font-bold text-htb-primary mb-4">LLM Attack Simulator</h3>
+                        
+                        <div class="bg-htb-terminal p-4 rounded-lg mb-6 font-terminal">
+                            <div class="text-htb-secondary mb-3">
+                                <span class="text-htb-primary font-bold">></span> Selecione uma técnica de ataque:
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="injection">Prompt Injection</button>
+                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="jailbreak">Jailbreak</button>
+                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="extraction">Data Extraction</button>
+                            </div>
+                            
+                            <div id="attack-simulation" class="bg-htb-darker p-3 rounded-lg h-64 overflow-y-auto">
+                                <div class="text-htb-secondary text-sm">
+                                    <span class="text-htb-primary">system> </span>Selecione uma técnica acima para começar a simulação...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="#contact" class="htb-btn px-6 py-3 rounded-lg font-medium inline-flex items-center">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                CONSULTE-ME SOBRE SEGURANÇA EM IA
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Machines Section -->
+    <section id="machines" class="py-20 htb-bg scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="HACK THE BOX MACHINES">
+                <span class="text-htb-primary">HACK THE BOX</span> MACHINES
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Máquina 1 - Completed Hard -->
+                <div class="htb-card rounded-xl overflow-hidden machine-card">
+                    <div class="relative">
+                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
+                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">HARD</div>
+                            
+                            <!-- Vetores de ataque sempre visíveis -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
+                                <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
+                                <ul class="text-sm text-htb-secondary">
+                                    <li>• Buffer Overflow em Serviço Customizado</li>
+                                    <li>• Exploração de Binário SUID</li>
+                                    <li>• Exploit de Kernel (CVE-2023-0386)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress overlay -->
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-primary"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Poison</h3>
+                        <p class="text-htb-secondary mb-4">
+                            Máquina Linux complexa com desafios de exploração binária e múltiplos vetores de privilege escalation.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Exploitation</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Linux</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Kernel</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-htb-secondary">OWNED: 15/02/2023</span>
+                            <span class="text-xs text-htb-primary">TEMPO: 1h 05m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Máquina 2 - Completed Medium -->
+                <div class="htb-card rounded-xl overflow-hidden machine-card">
+                    <div class="relative">
+                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
+                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">MEDIUM</div>
+                            
+                            <!-- Vetores de ataque sempre visíveis -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
+                                <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
+                                <ul class="text-sm text-htb-secondary">
+                                    <li>• Configuração incorreta de OAuth</li>
+                                    <li>• Roubo de token de conta de serviço</li>
+                                    <li>• Ataque Kerberoasting</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress overlay -->
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-primary"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Active</h3>
+                        <p class="text-htb-secondary mb-4">
+                            Ambiente Windows AD enterprise com múltiplos vetores de ataque e técnicas de movimento lateral.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Active Directory</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Kerberoasting</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Windows</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-htb-secondary">OWNED: 28/04/2023</span>
+                            <span class="text-xs text-htb-primary">TEMPO: 52m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Máquina 3 - In Progress -->
+                <div class="htb-card rounded-xl overflow-hidden machine-card">
+                    <div class="relative">
+                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
+                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">INSANE</div>
+                            
+                            <!-- Progresso de ataque sempre visível -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
+                                <h4 class="text-htb-primary text-lg font-bold mb-2">Progresso do Ataque:</h4>
+                                <ul class="text-sm text-htb-secondary">
+                                    <li>• Initial Foothold ✓</li>
+                                    <li>• User Access ✓</li>
+                                    <li>• Privilege Escalation ⟳</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress overlay - partial progress -->
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-accent" style="width: 65%"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Nightmare</h3>
+                        <p class="text-htb-secondary mb-4">
+                            Desafio avançado de exploração de binários com ASLR, stack canaries e proteções CFI customizadas.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Exploitation</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">ROP/JOP</span>
+                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Linux</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-htb-accent">STATUS: EM PROGRESSO</span>
+                            <span class="text-xs text-htb-secondary">65% COMPLETO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="https://app.hackthebox.com/profile/" target="_blank" class="htb-btn px-6 py-3 rounded-lg font-medium inline-flex items-center">
+                    <i class="fas fa-user-secret mr-2"></i>
+                    VER TODAS AS MÁQUINAS
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievements Section -->
+    <section class="py-16 htb-gradient scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12 glow-text glitch-effect" data-text="CONQUISTAS & RANKINGS">
+                <span class="text-htb-primary">CONQUISTAS</span> & RANKINGS
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="htb-card p-8 rounded-lg text-center">
+                    <div class="text-5xl text-htb-primary mb-4">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-htb-primary mb-2">TOP 1 BRASIL</h3>
+                    <p class="text-htb-secondary">Hack The Box</p>
+                </div>
+                
+                <div class="htb-card p-8 rounded-lg text-center">
+                    <div class="text-5xl text-htb-primary mb-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-htb-primary mb-2">TOP 100 GLOBAL</h3>
+                    <p class="text-htb-secondary">HackTheBox Hall of Fame</p>
+                </div>
+                
+                <div class="htb-card p-8 rounded-lg text-center">
+                    <div class="text-5xl text-htb-primary mb-4">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-htb-primary mb-2">OWASP CONTRIBUTOR</h3>
+                    <p class="text-htb-secondary">Security Research</p>
+                </div>
+            </div>
+            
+            <!-- HTB Stats Dashboard -->
+            <div class="htb-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-htb-primary mb-6">HTB Stats Dashboard</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Lado esquerdo: Estatísticas -->
+                    <div>
+                        <div class="mb-8">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-htb-secondary">Máquinas Comprometidas</span>
+                                <span class="text-htb-primary font-bold">287 / 358</span>
+                            </div>
+                            <div class="w-full bg-htb-terminal rounded-full h-2.5">
+                                <div class="bg-htb-primary h-2.5 rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-htb-secondary">Challenges Completados</span>
+                                <span class="text-htb-primary font-bold">156 / 203</span>
+                            </div>
+                            <div class="w-full bg-htb-terminal rounded-full h-2.5">
+                                <div class="bg-htb-primary h-2.5 rounded-full" style="width: 76%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-htb-secondary">CTFs Vencidos</span>
+                                <span class="text-htb-primary font-bold">23 / 39</span>
+                            </div>
+                            <div class="w-full bg-htb-terminal rounded-full h-2.5">
+                                <div class="bg-htb-primary h-2.5 rounded-full" style="width: 59%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-htb-secondary">Ranking Points</span>
+                                <span class="text-htb-primary font-bold">18,756</span>
+                            </div>
+                            <div class="w-full bg-htb-terminal rounded-full h-2.5">
+                                <div class="bg-htb-primary h-2.5 rounded-full" style="width: 94%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lado direito: Gráfico de conquistas -->
+                    <div>
+                        <div class="htb-bg p-4 rounded-lg h-full loading-container">
+                            <canvas id="htb-achievements-chart" class="w-full h-full"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 htb-bg scanner-effect">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="CONTATO">
+                <span class="text-htb-primary">CONTATO</span>
+            </h2>
+            
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <h3 class="text-2xl font-semibold mb-6 text-htb-primary">INFORMAÇÕES DE CONTATO</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="bg-htb-primary p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope text-htb-darker"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-htb-secondary">EMAIL</h4>
+                                <a href="mailto:marcos.tolosa@owasp.org" class="text-htb-secondary hover:text-htb-primary">marcos.tolosa@owasp.org</a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-htb-highlight p-3 rounded-full mr-4">
+                                <i class="fab fa-github text-htb-secondary"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-htb-secondary">GITHUB</h4>
+                                <a href="https://github.com/marcostolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary">github.com/marcostolosa</a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-htb-highlight p-3 rounded-full mr-4">
+                                <i class="fab fa-linkedin-in text-htb-secondary"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-htb-secondary">LINKEDIN</h4>
+                                <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary">linkedin.com/in/marcos-tolosa</a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-htb-primary p-3 rounded-full mr-4">
+                                <i class="fas fa-user-secret text-htb-darker"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-htb-secondary">HACKTHEBOX</h4>
+                                <a href="https://app.hackthebox.com/profile/" target="_blank" class="text-htb-secondary hover:text-htb-primary">HTB Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10">
+                        <h4 class="text-xl font-medium mb-4 text-htb-primary">SIGA-ME</h4>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/marcostolosa" target="_blank" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
+                                <i class="fab fa-github text-xl"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
+                                <i class="fab fa-linkedin-in text-xl"></i>
+                            </a>
+                            <a href="https://app.hackthebox.com/profile/" target="_blank" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
+                                <i class="fas fa-user-secret text-xl"></i>
+                            </a>
+                            <a href="#" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
+                                <i class="fab fa-twitter text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2">
+                    <div class="htb-card rounded-xl shadow-xl p-8">
+                        <h3 class="text-2xl font-semibold mb-6 text-htb-primary">ENVIAR MENSAGEM</h3>
+                        
+                        <form id="contactForm" class="contact-form">
+                            <div class="mb-6">
+                                <label for="name" class="block text-htb-secondary font-medium mb-2">NOME</label>
+                                <input type="text" id="name" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="email" class="block text-htb-secondary font-medium mb-2">EMAIL</label>
+                                <input type="email" id="email" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="subject" class="block text-htb-secondary font-medium mb-2">ASSUNTO</label>
+                                <input type="text" id="subject" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="message" class="block text-htb-secondary font-medium mb-2">MENSAGEM</label>
+                                <textarea id="message" rows="5" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full htb-btn py-3 px-6 rounded-lg font-medium flex items-center justify-center">
+                                <i class="fas fa-paper-plane mr-2"></i> ENVIAR MENSAGEM
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black/80 py-12 border-t border-htb-highlight">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-htb-primary rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-terminal text-htb-darker"></i>
+                        </div>
+                        <div class="text-xl font-bold glow-text">
+                            <span class="text-htb-primary">0x</span><span>Haze</span>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-htb-secondary">Red Team Engineer & AI Security Specialist</p>
+                </div>
+                
+                <div class="flex flex-col items-center md:items-end">
+                    <div class="flex space-x-6 mb-4">
+                        <a href="https://github.com/marcostolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary transition">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary transition">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://app.hackthebox.com/profile/" target="_blank" class="text-htb-secondary hover:text-htb-primary transition">
+                            <i class="fas fa-user-secret"></i>
+                        </a>
+                        <a href="mailto:marcos.tolosa@owasp.org" class="text-htb-secondary hover:text-htb-primary transition">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                    <p class="text-htb-secondary text-sm">
+                        &copy; 2025 Marcos Tolosa (0xHaze). TODOS OS DIREITOS RESERVADOS
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-htb-primary text-htb-darker w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 z-50">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <!-- Matrix Canvas Background -->
+    <canvas id="matrix-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-10"></canvas>
+
+    <!-- jQuery Terminal -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/js/jquery.terminal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/css/jquery.terminal.min.css">
+    
+    <!-- D3.js para gráfico de skills -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    
+    <!-- Chart.js para gráficos de conquistas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Scripts Principal -->
+    <script src="script.js"></script>
+
+    <!-- Preload estratégico de imagens críticas -->
+    <link rel="preload" as="image" href="https://avatars.githubusercontent.com/u/36050676?v=4">
+    <link rel="preload" as="image" href="https://www.hackthebox.com/images/htb-flag.svg">
+</body>
+</html>

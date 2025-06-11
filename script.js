@@ -1,4 +1,4 @@
-/* Script principal otimizado para o site 0xHaze
+/* Script principal otimizado para o site Haze
  * - Lazy loading via IntersectionObserver
  * - Smooth scroll por CSS nativo
  * - Matrix effect usando requestAnimationFrame
@@ -163,7 +163,7 @@ function initTerminal() {
     ];
 
     const responses = {
-        "whoami": "marcos.tolosa (0xHaze)\nRed Team Engineer | AI Security Specialist",
+        "whoami": "marcos.tolosa (Haze)\nRed Team Engineer | AI Security Specialist",
         "cat /etc/passwd | grep hacker": "hacker:x:1337:1337:Marcos Tolosa:/home/hacker:/bin/bash",
         "nmap -sV --script vuln target.com": `Starting Nmap 7.94 ( https://nmap.org )
 PORT    STATE SERVICE  VERSION
@@ -217,7 +217,7 @@ PORT    STATE SERVICE  VERSION
         }
     }, {
         greetings: 'Terminal de Segurança HTB v1.0 - Digite "help" para comandos',
-        prompt: '[[;#9FEF00;]root@0xhaze:~#] ',
+        prompt: '[[;#9FEF00;]root@Haze:~#] ',
         name: 'htb_terminal',
         height: '100%',
         scrollOnEcho: true,

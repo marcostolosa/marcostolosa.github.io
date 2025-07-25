@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Desvendando o Bug CVE-2021-46143</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4ade80, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        .step-arrow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #4b5563; /* gray-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <!-- Cabeçalho -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-black gradient-text mb-2">Desvendando o Bug CVE-2021-46143</h1>
+            <p class="text-lg md:text-xl text-gray-400">Como um 'Placar de Fliperama Quebrado' se Torna uma Falha Crítica no Parser Expat</p>
+        </header>
+
+        <!-- Seção 1: O que é Integer Overflow? -->
+        <section class="bg-gray-800 rounded-2xl p-6 md:p-8 mb-12 shadow-2xl border border-gray-700">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-1">
+                    <h2 class="text-3xl font-bold text-white mb-4">O que é um Integer Overflow?</h2>
+                    <p class="text-gray-300 mb-4">
+                        Imagine o placar de um jogo de fliperama antigo com 6 dígitos. O máximo de pontos é <code class="bg-gray-700 text-green-400 px-2 py-1 rounded">999.999</code>.
+                    </p>
+                    <p class="text-gray-300">
+                        Se você fizer mais um ponto, o placar não tem espaço para "1.000.000". Ele "vira" e volta para <code class="bg-gray-700 text-red-400 px-2 py-1 rounded">000.000</code>. Em C, as variáveis numéricas (como <code class="bg-gray-700 text-blue-400 px-2 py-1 rounded">int</code>) funcionam da mesma forma. Quando atingem o valor máximo e tentamos somar mais um, elas "dão a volta" e voltam ao valor mínimo (geralmente zero).
+                    </p>
+                </div>
+                <div class="flex-none text-center">
+                    <div class="bg-gray-900 border-4 border-gray-700 rounded-lg p-4 shadow-lg">
+                        <div class="text-xs text-gray-500 uppercase tracking-widest">High Score</div>
+                        <div class="font-mono text-5xl text-green-400 tracking-widest my-2">999999</div>
+                    </div>
+                    <div class="text-5xl font-bold text-white my-2">+ 1</div>
+                    <div class="bg-gray-900 border-4 border-red-500/50 rounded-lg p-4 shadow-lg">
+                        <div class="text-xs text-gray-500 uppercase tracking-widest">Overflow!</div>
+                        <div class="font-mono text-5xl text-red-400 tracking-widest my-2">000000</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2: A Anatomia do Ataque -->
+        <h2 class="text-3xl font-bold text-center text-white mb-8">Anatomia do Ataque: Passo a Passo</h2>
+        <div class="relative space-y-16">
+            <!-- Passo 1 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <span class="text-blue-400 font-bold">PASSO 1: O Início</span>
+                    <h3 class="text-2xl font-bold text-white mt-1">Análise do XML</h3>
+                    <p class="text-gray-400 mt-2">O Expat começa a ler um arquivo XML e aloca um pequeno espaço na memória para agrupar elementos. A variável <code class="bg-gray-700 text-blue-400 px-2 py-1 rounded">m_groupSize</code> começa com um valor baixo.</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="font-mono text-sm text-gray-500">// Memória</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <div class="bg-blue-500 h-8 rounded" style="width: 10%;"></div>
+                        <span class="text-gray-400">Ponteiro `m_groups` aponta para um bloco alocado.</span>
+                    </div>
+                    <p class="font-mono text-sm text-gray-500 mt-4">// Variável</p>
+                    <p class="font-mono text-green-400">m_groupSize = 4;</p>
+                </div>
+            </div>
+            <div class="step-arrow top-full -mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+
+            <!-- Passo 2 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <span class="text-blue-400 font-bold">PASSO 2: O Loop</span>
+                    <h3 class="text-2xl font-bold text-white mt-1">Aumentando o Grupo</h3>
+                    <p class="text-gray-400 mt-2">Um XML malicioso força o Expat a adicionar milhares de elementos ao grupo. A cada adição, <code class="bg-gray-700 text-blue-400 px-2 py-1 rounded">m_groupSize</code> é incrementado e a memória é realocada com <code class="bg-gray-700 text-purple-400 px-2 py-1 rounded">realloc</code> para comportar mais dados.</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="font-mono text-sm text-gray-500">// Memória (crescendo...)</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <div class="bg-blue-500 h-8 rounded" style="width: 60%;"></div>
+                        <span class="text-gray-400">Bloco de memória cada vez maior.</span>
+                    </div>
+                    <p class="font-mono text-sm text-gray-500 mt-4">// Variável (incrementando...)</p>
+                    <p class="font-mono text-green-400">m_groupSize = 2,147,483,647;</p>
+                </div>
+            </div>
+            <div class="step-arrow top-full -mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+
+            <!-- Passo 3 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center bg-red-900/20 border border-red-500/30 p-6 rounded-2xl">
+                <div>
+                    <span class="text-red-400 font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        PASSO 3: O OVERFLOW!
+                    </span>
+                    <h3 class="text-2xl font-bold text-white mt-1">O Contador "Quebra"</h3>
+                    <p class="text-gray-300 mt-2">O loop continua. <code class="bg-gray-700 text-blue-400 px-2 py-1 rounded">m_groupSize</code> atinge seu valor máximo (ex: <code class="bg-gray-700 text-yellow-400 px-2 py-1 rounded">UINT_MAX</code>). A próxima soma faz o valor "virar" e se tornar <code class="bg-gray-700 text-red-400 px-2 py-1 rounded">0</code>.</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-red-500/50">
+                    <p class="font-mono text-sm text-gray-500">// Variável (após overflow)</p>
+                    <p class="font-mono text-lg">m_groupSize = <span class="line-through text-gray-500">4294967295</span> + 1</p>
+                    <p class="font-mono text-4xl text-red-400 font-bold mt-2">m_groupSize = 0;</p>
+                </div>
+            </div>
+            <div class="step-arrow top-full -mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+
+            <!-- Passo 4 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <span class="text-blue-400 font-bold">PASSO 4: O Cálculo Falho</span>
+                    <h3 class="text-2xl font-bold text-white mt-1">Multiplicação por Zero</h3>
+                    <p class="text-gray-400 mt-2">O código tenta calcular o novo tamanho de memória necessário. Mas como <code class="bg-gray-700 text-red-400 px-2 py-1 rounded">m_groupSize</code> agora é 0, o resultado do cálculo também é 0.</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="font-mono text-sm text-gray-500">// Linha crítica do código</p>
+                    <pre class="bg-gray-900 p-3 rounded-md mt-2"><code class="text-yellow-300">tamanho_novo = <span class="text-red-400">m_groupSize</span> * sizeof(ITEM);</code></pre>
+                    <p class="font-mono text-lg text-white mt-4">tamanho_novo = <span class="text-red-400">0</span> * 8 = <span class="text-red-400 font-bold text-2xl">0</span>;</p>
+                </div>
+            </div>
+             <div class="step-arrow top-full -mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+
+            <!-- Passo 5 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <span class="text-blue-400 font-bold">PASSO 5: A Armadilha do `realloc`</span>
+                    <h3 class="text-2xl font-bold text-white mt-1">Liberando a Memória Sem Querer</h3>
+                    <p class="text-gray-400 mt-2">O código chama <code class="bg-gray-700 text-purple-400 px-2 py-1 rounded">realloc(ponteiro, 0)</code>. Por padrão (documentado na libc), isso é o mesmo que chamar <code class="bg-gray-700 text-purple-400 px-2 py-1 rounded">free(ponteiro)</code>. A memória é liberada, mas o ponteiro <code class="bg-gray-700 text-blue-400 px-2 py-1 rounded">m_groups</code> não é zerado. Ele agora aponta para um "espaço fantasma".</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="font-mono text-sm text-gray-500">// Chamada de função</p>
+                    <pre class="bg-gray-900 p-3 rounded-md mt-2"><code class="text-purple-400">realloc(m_groups, <span class="text-red-400">0</span>);</code></pre>
+                    <p class="font-mono text-sm text-gray-500 mt-4">// Estado da Memória</p>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div class="bg-red-500/50 h-8 rounded animate-pulse" style="width: 100%;"></div>
+                        <span class="text-red-400 font-bold">MEMÓRIA LIBERADA!</span>
+                    </div>
+                    <p class="font-mono text-sm text-gray-400 mt-2">`m_groups` agora é um <span class="text-yellow-400">ponteiro pendente (dangling pointer)</span>.</p>
+                </div>
+            </div>
+             <div class="step-arrow top-full -mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+
+            <!-- Passo 6 -->
+            <div class="grid md:grid-cols-2 gap-8 items-center bg-red-900/20 border border-red-500/30 p-6 rounded-2xl">
+                <div>
+                    <span class="text-red-400 font-bold flex items-center gap-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 1a.75.75 0 01.75.75V3.5h3.558a1 1 0 01.894 1.447l-1.5 2.5a1 1 0 01-1.388.172l-1.06-1.06a.75.75 0 00-1.06 0l-1.06 1.06a1 1 0 01-1.388-.172l-1.5-2.5A1 1 0 014.692 3.5H8.25V1.75A.75.75 0 0110 1zM3.25 9.75a.75.75 0 01.75-.75h12a.75.75 0 010 1.5h-12a.75.75 0 01-.75-.75zM10 12a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4.75 15a.75.75 0 01.75-.75h9.5a.75.75 0 010 1.5h-9.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                        </svg>
+                        PASSO 6: O DESASTRE
+                    </span>
+                    <h3 class="text-2xl font-bold text-white mt-1">Use-After-Free</h3>
+                    <p class="text-gray-300 mt-2">O programa, sem saber que a memória foi liberada, tenta escrever nela usando o ponteiro antigo. Isso corrompe a memória, levando a um <span class="font-bold text-white">crash</span> ou, pior, abrindo uma brecha para <span class="font-bold text-white">execução de código malicioso</span>.</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-red-500/50">
+                    <p class="font-mono text-sm text-gray-500">// Tentativa de escrita em memória livre</p>
+                    <pre class="bg-gray-900 p-3 rounded-md mt-2"><code class="text-yellow-300">m_groups[index] = novo_dado; <span class="text-red-500">// <-- BOOM!</span></code></pre>
+                    <div class="mt-4 text-center">
+                        <p class="text-2xl text-red-400 font-bold">SEGMENTATION FAULT</p>
+                        <p class="text-gray-400">(Ou pior...)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: O Perigo -->
+        <section class="mt-20">
+            <h2 class="text-3xl font-bold text-center text-white mb-8">Por que isso é tão Perigoso?</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Card DoS -->
+                <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 shadow-xl">
+                    <h3 class="text-2xl font-bold text-yellow-400 mb-3">Cenário 1: Crash (Negação de Serviço - DoS)</h3>
+                    <p class="text-gray-300">O mais provável. Ao tentar escrever na memória liberada, o sistema operacional (Windows/Linux) detecta uma operação ilegal e encerra o programa abruptamente. Um atacante pode usar isso para derrubar um servidor web ou qualquer aplicação que use a biblioteca Expat, simplesmente enviando um arquivo XML malicioso.</p>
+                </div>
+                <!-- Card RCE -->
+                <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 shadow-xl">
+                    <h3 class="text-2xl font-bold text-red-400 mb-3">Cenário 2: Execução de Código (RCE)</h3>
+                    <p class="text-gray-300">O pior caso. Um hacker habilidoso pode tentar, após o <code class="bg-gray-700 text-purple-400 px-1 rounded">free</code>, alocar aquele mesmo trecho de memória com seus próprios dados maliciosos (shellcode). Quando o código vulnerável for escrever no ponteiro antigo, ele na verdade estará sobrescrevendo a memória do hacker, que pode ser manipulada para desviar a execução do programa e tomar controle do sistema.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 4: A Correção -->
+        <section class="mt-20">
+            <h2 class="text-3xl font-bold text-center text-white mb-8">A Correção: Antes vs. Depois</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Antes -->
+                <div class="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl">
+                    <h3 class="text-2xl font-bold text-red-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                        Antes do Patch (Vulnerável)
+                    </h3>
+                    <p class="text-gray-300 mb-4">O código incrementava <code class="bg-gray-700 text-blue-400 px-1 rounded">m_groupSize</code> sem verificar se estava prestes a ocorrer um overflow.</p>
+                    <pre class="bg-gray-900 p-4 rounded-md text-sm"><code class="language-c text-gray-300">
+// Nenhum tipo de verificação aqui!
+m_groupSize++;
+
+// Se m_groupSize virou 0, a linha abaixo
+// causa o realloc(ptr, 0)
+ptr = realloc(ptr, m_groupSize * sizeof(ITEM));
+
+// Use-after-free acontece aqui
+ptr->dado = ...;
+                    </code></pre>
+                </div>
+                <!-- Depois -->
+                <div class="bg-green-900/20 border border-green-500/30 p-6 rounded-2xl">
+                    <h3 class="text-2xl font-bold text-green-400 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Depois do Patch (Seguro)
+                    </h3>
+                    <p class="text-gray-300 mb-4">Uma verificação simples é adicionada para garantir que a multiplicação não resultará em overflow antes de acontecer.</p>
+                     <pre class="bg-gray-900 p-4 rounded-md text-sm"><code class="language-c text-gray-300">
+<span class="text-green-400">// VERIFICAÇÃO DE SEGURANÇA!</span>
+if (m_groupSize >= <span class="text-yellow-400">SIZE_MAX</span> / sizeof(ITEM)) {
+  return <span class="text-red-400">XML_ERROR_NO_MEMORY</span>;
+}
+
+// Agora é seguro incrementar e realocar
+m_groupSize++;
+ptr = realloc(ptr, m_groupSize * sizeof(ITEM));
+...
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>

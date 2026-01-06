@@ -1,698 +1,514 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haze | Especialista em Red Team & Segurança de IA</title>
-    <meta name="description" content="Marcos Tolosa (Haze) - Red Team Engineer e especialista em segurança de IA. Top 1 Brasil no Hack The Box.">
-    <meta name="keywords" content="red team, hacking ético, segurança ofensiva, segurança em IA, Marcos Tolosa, Haze, Hack The Box">
+    <title>Tr0p | MindSecurity - Offensive Security & Red Team</title>
     
-    <!-- Preconnect para domínios externos -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Tailwind CSS - carregamento otimizado com defer -->
-    <script src="https://cdn.tailwindcss.com" defer></script>
+    <!-- Babel para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Font Awesome - apenas ícones essenciais -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts - com preload -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Estilos CSS externos -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Configuração do Tailwind inline para evitar carregamento adicional -->
+    <!-- Fontes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <!-- Configuração do Tailwind -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        htb: {
-                            dark: '#0A0A0A',
-                            darker: '#050505',
-                            primary: '#9FEF00',
-                            secondary: '#A4B1CD',
-                            accent: '#FF6B00',
-                            terminal: '#111111',
-                            highlight: '#1A2332'
-                        }
-                    },
                     fontFamily: {
-                        'terminal': ['Courier New', 'monospace'],
-                        'htb': ['Rajdhani', 'sans-serif']
+                        mono: ['"Fira Code"', '"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'hacker-green': '#00ff41',
+                        'hacker-dark': '#0d1117',
+                        'red-team': '#ff0033',
+                        'purple-team': '#bc13fe',
                     },
                     animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'blink': 'blink 1s step-end infinite'
+                        'cursor-blink': 'blink 1s step-end infinite',
+                        'glitch': 'glitch 1s linear infinite',
                     },
                     keyframes: {
                         blink: {
-                            '0%, 100%': { 'border-color': 'transparent' },
-                            '50%': { 'border-color': '#9FEF00' }
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' },
                         }
                     }
                 }
             }
         }
     </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff0033; }
+
+        .glass-panel {
+            background: rgba(13, 17, 23, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(50, 50, 50, 0.5);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body class="htb-gradient" id="top">
-    <!-- Header/Navigation -->
-    <header class="fixed w-full z-50 htb-header">
-        <div class="container mx-auto px-6 py-3">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-htb-primary rounded-full flex items-center justify-center mr-3">
-                        <i class="fas fa-terminal text-htb-darker"></i>
-                    </div>
-                    <div class="text-xl font-bold terminal glow-text">
-                        <span>Haze</span>
-                    </div>
-                </div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="#home" class="text-htb-secondary hover:text-htb-primary transition nav-link">HOME</a>
-                    <a href="#about" class="text-htb-secondary hover:text-htb-primary transition nav-link">SOBRE</a>
-                    <a href="#skills" class="text-htb-secondary hover:text-htb-primary transition nav-link">SKILLS</a>
-                    <a href="#ai-security" class="text-htb-secondary hover:text-htb-primary transition nav-link">AI SECURITY</a>
-                    <a href="#contact" class="text-htb-secondary hover:text-htb-primary transition nav-link">CONTATO</a>
-                </nav>
-                <div class="md:hidden">
-                    <button id="menu-toggle" class="text-htb-secondary focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 htb-bg rounded-lg">
-                <a href="#home" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">HOME</a>
-                <a href="#about" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">SOBRE</a>
-                <a href="#skills" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">SKILLS</a>
-                <a href="#ai-security" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">AI SECURITY</a>
-                <a href="#contact" class="block py-2 px-4 hover:bg-htb-highlight hover:text-htb-primary transition">CONTATO</a>
-            </div>
-        </div>
-    </header>
+<body class="font-mono crt text-sm sm:text-base">
+    <div id="root"></div>
 
-    <!-- Hero Section -->
-    <section id="home" class="pt-32 pb-20 relative overflow-hidden">
-        <div class="matrix-bg"></div>
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/2 mb-12 md:mb-0">
-                    <div class="htb-bg p-6 rounded-lg mb-8">
-                        <div class="mb-2 text-sm text-htb-secondary font-terminal">root@Haze:~#</div>
-                        <div id="terminal" class="h-64 rounded terminal-scroll"></div>
-                    </div>    
-                
-                </div>
-                <div class="md:w-1/2 flex justify-center">
-                    <div class="relative w-64 h-64 md:w-80 md:h-80">
-                        <div class="absolute inset-0 bg-htb-primary rounded-full opacity-20 blur-xl"></div>
-                        <img src="https://avatars.githubusercontent.com/u/36050676?v=4" alt="Haze" 
-                             class="relative w-full h-full rounded-full object-cover border-4 border-htb-primary shadow-xl htb-pulse" loading="lazy">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-    <!-- About Section -->
-    <section id="about" class="py-20 htb-bg scanner-effect">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SOBRE MIM">
-                <span class="text-htb-primary">SOBRE</span> MIM
-            </h2>
-            
-            <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/3 mb-8 md:mb-0 flex justify-center">
-                    <div class="relative">
-                        <div class="absolute -inset-2 bg-htb-primary rounded-full opacity-15 blur-lg"></div>
-                        <img src="https://avatars.githubusercontent.com/u/36050676?v=4" alt="Haze" 
-                             class="relative w-64 h-64 rounded-full object-cover border-4 border-htb-primary shadow-lg" loading="lazy">
+        // --- DADOS REAIS EXTRAÍDOS DO GITHUB/PERFIL ---
+        const SITE_DATA = {
+            alias: "Tr0p",
+            realName: "Marcos Tolosa",
+            role: "Red Teamer | Exploit Dev | Bug Hunter",
+            tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
+            location: "São Paulo, BR",
+            email: "marcostolosa@mindsecurity.org",
+            social: {
+                github: "https://github.com/marcostolosa",
+                linkedin: "https://linkedin.com/in/marcos-tolosa",
+            },
+            skills: [
+                { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
+                { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
+                { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
+                { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
+                { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
+                { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
+            ],
+            // Projetos Reais do GitHub
+            projects: [
+                { 
+                    id: 1, 
+                    title: "manw-ng", 
+                    desc: "Ferramenta de automação para análise de malware e monitoramento de redes. Focado em stealth e eficiência.", 
+                    tech: ["Python", "Networking"],
+                    type: "Tool"
+                },
+                { 
+                    id: 2, 
+                    title: "OCRack", 
+                    desc: "Ferramenta ofensiva baseada em OCR para extração de dados e bypass de controles visuais em avaliações de segurança.", 
+                    tech: ["Python", "OCR", "Automation"],
+                    type: "Offensive"
+                },
+                { 
+                    id: 3, 
+                    title: "REload.Me", 
+                    desc: "Plataforma de ensino simplificada para Engenharia Reversa. 'The most easy reverse engineer classroom'.", 
+                    tech: ["Python", "Education", "RE"],
+                    type: "Education"
+                },
+                { 
+                    id: 4, 
+                    title: "arctax", 
+                    desc: "Framework modular para automação de tarefas de pós-exploração e reconhecimento.", 
+                    tech: ["Python", "Recon"],
+                    type: "Framework"
+                },
+                {
+                    id: 5,
+                    title: "LeakHound",
+                    desc: "Scanner automatizado para detectar vazamento de segredos e credenciais em repositórios e logs.",
+                    tech: ["Python", "OSINT"],
+                    type: "Scanner"
+                }
+            ],
+            // CVEs Reais/Mencionadas
+            cves: [
+                { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "Vulnerabilidade crítica de execução remota de código descoberta oculta por 13 anos." },
+                { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Cross-Site Scripting refletido permitindo hijacking de sessão." },
+                { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Remote Command Execution não autenticado em infraestrutura governamental dos EUA." }
+            ]
+        };
+
+        const GlitchText = ({ text, color = "text-red-team" }) => (
+            <span className={`relative inline-block ${color}`}>
+                <span className="relative z-10">{text}</span>
+                <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-70 animate-pulse translate-x-[2px]">{text}</span>
+            </span>
+        );
+
+        const Terminal = ({ onNavigate }) => {
+            const [input, setInput] = useState("");
+            const [history, setHistory] = useState([
+                { type: 'info', content: 'MindSecurity OS v3.0 [Kernel 6.8.0-kali3-amd64]' },
+                { type: 'success', content: 'Authenticated as Tr0p. Access Level: ROOT' },
+                { type: 'info', content: 'Type "help" for payload list.' },
+            ]);
+            const scrollRef = useRef(null);
+
+            useEffect(() => {
+                if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }, [history]);
+
+            const handleCommand = (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = input.trim().toLowerCase();
+                    const newHistory = [...history, { type: 'user', content: cmd }];
+
+                    switch(cmd) {
+                        case 'help':
+                            newHistory.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear, exploit' });
+                            break;
+                        case 'whoami':
+                            newHistory.push({ type: 'success', content: 'uid=0(root) gid=0(root) groups=0(root) // Red Teamer & Exploit Dev' });
+                            break;
+                        case 'tools':
+                            newHistory.push({ type: 'info', content: 'Listing repos: manw-ng, OCRack, arctax, REload.Me...' });
+                            onNavigate('projects');
+                            break;
+                        case 'cves':
+                            newHistory.push({ type: 'danger', content: 'CRITICAL VULNS FOUND: CVE-2025-10230, CVE-2025-67503...' });
+                            onNavigate('cves');
+                            break;
+                        case 'contact':
+                            onNavigate('contact');
+                            break;
+                        case 'clear':
+                            setHistory([]);
+                            setInput("");
+                            return;
+                        default:
+                            newHistory.push({ type: 'error', content: `bash: ${cmd}: command not found` });
+                    }
+                    setHistory(newHistory);
+                    setInput("");
+                }
+            };
+
+            return (
+                <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded-lg overflow-hidden border border-red-900/50 shadow-[0_0_30px_rgba(255,0,51,0.1)]">
+                    <div className="bg-neutral-900/90 px-4 py-2 flex items-center justify-between border-b border-white/10">
+                        <div className="flex gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                        </div>
+                        <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
+                    </div>
+                    <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black/90 text-gray-300">
+                        {history.map((line, i) => (
+                            <div key={i} className="mb-1 break-words">
+                                {line.type === 'user' && <span className="text-red-500 font-bold">root@Tr0p:~# </span>}
+                                <span className={
+                                    line.type === 'error' ? 'text-red-500' : 
+                                    line.type === 'success' ? 'text-green-500' : 
+                                    line.type === 'danger' ? 'text-red-400 font-bold blink' :
+                                    'text-gray-300'
+                                }>{line.content}</span>
+                            </div>
+                        ))}
+                        <div className="flex items-center mt-2">
+                            <span className="text-red-500 font-bold mr-2">root@Tr0p:~#</span>
+                            <input 
+                                type="text" 
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={handleCommand}
+                                className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
+                                autoFocus
+                                spellCheck="false"
+                            />
+                        </div>
                     </div>
                 </div>
-                <div class="md:w-2/3 md:pl-12">
-                    <div class="htb-bg p-6 rounded-lg mb-6">
-                        <p class="text-htb-secondary mb-4">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-accent font-bold">whois</span> Haze
-                        </p>
-                        <p class="text-htb-secondary ml-4 mb-2">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Nome:</span> Marcos Tolosa (Haze)
-                        </p>
-                        <p class="text-htb-secondary ml-4 mb-2">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Função:</span> Red Team Engineer | Prompt Architect
-                        </p>
-                        <p class="text-htb-secondary ml-4 mb-2">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Especialidades:</span> AI x Offensive Security | DevSecOps | MLOps
-                        </p>
-                        <p class="text-htb-secondary ml-4 mb-2">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-primary">Experiência:</span> 10+ anos em segurança ofensiva
-                        </p>
+            );
+        };
+
+        const NavBar = ({ active, setActive }) => (
+            <nav className="fixed top-0 w-full z-50 glass-panel border-b border-red-500/20">
+                <div className="max-w-6xl mx-auto px-4">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex-shrink-0 font-bold text-xl tracking-wider cursor-pointer font-mono" onClick={() => setActive('home')}>
+                            <span className="text-red-500">./</span>Tr0p
+                        </div>
+                        <div className="hidden md:block">
+                            <div className="ml-10 flex items-baseline space-x-8">
+                                {[
+                                  {id: 'home', label: '~/home'},
+                                  {id: 'about', label: './whoami'},
+                                  {id: 'projects', label: './tools'},
+                                  {id: 'cves', label: './pwned'},
+                                  {id: 'contact', label: './connect'}
+                                ].map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActive(item.id)}
+                                        className={`px-3 py-2 rounded-md text-sm font-bold transition-colors font-mono ${
+                                            active === item.id 
+                                            ? 'text-red-500 bg-red-900/10 border border-red-500/30' 
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </nav>
+        );
+
+        const SectionTitle = ({ title, subtitle }) => (
+            <div className="mb-12 text-center">
+                <h2 className="text-3xl md:text-5xl font-bold mb-4 flex justify-center items-center gap-2 tracking-tighter">
+                    <span className="text-red-600 text-xl align-top">root@server:~$</span> 
+                    <GlitchText text={title} color="text-white" />
+                </h2>
+                <div className="h-0.5 w-32 bg-red-600 mx-auto mb-4"></div>
+                <p className="text-gray-400 max-w-2xl mx-auto font-mono text-sm">{subtitle}</p>
+            </div>
+        );
+
+        const CVECard = ({ cve }) => (
+            <div className="glass-panel border-l-4 border-l-red-600 p-6 relative overflow-hidden group hover:bg-red-900/10 transition-colors">
+                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20">
+                    <i className="fa-solid fa-bug text-6xl"></i>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-red-500 font-mono">{cve.id}</h3>
+                    <span className="text-xs font-bold px-2 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded">{cve.score}</span>
+                </div>
+                <h4 className="text-white font-bold mb-2">{cve.title}</h4>
+                <p className="text-gray-400 text-sm">{cve.desc}</p>
+            </div>
+        );
+
+        const App = () => {
+            const [activeSection, setActiveSection] = useState('home');
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#050505]">
+                    <NavBar active={activeSection} setActive={setActiveSection} />
                     
-                    <div class="htb-bg p-6 rounded-lg mb-8">
-                        <p class="text-htb-secondary mb-4">
-                            <span class="text-htb-primary font-bold">></span> <span class="text-htb-accent font-bold">cat</span> bio.txt
-                        </p>
-                        <p class="text-htb-secondary ml-4">
-                            Especialista em Segurança Ofensiva com +10 anos de experiência prática em Red Team, 
-                            engenharia reversa, automação de ataques com LLMs e integração de IA com segurança cibernética. 
-                            Atualmente explorando IA autônoma, GDB com LLMs (MCP) e análise de código automática. 
-                            Participante ativo da comunidade Hack The Box e mantenedor de projetos open source.
-                        </p>
-                    </div>
-                    
-                    <div class="flex flex-wrap gap-4">
-                        <a href="https://github.com/marcostolosa" target="_blank" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
-                            <i class="fab fa-github mr-2"></i> GITHUB
-                        </a>
-                        <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
-                            <i class="fab fa-linkedin-in mr-2"></i> LINKEDIN
-                        </a>
-                        <a href="mailto:marcos.tolosa@owasp.org" class="bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-4 py-2 rounded flex items-center font-medium">
-                            <i class="fas fa-envelope mr-2"></i> EMAIL
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                    {/* Hero Section */}
+                    {activeSection === 'home' && (
+                        <div className="pt-32 pb-16 px-4 min-h-screen flex flex-col items-center justify-center relative">
+                            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 opacity-10 pointer-events-none">
+                                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-600 rounded-full blur-[150px]"></div>
+                            </div>
 
-    <!-- Skills Section -->
-    <section id="skills" class="py-20 htb-gradient scanner-effect">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="SKILLS & TECNOLOGIAS">
-                <span class="text-htb-primary">SKILLS</span> & TECNOLOGIAS
-            </h2>
-            
-            <div class="mb-16">
-                <div class="htb-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-htb-primary mb-6">Mapa de Competências</h3>
-                    <div id="skills-graph" class="w-full h-96 loading-container">
-                        <div class="loading-indicator"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Red Teaming -->
-                <div class="htb-card p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-htb-primary p-2 rounded-full mr-4">
-                            <i class="fas fa-user-secret text-htb-darker"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-htb-primary">Red Teaming & APT Emulation</h3>
-                    </div>
-                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                        <li>Simulação realista de ameaças avançadas</li>
-                        <li>Desenvolvimento de TTPs customizadas</li>
-                        <li>Lateral movement e evasion techniques</li>
-                        <li>Chains de exploração e C2s stealth</li>
-                    </ul>
-                </div>
-                
-                <!-- Reverse Engineering -->
-                <div class="htb-card p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-htb-accent p-2 rounded-full mr-4">
-                            <i class="fas fa-bug text-htb-darker"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-htb-accent">Engenharia Reversa Profunda</h3>
-                    </div>
-                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                        <li>Desenvolvimento de exploits personalizados</li>
-                        <li>ROP/JOP chains e shellcode crafting</li>
-                        <li>Análise estática/dinâmica com Frida/Ghidra</li>
-                        <li>Bypass de EDR/AV</li>
-                    </ul>
-                </div>
-                
-                <!-- AI Security -->
-                <div class="htb-card p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-htb-primary p-2 rounded-full mr-4">
-                            <i class="fas fa-robot text-htb-darker"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-htb-primary">AI/ML Aplicados à Segurança</h3>
-                    </div>
-                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                        <li>Assistentes ofensivos com LLMs (LangChain, Ollama)</li>
-                        <li>Automação de pentests e RE com IA</li>
-                        <li>Engenharia de prompts tática</li>
-                        <li>Integração com GDB para análise assistida</li>
-                    </ul>
-                </div>
-                
-                <!-- DevSecOps -->
-                <div class="htb-card p-6 rounded-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-htb-accent p-2 rounded-full mr-4">
-                            <i class="fas fa-code-branch text-htb-darker"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-htb-accent">AppSec & DevSecOps Avançado</h3>
-                    </div>
-                    <ul class="list-disc list-inside text-htb-secondary space-y-2">
-                        <li>SAST, DAST e revisão de código</li>
-                        <li>Threat Modeling (STRIDE, CVSS)</li>
-                        <li>Segurança em containers e Kubernetes</li>
-                        <li>Pipelines GitHub Actions e Terraform</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Tools & Technologies -->
-            <div class="mt-16">
-                <h3 class="text-xl font-semibold mb-8 text-center glow-text">
-                    <span class="text-htb-primary">TOOLS</span> & TECHNOLOGIES
-                </h3>
-                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Python</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="Bash" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Bash</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/powershell/powershell-original.svg" alt="PowerShell" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">PowerShell</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" alt="Go" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Golang</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="Linux" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Linux</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Docker</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" alt="Kubernetes" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">K8s</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Terraform</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" alt="AWS" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">AWS</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" alt="Azure" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Azure</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="GCP" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">GCP</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">TensorFlow</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="PyTorch" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">PyTorch</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="FastAPI" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">FastAPI</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg" alt="Flask" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Flask</span>
-                    </div>
-                    <div class="tool-icon flex flex-col items-center p-4 htb-bg rounded-lg">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ghidra/ghidra-original.svg" alt="Ghidra" class="w-12 h-12" loading="lazy">
-                        <span class="text-xs mt-2 text-htb-secondary">Ghidra</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                            <div className="text-center space-y-6 max-w-4xl mx-auto z-10">
+                                <div className="inline-block border border-red-500/30 bg-red-950/30 px-4 py-1 rounded text-red-500 text-xs font-mono mb-4">
+                                    <i className="fa-solid fa-skull mr-2"></i>
+                                    Red Team Operative Active
+                                </div>
+                                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-2">
+                                    TR0P
+                                </h1>
+                                <p className="text-xl md:text-2xl text-gray-400 font-mono">
+                                    {SITE_DATA.realName} <span className="text-red-600 mx-2">///</span> {SITE_DATA.role}
+                                </p>
+                                <p className="max-w-2xl mx-auto text-gray-500 leading-relaxed font-mono text-sm border-l-2 border-red-900 pl-4 py-2 bg-white/5">
+                                    "{SITE_DATA.tagline}"
+                                </p>
+                                
+                                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                                    <button onClick={() => setActiveSection('projects')} className="bg-red-600 text-black px-8 py-3 font-bold hover:bg-white transition-all uppercase tracking-widest text-sm skew-x-[-10deg]">
+                                        <span className="skew-x-[10deg] inline-block">Ver Tools</span>
+                                    </button>
+                                    <button onClick={() => setActiveSection('cves')} className="border border-red-600/50 text-red-500 px-8 py-3 font-bold hover:bg-red-900/20 transition-all uppercase tracking-widest text-sm skew-x-[-10deg]">
+                                        <span className="skew-x-[10deg] inline-block">CVEs & Research</span>
+                                    </button>
+                                </div>
+                            </div>
 
-    <!-- AI Security Section -->
-    <section id="ai-security" class="py-20 htb-gradient scanner-effect">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="AI x SECURITY">
-                <span class="text-htb-primary">AI</span> x <span class="text-htb-accent">SECURITY</span>
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- Lado esquerdo: Projetos de AI Security -->
-                <div>
-                    <div class="htb-card p-6 rounded-lg mb-8">
-                        <h3 class="text-xl font-bold text-htb-primary mb-4">Projetos Recentes</h3>
-                        
-                        <div class="mb-6">
-                            <h4 class="text-lg font-semibold text-htb-accent">LLM-powered Vulnerability Scanner</h4>
-                            <p class="text-htb-secondary mb-2">Framework de automação que combina ferramentas tradicionais de pentest com LLMs para interpretação e análise de resultados em tempo real.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">LangChain</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">GPT-4</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Nuclei</span>
+                            <div className="w-full mt-16 px-4">
+                                <Terminal onNavigate={setActiveSection} />
                             </div>
                         </div>
-                        
-                        <div class="mb-6">
-                            <h4 class="text-lg font-semibold text-htb-accent">AIJacking Protection System</h4>
-                            <p class="text-htb-secondary mb-2">Sistema de defesa contra prompt injection e data leakage em aplicações que utilizam LLMs, com monitoramento contínuo e alertas.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">RAG</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Prompt Security</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Vector DB</span>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h4 class="text-lg font-semibold text-htb-accent">GDB-LLM Assistant</h4>
-                            <p class="text-htb-secondary mb-2">Ferramenta que integra LLMs com GDB para análise assistida de binários e descoberta acelerada de vulnerabilidades.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">LLDB</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Ollama</span>
-                                <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Analysis</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Lado direito: Demo Interativo de LLM -->
-                <div>
-                    <div class="htb-card p-6 rounded-lg h-full">
-                        <h3 class="text-xl font-bold text-htb-primary mb-4">LLM Attack Simulator</h3>
-                        
-                        <div class="bg-htb-terminal p-4 rounded-lg mb-6 font-terminal">
-                            <div class="text-htb-secondary mb-3">
-                                <span class="text-htb-primary font-bold">></span> Selecione uma técnica de ataque:
-                            </div>
-                            
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="injection">Prompt Injection</button>
-                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="jailbreak">Jailbreak</button>
-                                <button class="attack-btn bg-htb-highlight hover:bg-htb-primary hover:text-htb-darker text-htb-secondary px-3 py-1 rounded text-sm" data-attack="extraction">Data Extraction</button>
-                            </div>
-                            
-                            <div id="attack-simulation" class="bg-htb-darker p-3 rounded-lg h-64 overflow-y-auto">
-                                <div class="text-htb-secondary text-sm">
-                                    <span class="text-htb-primary">system> </span>Selecione uma técnica acima para começar a simulação...
+                    )}
+
+                    {/* About Section */}
+                    {activeSection === 'about' && (
+                        <div className="pt-32 px-4 max-w-5xl mx-auto animate-fade-in">
+                            <SectionTitle title="whoami" subtitle="The person behind the shell." />
+                            <div className="grid md:grid-cols-2 gap-12">
+                                <div className="glass-panel p-6 border-t-4 border-t-red-600">
+                                    <h3 className="text-2xl font-bold text-white mb-4">Bio</h3>
+                                    <p className="text-gray-400 mb-4 leading-relaxed">
+                                        Olá, sou o <strong className="text-white">Marcos Tolosa (aka Tr0p)</strong>. 
+                                        Red Teamer, Pentester, Bug Bounty Hunter e Engenheiro Reverso.
+                                    </p>
+                                    <p className="text-gray-400 mb-4 leading-relaxed">
+                                        Meu cérebro funciona de forma diferente <strong className="text-white">(ASD Level 1)</strong>, o que me dá o hiperfoco necessário para desmontar ameaças complexas e entender como elas funcionam linha por linha.
+                                    </p>
+                                    <p className="text-gray-400">
+                                        Quando não estou em um engagement, estou pesquisando novas vulnerabilidades no <strong className="text-green-500">BugCrowd/HackerOne</strong> ou escrevendo automações em Python para eliminar tarefas repetitivas.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-4 font-mono">./skills --verbose</h3>
+                                    <div className="space-y-4">
+                                        {SITE_DATA.skills.map((skill, idx) => (
+                                            <div key={idx}>
+                                                <div className="flex justify-between text-xs font-mono mb-1">
+                                                    <span className="text-gray-300"><i className={`fa-solid ${skill.icon} mr-2 w-4`}></i>{skill.name}</span>
+                                                    <span className={skill.color}>{skill.level}%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-800 h-2 rounded-sm overflow-hidden">
+                                                    <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="mt-8 p-4 border border-dashed border-gray-700 rounded bg-black/50">
+                                        <h4 className="text-gray-500 text-xs font-mono uppercase mb-2">Stack Ofensiva</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['BurpSuite Pro', 'Frida', 'Cobalt Strike', 'Ghidra', 'Impacket', 'Nuclei', 'Metasploit'].map(tool => (
+                                                <span key={tool} className="text-xs bg-red-900/20 text-red-400 px-2 py-1 rounded border border-red-900/30">{tool}</span>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="text-center">
-                            <a href="#contact" class="htb-btn px-6 py-3 rounded-lg font-medium inline-flex items-center">
-                                <i class="fas fa-shield-alt mr-2"></i>
-                                CONSULTE-ME SOBRE SEGURANÇA EM IA
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                    )}
 
-    <!-- Machines Section -->
-    <section id="machines" class="py-20 htb-bg scanner-effect">
-        <div class="container mx-auto px-6">            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Máquina 1 - Completed Hard -->
-                <div class="htb-card rounded-xl overflow-hidden machine-card">
-                    <div class="relative">
-                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
-                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">HARD</div>
-                            
-                            <!-- Vetores de ataque sempre visíveis -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
-                                <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
-                                <ul class="text-sm text-htb-secondary">
-                                    <li>• Buffer Overflow em Serviço Customizado</li>
-                                    <li>• Exploração de Binário SUID</li>
-                                    <li>• Exploit de Kernel (CVE-2023-0386)</li>
-                                </ul>
+                    {/* Projects Section */}
+                    {activeSection === 'projects' && (
+                        <div className="pt-32 px-4 max-w-6xl mx-auto animate-fade-in">
+                            <SectionTitle title="./tools_dev" subtitle="Open source arsenal & scripts." />
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {SITE_DATA.projects.map(project => (
+                                    <div key={project.id} className="glass-panel p-6 flex flex-col hover:border-red-500/50 transition-colors group">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="text-xl font-bold text-white font-mono group-hover:text-red-500 transition-colors">{project.title}</h3>
+                                            <i className="fa-brands fa-github text-2xl text-gray-600 group-hover:text-white"></i>
+                                        </div>
+                                        <p className="text-gray-400 text-sm mb-6 flex-1">{project.desc}</p>
+                                        <div className="border-t border-gray-800 pt-4 mt-auto">
+                                            <div className="flex flex-wrap gap-2">
+                                                {project.tech.map(t => (
+                                                    <span key={t} className="text-[10px] font-mono bg-white/5 text-gray-400 px-2 py-1">{t}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-12 text-center">
+                                <a href={SITE_DATA.social.github} target="_blank" className="bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded font-mono text-sm border border-white/10 transition-colors">
+                                    <i className="fa-brands fa-github mr-2"></i> github.com/marcostolosa
+                                </a>
                             </div>
                         </div>
-                        
-                        <!-- Progress overlay -->
-                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-primary"></div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Poison</h3>
-                        <p class="text-htb-secondary mb-4">
-                            Máquina Linux complexa com desafios de exploração binária e múltiplos vetores de privilege escalation.
-                        </p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Exploitation</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Linux</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Kernel</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-htb-secondary">OWNED: 15/02/2023</span>
-                            <span class="text-xs text-htb-primary">TEMPO: 1h 05m</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Máquina 2 - Completed Medium -->
-                <div class="htb-card rounded-xl overflow-hidden machine-card">
-                    <div class="relative">
-                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
-                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">MEDIUM</div>
-                            
-                            <!-- Vetores de ataque sempre visíveis -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
-                                <h4 class="text-htb-primary text-lg font-bold mb-2">Vetores Comprometidos:</h4>
-                                <ul class="text-sm text-htb-secondary">
-                                    <li>• Configuração incorreta de OAuth</li>
-                                    <li>• Roubo de token de conta de serviço</li>
-                                    <li>• Ataque Kerberoasting</li>
-                                </ul>
+                    )}
+
+                    {/* CVEs Section */}
+                    {activeSection === 'cves' && (
+                        <div className="pt-32 px-4 max-w-4xl mx-auto animate-fade-in">
+                            <SectionTitle title="CVE_DATABASE" subtitle="Vulnerabilities found & disclosed." />
+                            <div className="space-y-6">
+                                {SITE_DATA.cves.map((cve, idx) => (
+                                    <CVECard key={idx} cve={cve} />
+                                ))}
                             </div>
                         </div>
-                        
-                        <!-- Progress overlay -->
-                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-primary"></div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Active</h3>
-                        <p class="text-htb-secondary mb-4">
-                            Ambiente Windows AD enterprise com múltiplos vetores de ataque e técnicas de movimento lateral.
-                        </p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Active Directory</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Kerberoasting</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Windows</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-htb-secondary">OWNED: 28/04/2023</span>
-                            <span class="text-xs text-htb-primary">TEMPO: 52m</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Máquina 3 - In Progress -->
-                <div class="htb-card rounded-xl overflow-hidden machine-card">
-                    <div class="relative">
-                        <div class="h-48 bg-gradient-to-r from-htb-highlight to-htb-terminal flex items-center justify-center relative overflow-hidden machine-banner">
-                            <div class="absolute top-4 right-4 badge px-2 py-1 rounded text-xs">INSANE</div>
-                            
-                            <!-- Progresso de ataque sempre visível -->
-                            <div class="absolute inset-0 bg-gradient-to-b from-htb-darker/80 to-htb-darker flex flex-col justify-center items-center p-4">
-                                <h4 class="text-htb-primary text-lg font-bold mb-2">Progresso do Ataque:</h4>
-                                <ul class="text-sm text-htb-secondary">
-                                    <li>• Initial Foothold ✓</li>
-                                    <li>• User Access ✓</li>
-                                    <li>• Privilege Escalation ⟳</li>
-                                </ul>
+                    )}
+
+                    {/* Contact Section */}
+                    {activeSection === 'contact' && (
+                        <div className="pt-32 px-4 max-w-4xl mx-auto animate-fade-in">
+                            <SectionTitle title="./connect" subtitle="Secure communication channels." />
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div className="glass-panel p-8">
+                                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                                        <div>
+                                            <label className="text-xs font-mono text-red-500 mb-1 block">TARGET</label>
+                                            <input type="text" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="Nome / Empresa" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-mono text-red-500 mb-1 block">CALLBACK</label>
+                                            <input type="email" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="seu@email.com" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-mono text-red-500 mb-1 block">DATA</label>
+                                            <textarea rows="5" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="Detalhes do projeto..."></textarea>
+                                        </div>
+                                        <button className="w-full bg-red-600 text-black font-bold py-3 hover:bg-white transition-colors uppercase tracking-widest text-sm">
+                                            Send Packet
+                                        </button>
+                                    </form>
+                                </div>
+                                <div className="flex flex-col justify-center space-y-6">
+                                    <a href={`mailto:${SITE_DATA.email}`} className="glass-panel p-6 flex items-center gap-4 hover:border-red-500 transition-colors group">
+                                        <div className="w-12 h-12 bg-red-900/20 flex items-center justify-center rounded text-red-500 group-hover:bg-red-600 group-hover:text-black transition-colors">
+                                            <i className="fa-solid fa-envelope text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-500 uppercase font-mono">Email</div>
+                                            <div className="text-white text-sm break-all">{SITE_DATA.email}</div>
+                                        </div>
+                                    </a>
+                                    <a href={SITE_DATA.social.linkedin} target="_blank" className="glass-panel p-6 flex items-center gap-4 hover:border-blue-500 transition-colors group">
+                                        <div className="w-12 h-12 bg-blue-900/20 flex items-center justify-center rounded text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                            <i className="fa-brands fa-linkedin-in text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-500 uppercase font-mono">LinkedIn</div>
+                                            <div className="text-white text-sm">/in/marcos-tolosa</div>
+                                        </div>
+                                    </a>
+                                    <a href={SITE_DATA.social.github} target="_blank" className="glass-panel p-6 flex items-center gap-4 hover:border-white transition-colors group">
+                                        <div className="w-12 h-12 bg-gray-800 flex items-center justify-center rounded text-white group-hover:bg-white group-hover:text-black transition-colors">
+                                            <i className="fa-brands fa-github text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-500 uppercase font-mono">GitHub</div>
+                                            <div className="text-white text-sm">/marcostolosa</div>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Progress overlay - partial progress -->
-                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-htb-accent" style="width: 65%"></div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2 text-htb-primary">Nightmare</h3>
-                        <p class="text-htb-secondary mb-4">
-                            Desafio avançado de exploração de binários com ASLR, stack canaries e proteções CFI customizadas.
-                        </p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Binary Exploitation</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">ROP/JOP</span>
-                            <span class="bg-htb-highlight text-htb-secondary px-2 py-1 rounded text-xs">Linux</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-htb-accent">STATUS: EM PROGRESSO</span>
-                            <span class="text-xs text-htb-secondary">65% COMPLETO</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 htb-bg scanner-effect">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-16 glow-text glitch-effect" data-text="CONTATO">
-                <span class="text-htb-primary">CONTATO</span>
-            </h2>
-            
-            <div class="flex flex-col lg:flex-row gap-12">
-                <div class="lg:w-1/2">
-                    <h3 class="text-2xl font-semibold mb-6 text-htb-primary">INFORMAÇÕES DE CONTATO</h3>
+                    )}
                     
-                    <div class="space-y-6">
-                        <div class="flex items-start">
-                            <div class="bg-htb-primary p-3 rounded-full mr-4">
-                                <i class="fas fa-envelope text-htb-darker"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-htb-secondary">EMAIL</h4>
-                                <a href="mailto:marcos.tolosa@owasp.org" class="text-htb-secondary hover:text-htb-primary">marcos.tolosa@owasp.org</a>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <div class="bg-htb-highlight p-3 rounded-full mr-4">
-                                <i class="fab fa-github text-htb-secondary"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-htb-secondary">GITHUB</h4>
-                                <a href="https://github.com/marcostolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary">github.com/marcostolosa</a>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <div class="bg-htb-highlight p-3 rounded-full mr-4">
-                                <i class="fab fa-linkedin-in text-htb-secondary"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-htb-secondary">LINKEDIN</h4>
-                                <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary">linkedin.com/in/marcos-tolosa</a>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                    <div class="mt-10">
-                        <h4 class="text-xl font-medium mb-4 text-htb-primary">SIGA-ME</h4>
-                        <div class="flex space-x-4">
-                            <a href="https://github.com/marcostolosa" target="_blank" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
-                                <i class="fab fa-github text-xl"></i>
-                            </a>
-                            <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
-                                <i class="fab fa-linkedin-in text-xl"></i>
-                            </a>
-                            <a href="#" class="bg-htb-highlight w-12 h-12 rounded-full flex items-center justify-center text-htb-secondary hover:bg-htb-primary hover:text-htb-darker transition">
-                                <i class="fab fa-twitter text-xl"></i>
-                            </a>
-                        </div>
-                    </div>
+                    <footer className="fixed bottom-0 w-full py-1 bg-neutral-900 border-t border-white/5 z-40 text-[10px] text-gray-600 font-mono flex justify-between px-4">
+                        <span>TR0P SECURITY OS v3.0</span>
+                        <span>SYSTEM STATUS: STABLE</span>
+                    </footer>
                 </div>
-                
-                <div class="lg:w-1/2">
-                    <div class="htb-card rounded-xl shadow-xl p-8">
-                        <h3 class="text-2xl font-semibold mb-6 text-htb-primary">ENVIAR MENSAGEM</h3>
-                        
-                        <form id="contactForm" class="contact-form">
-                            <div class="mb-6">
-                                <label for="name" class="block text-htb-secondary font-medium mb-2">NOME</label>
-                                <input type="text" id="name" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
-                            </div>
-                            
-                            <div class="mb-6">
-                                <label for="email" class="block text-htb-secondary font-medium mb-2">EMAIL</label>
-                                <input type="email" id="email" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
-                            </div>
-                            
-                            <div class="mb-6">
-                                <label for="subject" class="block text-htb-secondary font-medium mb-2">ASSUNTO</label>
-                                <input type="text" id="subject" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary">
-                            </div>
-                            
-                            <div class="mb-6">
-                                <label for="message" class="block text-htb-secondary font-medium mb-2">MENSAGEM</label>
-                                <textarea id="message" rows="5" class="w-full px-4 py-3 bg-htb-terminal border border-htb-highlight rounded-lg focus:outline-none focus:ring-2 focus:ring-htb-primary text-htb-secondary"></textarea>
-                            </div>
-                            
-                            <button type="submit" class="w-full htb-btn py-3 px-6 rounded-lg font-medium flex items-center justify-center">
-                                <i class="fas fa-paper-plane mr-2"></i> ENVIAR MENSAGEM
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            );
+        };
 
-    <!-- Footer -->
-    <footer class="bg-black/80 py-12 border-t border-htb-highlight">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-htb-primary rounded-full flex items-center justify-center mr-3">
-                            <i class="fas fa-terminal text-htb-darker"></i>
-                        </div>
-                        <div class="text-xl font-bold glow-text">
-                            <span>Haze</span>
-                        </div>
-                    </div>
-                    <p class="mt-2 text-htb-secondary">Red Team Engineer & AI Security Specialist</p>
-                </div>
-                
-                <div class="flex flex-col items-center md:items-end">
-                    <div class="flex space-x-6 mb-4">
-                        <a href="https://github.com/marcostolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary transition">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="https://www.linkedin.com/in/marcos-tolosa" target="_blank" class="text-htb-secondary hover:text-htb-primary transition">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="mailto:marcos.tolosa@owasp.org" class="text-htb-secondary hover:text-htb-primary transition">
-                            <i class="fas fa-envelope"></i>
-                        </a>
-                    </div>
-                    <p class="text-htb-secondary text-sm">
-                        &copy; 2025 Marcos Tolosa (Haze). TODOS OS DIREITOS RESERVADOS
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Back to Top Button -->
-    <button id="back-to-top" class="fixed bottom-8 right-8 bg-htb-primary text-htb-darker w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 z-50">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    
-    <!-- Matrix Canvas Background -->
-    <canvas id="matrix-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-10"></canvas>
-
-    <!-- jQuery Terminal -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/js/jquery.terminal.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/css/jquery.terminal.min.css">
-    
-    <!-- D3.js para gráfico de skills -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    
-    <!-- Chart.js para gráficos de conquistas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Scripts Principal -->
-    <script src="script.js"></script>
-
-    <!-- Preload estratégico de imagens críticas -->
-    <link rel="preload" as="image" href="https://avatars.githubusercontent.com/u/36050676?v=4">
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>

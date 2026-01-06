@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tr0p | MindSecurity - Offensive Security & Red Team</title>
+    <title>Tr0p | MindSecurity - Debug Mode</title>
     
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- React & ReactDOM (Versão Development para mostrar erros) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel para JSX -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
@@ -38,7 +38,6 @@
                     },
                     animation: {
                         'cursor-blink': 'blink 1s step-end infinite',
-                        'glitch': 'glitch 1s linear infinite',
                     },
                     keyframes: {
                         blink: {
@@ -80,15 +79,45 @@
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
         }
+        
+        /* Classe de erro para debug */
+        #error-display {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a0000;
+            color: #ff3333;
+            padding: 2rem;
+            z-index: 9999;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow: auto;
+        }
+        .blink-danger {
+            animation: blink 1s step-end infinite;
+        }
     </style>
 </head>
 <body class="font-mono crt text-sm sm:text-base">
+    <!-- Container de Erro -->
+    <div id="error-display"></div>
+    
+    <!-- Container React -->
     <div id="root"></div>
+
+    <!-- Script de Captura de Erros -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            const display = document.getElementById('error-display');
+            display.style.display = 'block';
+            display.innerHTML = `<h1>SYSTEM CRITICAL FAILURE</h1><hr/><p>Error: ${message}</p><p>Source: ${source}:${lineno}:${colno}</p><p>Stack: ${error ? error.stack : 'N/A'}</p>`;
+        };
+    </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- DADOS REAIS EXTRAÍDOS DO GITHUB/PERFIL ---
+        // --- DADOS REAIS ---
         const SITE_DATA = {
             alias: "Tr0p",
             realName: "Marcos Tolosa",
@@ -108,7 +137,6 @@
                 { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
                 { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
             ],
-            // Projetos Reais do GitHub
             projects: [
                 { 
                     id: 1, 
@@ -146,7 +174,6 @@
                     type: "Scanner"
                 }
             ],
-            // CVEs Reais/Mencionadas
             cves: [
                 { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "Vulnerabilidade crítica de execução remota de código descoberta oculta por 13 anos." },
                 { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Cross-Site Scripting refletido permitindo hijacking de sessão." },
@@ -226,7 +253,7 @@
                                 <span className={
                                     line.type === 'error' ? 'text-red-500' : 
                                     line.type === 'success' ? 'text-green-500' : 
-                                    line.type === 'danger' ? 'text-red-400 font-bold blink' :
+                                    line.type === 'danger' ? 'text-red-400 font-bold blink-danger' :
                                     'text-gray-300'
                                 }>{line.content}</span>
                             </div>

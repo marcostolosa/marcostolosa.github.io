@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tr0p | MindSecurity - Red Team</title>
+    <title>Marcos (Tr0p) Tolosa | Red Team Operator</title>
     
-    <!-- FIX CLOUDFLARE: data-cfasync="false" impede o Rocket Loader de quebrar os scripts -->
+    <!-- ANTI-CLOUDFLARE ROCKET LOADER FIX -->
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js" data-cfasync="false"></script>
@@ -20,8 +20,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Fontes Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script data-cfasync="false">
         tailwind.config = {
@@ -29,16 +29,27 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        mono: ['"Fira Code"', '"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        'hacker-green': '#00ff41',
-                        'hacker-dark': '#0d1117',
-                        'red-team': '#ff0033',
-                        'purple-team': '#bc13fe',
+                        bg: '#050505',
+                        panel: '#0f0f0f',
+                        border: '#262626',
+                        primary: '#b91c1c', /* Red 700 */
+                        primaryLight: '#ef4444', /* Red 500 */
+                        accent: '#d97706', /* Amber 600 */
+                        text: '#e5e5e5',
+                        muted: '#737373',
                     },
                     animation: {
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
@@ -46,413 +57,340 @@
     </script>
 
     <style>
-        body {
-            background-color: #050505;
-            color: #e2e8f0;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ff0033; }
-
-        .glass-panel {
-            background: rgba(13, 17, 23, 0.95);
-            border: 1px solid rgba(50, 50, 50, 0.5);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        #loading-msg {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff0033;
-            font-family: monospace;
-            font-size: 1.5rem;
-            text-align: center;
-            z-index: 0;
-        }
-        
-        #debug-console {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #110000;
-            color: #ff5555;
-            z-index: 9999;
-            padding: 20px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            overflow: auto;
-        }
+        body { background-color: #050505; color: #e5e5e5; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
+        .operator-panel { background: #0f0f0f; border: 1px solid #262626; position: relative; transition: border-color 0.2s; }
+        .operator-panel:hover { border-color: #404040; }
+        .section-header { border-left: 3px solid #b91c1c; padding-left: 1rem; margin-bottom: 2rem; }
     </style>
 </head>
-<body class="font-mono">
+<body class="font-sans antialiased selection:bg-primary selection:text-white">
 
-    <!-- Console de Debug (Aparece se houver erro crítico) -->
-    <div id="debug-console"></div>
+    <div id="root"></div>
 
-    <!-- Mensagem de carregamento -->
-    <div id="loading-msg">
-        INITIALIZING SYSTEM...<br>
-        <span style="font-size: 0.8rem; color: #666;">Bypassing Cloudflare Rocket Loader...</span>
+    <!-- Fallback de Erro -->
+    <div id="loading-msg" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#b91c1c;font-family:monospace;">
+        INITIALIZING OPERATOR PROFILE...
     </div>
 
-    <!-- Onde o React vai montar -->
-    <div id="root" style="position: relative; z-index: 10;"></div>
-
-    <!-- Captura Global de Erros (Antes do Babel) -->
-    <script data-cfasync="false">
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            const consoleDiv = document.getElementById('debug-console');
-            const loader = document.getElementById('loading-msg');
-            if (consoleDiv) {
-                consoleDiv.style.display = 'block';
-                if(loader) loader.style.display = 'none';
-                consoleDiv.innerHTML += `<h3>CRITICAL ERROR DETECTED</h3><hr/>
-                <p><strong>Message:</strong> ${msg}</p>
-                <p><strong>Line:</strong> ${lineNo} : ${columnNo}</p>
-                <p><strong>URL:</strong> ${url}</p>
-                <p><strong>Stack:</strong> ${error ? error.stack : 'N/A'}</p>`;
-            }
-            return false;
-        };
-        
-        // Timeout de segurança
-        setTimeout(() => {
-            const root = document.getElementById('root');
-            if (root && root.innerHTML.trim() === '') {
-                const consoleDiv = document.getElementById('debug-console');
-                const loader = document.getElementById('loading-msg');
-                if (consoleDiv && consoleDiv.style.display === 'none') {
-                     consoleDiv.style.display = 'block';
-                     if(loader) loader.style.display = 'none';
-                     consoleDiv.innerHTML += `<h3>CLOUDFLARE/TIMEOUT ERROR</h3><hr/>
-                     <p>React failed to mount. Since you are using Cloudflare, please check:</p>
-                     <ul>
-                        <li>1. Purge your Cloudflare Cache (Caching > Configuration > Purge Everything).</li>
-                        <li>2. Disable 'Rocket Loader' in Cloudflare (Speed > Optimization).</li>
-                     </ul>`;
-                }
-            }
-        }, 5000);
-    </script>
-
     <script type="text/babel" data-cfasync="false">
-        // --- DADOS DO SITE ---
-        const SITE_DATA = {
-            alias: "Tr0p",
-            realName: "Marcos Tolosa",
-            role: "Red Teamer | Exploit Dev",
-            tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
-            email: "marcostolosa@mindsecurity.org",
-            github: "https://github.com/marcostolosa",
-            linkedin: "https://linkedin.com/in/marcos-tolosa",
-            skills: [
-                { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
-                { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
-                { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
-                { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
-                { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
-                { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
+        const { useState, useEffect } = React;
+
+        const DATA = {
+            profile: {
+                name: "Marcos (Tr0p) Tolosa",
+                role: "Offensive Security • Red Team • Pentester • AppSec",
+                location: "Rio de Janeiro, Brasil",
+                email: "marcos.tolosa@owasp.org",
+                github: "https://github.com/marcostolosa",
+                linkedin: "https://linkedin.com/in/marcos-tolosa",
+                youtube: "https://youtube.com/@Tr0p",
+                bio: "I'm a Red Teamer, Pentester, Bug Bounty Hunter, and Reverse Engineer with a passion for automating the boring stuff. My brain is wired differently (ASD Level 1), giving me the hyperfocus needed to dismantle complex threats and understand their core. I don't just find vulnerabilities; I tear them apart to understand how they tick.",
+                stack_summary: "If it can be scripted, I automate it. Advanced Regex, Semgrep, CodeQL, and custom scripts are part of my workflow."
+            },
+            experience: [
+                {
+                    company: "Bugcrowd",
+                    role: "Bug Bounty Hunter | Offensive Researcher",
+                    period: "Set 2025 - Present",
+                    desc: "Researching and exploiting vulnerabilities in Web/Mobile apps via private programs. Conducting attack surface analysis, targeted fuzzing, and contextualized exploitation."
+                },
+                {
+                    company: "HackerOne",
+                    role: "Bug Bounty Hunter | Offensive Researcher",
+                    period: "Set 2025 - Present",
+                    desc: "Identifying vulnerabilities in Web, Mobile, and APIs. Focus on real impact: XSS, SSRF, IDOR, SQLi, Race Conditions, Auth Bypass, and HTTP Request Smuggling."
+                },
+                {
+                    company: "YesWeHack",
+                    role: "Bug Bounty Hunter",
+                    period: "Set 2025 - Present",
+                    desc: "Focus on high-impact vulnerabilities and kill chains in European and global programs."
+                }
+            ],
+            volunteer: [
+                { role: "Member", org: "CVE Hunters", period: "Out 2025 - Present", desc: "Promoting vulnerability research in open-source software." },
+                { role: "Member", org: "OWASP Foundation", period: "Jan 2021 - Present", desc: "Active member contributing to the Open Web Application Security Project." },
+                { role: "Content Creator", org: "YouTube (Tr0p)", period: "Set 2025 - Present", desc: "Sharing knowledge on Hacking, Bug Bounty, and Reverse Engineering." }
+            ],
+            hall_of_fame: [
+                {
+                    title: "U.S. GOV. (NCUA) Recognition",
+                    issuer: "U.S. Government via Bugcrowd",
+                    date: "Dez 2025",
+                    desc: "Official recognition for identifying P1 Unauthenticated OS Command Injection in federal infrastructure.",
+                    tag: "CRITICAL"
+                },
+                {
+                    title: "CVE-2025-10230 (CVSS 10.0)",
+                    issuer: "MITRE / Samba Team",
+                    date: "Out 2025",
+                    desc: "Discovered critical OS Command Injection in Samba hidden for 13 years.",
+                    tag: "CVE"
+                },
+                {
+                    title: "CVE-2025-67503 (CVSS 8.2)",
+                    issuer: "GitHub / WeGIA",
+                    date: "Out 2025",
+                    desc: "Discovered High-severity Reflected XSS in WeGIA platform leading to session hijacking.",
+                    tag: "CVE"
+                },
+                {
+                    title: "Samba Buffer Overflow",
+                    issuer: "Samba Team",
+                    date: "Set 2025",
+                    desc: "Reported BoF in InfiniBand wrapper due to unsafe sprintf() usage.",
+                    tag: "BUG REPORT"
+                }
             ],
             projects: [
-                { id: 1, title: "manw-ng", desc: "Malware analysis automation & network monitoring tool focused on stealth.", tech: ["Python", "Networking"] },
-                { id: 2, title: "OCRack", desc: "Offensive tool using OCR for data extraction and visual captcha bypass.", tech: ["Python", "OCR"] },
-                { id: 3, title: "REload.Me", desc: "Simplified reverse engineering learning platform.", tech: ["Python", "Education"] },
-                { id: 4, title: "arctax", desc: "Modular framework for post-exploitation recon.", tech: ["Python", "Recon"] },
-                { id: 5, title: "LeakHound", desc: "Secret scanning for repositories and logs.", tech: ["Python", "OSINT"] }
+                { title: "OCRack", desc: "High-performance PDF translation/extraction tool using PaddleOCR & GPT-4.", url: "https://github.com/marcostolosa/OCRack", tech: ["Python", "AI", "OCR"] },
+                { title: "ARCTAX", desc: "AI bypass prompt generator with ML classifier and Uncensored local LLM.", url: "https://github.com/marcostolosa/arctax", tech: ["ML", "Prompt Injection"] },
+                { title: "MANW-NG", desc: "Dynamic Windows API (Win32/Native) documentation scraper for RE.", url: "https://github.com/marcostolosa/manw-ng", tech: ["Python", "WinInternals"] },
+                { title: "REload.Me", desc: "Simplified reverse engineering learning platform.", url: "https://github.com/mindsecurity/REload.Me", tech: ["RE", "Education"] },
+                { title: "riskIA-service", desc: "FastAPI ML-based application risk classifier.", url: "https://github.com/marcostolosa/riskIA-service", tech: ["FastAPI", "ML"] },
+                { title: "OSCP Insights", desc: "AI-driven analysis of OSCP success stories.", url: "https://github.com/marcostolosa/study-insights", tech: ["Python", "AI Analysis"] }
             ],
-            cves: [
-                { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "13-year-old hidden RCE vulnerability." },
-                { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Reflected Cross-Site Scripting." },
-                { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Unauthenticated Remote Command Execution." }
+            skills: {
+                "Heavy Hitters": ["BurpSuite Pro", "Cobalt Strike", "Frida", "Radare2", "Ghidra", "IDA Pro", "Impacket", "Nuclei", "Metasploit"],
+                "Languages": ["Python (Expert)", "Bash", "PowerShell", "C/C++", "JavaScript", "Assembly"],
+                "AI Security": ["AI Red Teaming", "Adversarial ML", "PyTorch", "LangChain", "Prompt Injection"],
+                "Techniques": ["Reverse Engineering", "Malware Analysis", "Exploit Dev", "Fuzzing", "Code Review (Semgrep/CodeQL)"]
+            },
+            education: [
+                { school: "Stanford University", course: "Mobile Security (XACS215)", year: "2021-2022" },
+                { school: "FIAP", course: "Red Team Operations", year: "2024-2025" },
+                { school: "MIT", course: "Big Data", year: "2017-2018" }
+            ],
+            certs: [
+                "CRTA - Certified Red Team Analyst",
+                "OSCP (OffSec Certified Professional)",
+                "CCEP - Certified CyberSecurity Educator",
+                "Advanced Prompt Hacking",
+                "Certified Kubernetes Security Specialist",
+                "CCSP - Certified Cloud Security Professional",
+                "AWS Security Best Practices"
             ]
         };
 
-        const { useState, useEffect, useRef } = React;
-
-        const GlitchText = ({ text }) => (
-            <span className="relative inline-block text-red-team">
-                <span className="relative z-10">{text}</span>
-                <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-50 animate-pulse">{text}</span>
-            </span>
-        );
-
-        const Terminal = ({ onNavigate }) => {
-            const [input, setInput] = useState("");
-            const [history, setHistory] = useState([
-                { type: 'info', content: 'MindSecurity OS v3.3 [Stable]' },
-                { type: 'success', content: 'Authenticated: Tr0p (UID 0)' },
-                { type: 'info', content: 'Type "help" to start.' },
-            ]);
-            const scrollRef = useRef(null);
-
-            useEffect(() => {
-                if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            }, [history]);
-
-            const handleCommand = (e) => {
-                if (e.key === 'Enter') {
-                    const cmd = input.trim().toLowerCase();
-                    let newLines = [{ type: 'user', content: cmd }];
-
-                    switch(cmd) {
-                        case 'help':
-                            newLines.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear' });
-                            break;
-                        case 'whoami':
-                            newLines.push({ type: 'success', content: 'Red Teamer | Exploit Dev | Bug Hunter' });
-                            break;
-                        case 'tools':
-                            newLines.push({ type: 'info', content: 'Navigating to tools...' });
-                            onNavigate('projects');
-                            break;
-                        case 'cves':
-                            newLines.push({ type: 'info', content: 'Accessing vulnerability database...' });
-                            onNavigate('cves');
-                            break;
-                        case 'contact':
-                            onNavigate('contact');
-                            break;
-                        case 'clear':
-                            setHistory([]);
-                            setInput("");
-                            return;
-                        default:
-                            newLines.push({ type: 'error', content: 'Command not found.' });
-                    }
-                    setHistory(prev => [...prev, ...newLines]);
-                    setInput("");
-                }
-            };
-
+        const Nav = ({ active, set }) => {
+            const tabs = [
+                { id: 'profile', icon: 'fa-user', label: 'PROFILE' },
+                { id: 'research', icon: 'fa-flask', label: 'RESEARCH & DISCLOSURE' },
+                { id: 'ops', icon: 'fa-globe', label: 'OPERATIONS' },
+                { id: 'arsenal', icon: 'fa-toolbox', label: 'ARSENAL' },
+                { id: 'certs', icon: 'fa-certificate', label: 'CREDENTIALS' }
+            ];
             return (
-                <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded overflow-hidden border border-red-900/30">
-                    <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex justify-between">
-                        <div className="flex gap-2 items-center">
-                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                            <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                            <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                <nav className="fixed top-0 w-full bg-bg/95 border-b border-border z-50 h-16 backdrop-blur-md">
+                    <div className="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+                        <div className="font-mono font-bold tracking-tighter text-lg">
+                            <span className="text-primary">./</span>TR0P
                         </div>
-                        <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
-                    </div>
-                    <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black text-gray-300">
-                        {history.map((line, i) => (
-                            <div key={i} className="mb-1">
-                                {line.type === 'user' && <span className="text-red-500 mr-2">root@Tr0p:~#</span>}
-                                <span className={line.type === 'error' ? 'text-red-500' : line.type === 'success' ? 'text-green-500' : 'text-gray-300'}>
-                                    {line.content}
-                                </span>
-                            </div>
-                        ))}
-                        <div className="flex items-center mt-2">
-                            <span className="text-red-500 mr-2">root@Tr0p:~#</span>
-                            <input 
-                                className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleCommand}
-                                autoFocus
-                                spellCheck="false"
-                            />
+                        <div className="flex gap-1 md:gap-6 overflow-x-auto no-scrollbar">
+                            {tabs.map(t => (
+                                <button key={t.id} onClick={() => set(t.id)} 
+                                    className={`flex items-center gap-2 px-3 py-2 text-xs font-bold font-mono transition-colors border-b-2 whitespace-nowrap ${active === t.id ? 'border-primary text-white' : 'border-transparent text-muted hover:text-white'}`}>
+                                    <i className={`fa-solid ${t.icon}`}></i>
+                                    <span className="hidden md:inline">{t.label}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
-                </div>
+                </nav>
             );
         };
 
-        const App = () => {
-            const [section, setSection] = useState('home');
+        const Tag = ({ text, type = 'default' }) => {
+            const colors = {
+                default: 'border-border text-muted',
+                critical: 'border-primary text-primary bg-primary/5',
+                cve: 'border-purple-500 text-purple-500 bg-purple-500/5'
+            };
+            return <span className={`text-[10px] font-mono px-2 py-0.5 border rounded uppercase tracking-wider ${colors[type] || colors.default}`}>{text}</span>;
+        };
 
-            const NavButton = ({ id, label }) => (
-                <button 
-                    onClick={() => setSection(id)}
-                    className={`px-3 py-2 text-sm font-mono font-bold transition-colors ${section === id ? 'text-red-500 border border-red-500/20 bg-red-500/10 rounded' : 'text-gray-400 hover:text-white'}`}
-                >
-                    {label}
-                </button>
-            );
+        const App = () => {
+            const [tab, setTab] = useState('profile');
+            
+            useEffect(() => { document.getElementById('loading-msg').style.display = 'none'; }, []);
 
             return (
-                <div className="min-h-screen pb-12">
-                    {/* Nav */}
-                    <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 backdrop-blur-md bg-black/80">
-                        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                            <div className="font-bold text-xl cursor-pointer font-mono" onClick={() => setSection('home')}>
-                                <span className="text-red-500">./</span>Tr0p
+                <div className="min-h-screen pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto">
+                    <Nav active={tab} set={setTab} />
+
+                    {/* PROFILE TAB */}
+                    {tab === 'profile' && (
+                        <div className="grid md:grid-cols-12 gap-8 animate-fade-in">
+                            <div className="md:col-span-4 space-y-6">
+                                <div className="operator-panel p-6 text-center md:text-left">
+                                    <div className="w-24 h-24 bg-panel border-2 border-primary rounded-full mx-auto md:mx-0 flex items-center justify-center mb-4">
+                                        <i className="fa-solid fa-user-secret text-4xl text-muted"></i>
+                                    </div>
+                                    <h1 className="text-2xl font-bold text-white tracking-tight">{DATA.profile.name}</h1>
+                                    <p className="text-primary font-mono text-xs mt-1 uppercase tracking-wide">{DATA.profile.role}</p>
+                                    
+                                    <div className="mt-6 space-y-3 text-sm text-muted">
+                                        <div className="flex items-center gap-3"><i className="fa-solid fa-location-dot w-4 text-center"></i> {DATA.profile.location}</div>
+                                        <div className="flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center"></i> <a href={`mailto:${DATA.profile.email}`} className="hover:text-white">{DATA.profile.email}</a></div>
+                                        <div className="flex items-center gap-3"><i className="fa-brands fa-github w-4 text-center"></i> <a href={DATA.profile.github} target="_blank" className="hover:text-white">/marcostolosa</a></div>
+                                    </div>
+
+                                    <div className="flex gap-4 mt-6 justify-center md:justify-start">
+                                        <a href={DATA.profile.github} target="_blank" className="text-xl text-muted hover:text-white"><i className="fa-brands fa-github"></i></a>
+                                        <a href={DATA.profile.linkedin} target="_blank" className="text-xl text-muted hover:text-blue-500"><i className="fa-brands fa-linkedin"></i></a>
+                                        <a href={DATA.profile.youtube} target="_blank" className="text-xl text-muted hover:text-red-500"><i className="fa-brands fa-youtube"></i></a>
+                                    </div>
+                                </div>
+                                
+                                <div className="operator-panel p-4">
+                                    <h3 className="text-xs font-bold text-white uppercase mb-3 border-b border-border pb-2">Primary Focus</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Red Team', 'Pentest', 'Exploit Dev', 'AI Security', 'Reverse Eng'].map(s => <Tag key={s} text={s} />)}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="hidden md:flex space-x-4">
-                                <NavButton id="home" label="~/home" />
-                                <NavButton id="about" label="./whoami" />
-                                <NavButton id="projects" label="./tools" />
-                                <NavButton id="cves" label="./cves" />
-                                <NavButton id="contact" label="./connect" />
+
+                            <div className="md:col-span-8 space-y-8">
+                                <div className="operator-panel p-8">
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white">WHOAMI</h2></div>
+                                    <p className="text-gray-400 leading-relaxed mb-4">{DATA.profile.bio}</p>
+                                    <p className="text-gray-400 leading-relaxed border-l-2 border-accent pl-4 italic text-sm">{DATA.profile.stack_summary}</p>
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    {Object.entries(DATA.skills).map(([cat, list]) => (
+                                        <div key={cat} className="operator-panel p-5">
+                                            <h3 className="text-xs font-bold text-primary uppercase mb-3">{cat}</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {list.map(i => <span key={i} className="text-[11px] bg-white/5 px-2 py-1 rounded text-gray-300">{i}</span>)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </nav>
+                    )}
 
-                    {/* Content */}
-                    <main className="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
-                        
-                        {/* HOME */}
-                        {section === 'home' && (
-                            <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-                                <div className="mb-6 inline-block px-4 py-1 rounded bg-red-900/20 border border-red-500/30 text-red-500 text-xs font-mono">
-                                    SYSTEM STATUS: OPERATIONAL
+                    {/* RESEARCH TAB */}
+                    {tab === 'research' && (
+                        <div className="max-w-5xl mx-auto animate-fade-in">
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white">HALL OF FAME & CVEs</h2></div>
+                                    {DATA.hall_of_fame.map((item, idx) => (
+                                        <div key={idx} className="operator-panel p-5 border-l-4 border-l-primary hover:border-l-primaryLight transition-all">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <Tag text={item.tag} type={item.tag === 'CRITICAL' ? 'critical' : 'cve'} />
+                                                <span className="text-[10px] text-muted font-mono">{item.date}</span>
+                                            </div>
+                                            <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
+                                            <p className="text-xs text-primary font-mono mb-2 uppercase">{item.issuer}</p>
+                                            <p className="text-sm text-gray-400">{item.desc}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <h1 className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
-                                    TR0P
-                                </h1>
-                                <p className="text-xl text-gray-400 font-mono mb-8">
-                                    {SITE_DATA.role}
-                                </p>
-                                <div className="max-w-2xl bg-white/5 p-4 rounded border-l-4 border-red-600 mb-12 text-gray-300 text-sm font-mono">
-                                    "{SITE_DATA.tagline}"
+                                
+                                <div className="space-y-6">
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white">VOLUNTEER WORK</h2></div>
+                                    {DATA.volunteer.map((v, idx) => (
+                                        <div key={idx} className="operator-panel p-5">
+                                            <div className="flex justify-between mb-1">
+                                                <h3 className="font-bold text-white">{v.org}</h3>
+                                                <span className="text-[10px] text-muted bg-white/5 px-2 py-0.5 rounded">{v.period}</span>
+                                            </div>
+                                            <p className="text-primary font-mono text-xs mb-2">{v.role}</p>
+                                            <p className="text-sm text-gray-400">{v.desc}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <Terminal onNavigate={setSection} />
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* ABOUT */}
-                        {section === 'about' && (
-                            <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                    <span className="text-red-500">./</span>whoami
-                                </h2>
-                                <div className="grid md:grid-cols-2 gap-12">
-                                    <div className="text-gray-300 space-y-4 leading-relaxed">
-                                        <p>Hello, I'm <strong className="text-white">Marcos Tolosa</strong>.</p>
-                                        <p>I focus on dismantling complex threats and understanding how they work line by line.</p>
-                                        <p>When not on an engagement, I'm hunting bugs or writing automation scripts.</p>
+                    {/* OPERATIONS TAB */}
+                    {tab === 'ops' && (
+                        <div className="max-w-4xl mx-auto animate-fade-in">
+                            <div className="section-header"><h2 className="text-xl font-bold text-white">ACTIVE ENGAGEMENTS</h2></div>
+                            <div className="space-y-6 border-l border-border ml-3 pl-8 relative">
+                                {DATA.experience.map((exp, idx) => (
+                                    <div key={idx} className="relative">
+                                        <div className="absolute -left-[39px] top-0 w-4 h-4 bg-primary rounded-full border-2 border-bg"></div>
+                                        <div className="operator-panel p-6">
+                                            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
+                                                <h3 className="text-xl font-bold text-white">{exp.company}</h3>
+                                                <span className="text-xs text-muted font-mono bg-white/5 px-2 py-1 rounded mt-2 sm:mt-0 w-fit">{exp.period}</span>
+                                            </div>
+                                            <p className="text-primary font-mono text-sm mb-4">{exp.role}</p>
+                                            <p className="text-gray-400 text-sm">{exp.desc}</p>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ARSENAL TAB */}
+                    {tab === 'arsenal' && (
+                        <div className="animate-fade-in">
+                            <div className="section-header"><h2 className="text-xl font-bold text-white">TOOL DEVELOPMENT</h2></div>
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {DATA.projects.map((proj, idx) => (
+                                    <a key={idx} href={proj.url} target="_blank" className="operator-panel p-6 flex flex-col group hover:-translate-y-1 transition-transform">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="text-lg font-bold text-white font-mono group-hover:text-primary transition-colors">{proj.title}</h3>
+                                            <i className="fa-brands fa-github text-muted group-hover:text-white"></i>
+                                        </div>
+                                        <p className="text-sm text-gray-400 mb-6 flex-1">{proj.desc}</p>
+                                        <div className="flex flex-wrap gap-2 pt-4 border-t border-border mt-auto">
+                                            {proj.tech.map(t => <span key={t} className="text-[10px] font-mono text-muted bg-bg px-2 py-1 border border-border rounded">{t}</span>)}
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CREDENTIALS TAB */}
+                    {tab === 'certs' && (
+                        <div className="max-w-5xl mx-auto animate-fade-in">
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white">CERTIFICATIONS</h2></div>
+                                    <div className="space-y-3">
+                                        {DATA.certs.map((c, i) => (
+                                            <div key={i} className="operator-panel p-3 border-l-2 border-transparent hover:border-primary transition-colors flex items-center justify-between">
+                                                <span className="text-sm text-gray-300">{c}</span>
+                                                <i className="fa-solid fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white">ACADEMIC BACKGROUND</h2></div>
                                     <div className="space-y-4">
-                                        {SITE_DATA.skills.map((skill, idx) => (
-                                            <div key={idx}>
-                                                <div className="flex justify-between text-xs font-mono mb-1 text-gray-400">
-                                                    <span>{skill.name}</span>
-                                                    <span>{skill.level}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-800 h-2 rounded overflow-hidden">
-                                                    <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
-                                                </div>
+                                        {DATA.education.map((edu, i) => (
+                                            <div key={i} className="operator-panel p-4">
+                                                <h4 className="font-bold text-white text-sm">{edu.school}</h4>
+                                                <p className="text-xs text-primary font-mono mt-1">{edu.course}</p>
+                                                <div className="text-[10px] text-muted mt-2 text-right">{edu.year}</div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* PROJECTS */}
-                        {section === 'projects' && (
-                            <div className="animate-pulse-fast">
-                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                    <span className="text-red-500">./</span>tools_dev
-                                </h2>
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {SITE_DATA.projects.map(p => (
-                                        <div key={p.id} className="glass-panel p-6 hover:border-red-500/50 transition-colors">
-                                            <div className="flex justify-between mb-4">
-                                                <h3 className="text-lg font-bold text-white font-mono">{p.title}</h3>
-                                                <i className="fa-brands fa-github text-gray-500"></i>
-                                            </div>
-                                            <p className="text-sm text-gray-400 mb-4 h-20">{p.desc}</p>
-                                            <div className="flex gap-2">
-                                                {p.tech.map(t => (
-                                                    <span key={t} className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 border border-white/10">{t}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="mt-8 text-center">
-                                    <a href={SITE_DATA.github} className="text-red-500 hover:text-white underline decoration-red-500/30 underline-offset-4">
-                                        View all on GitHub
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* CVES */}
-                        {section === 'cves' && (
-                            <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                    <span className="text-red-500">./</span>cve_database
-                                </h2>
-                                <div className="space-y-6">
-                                    {SITE_DATA.cves.map((cve, idx) => (
-                                        <div key={idx} className="border-l-4 border-red-600 bg-white/5 p-6">
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-red-500 font-bold font-mono">{cve.id}</span>
-                                                <span className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded border border-red-900/50">{cve.score}</span>
-                                            </div>
-                                            <h3 className="text-white font-bold mb-2">{cve.title}</h3>
-                                            <p className="text-gray-400 text-sm">{cve.desc}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* CONTACT */}
-                        {section === 'contact' && (
-                            <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                    <span className="text-red-500">./</span>connect
-                                    </h2>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <a href={`mailto:${SITE_DATA.email}`} className="block glass-panel p-4 hover:border-red-500 transition-colors">
-                                            <div className="text-xs text-gray-500 font-mono">EMAIL</div>
-                                            <div className="text-white">{SITE_DATA.email}</div>
-                                        </a>
-                                        <a href={SITE_DATA.linkedin} className="block glass-panel p-4 hover:border-blue-500 transition-colors">
-                                            <div className="text-xs text-gray-500 font-mono">LINKEDIN</div>
-                                            <div className="text-white">/in/marcos-tolosa</div>
-                                        </a>
-                                        <a href={SITE_DATA.github} className="block glass-panel p-4 hover:border-white transition-colors">
-                                            <div className="text-xs text-gray-500 font-mono">GITHUB</div>
-                                            <div className="text-white">/marcostolosa</div>
-                                        </a>
-                                    </div>
-                                    <div className="glass-panel p-6">
-                                        <p className="text-gray-400 text-sm mb-4">
-                                            Open for Red Team engagements and research collaborations.
-                                        </p>
-                                        <button className="w-full bg-red-600 text-black font-bold py-2 hover:bg-white transition-colors">
-                                            INITIATE HANDSHAKE
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </main>
-                    
-                    <footer className="fixed bottom-0 w-full bg-black border-t border-gray-800 py-2 text-center text-[10px] text-gray-600 font-mono">
-                        MINDSECURITY v3.3 // STABLE
-                    </footer>
                 </div>
             );
         };
 
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            const root = ReactDOM.createRoot(rootElement);
-            root.render(<App />);
-            
-            // Remove o loader se renderizou com sucesso
-            setTimeout(() => {
-                const loader = document.getElementById('loading-msg');
-                if(loader) loader.style.display = 'none';
-            }, 100);
-        } else {
-            console.error("Root element not found");
-        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tr0p | MindSecurity - Debug Mode</title>
+    <title>Tr0p | MindSecurity - Red Team</title>
     
-    <!-- React & ReactDOM (Versão Development para mostrar erros) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React & ReactDOM (Versão Production para estabilidade) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -21,7 +21,6 @@
     <!-- Fontes Google -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <!-- Configuração do Tailwind -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -37,13 +36,7 @@
                         'purple-team': '#bc13fe',
                     },
                     animation: {
-                        'cursor-blink': 'blink 1s step-end infinite',
-                    },
-                    keyframes: {
-                        blink: {
-                            '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0' },
-                        }
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -55,487 +48,363 @@
             background-color: #050505;
             color: #e2e8f0;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
         
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0d1117; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #ff0033; }
 
         .glass-panel {
-            background: rgba(13, 17, 23, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(13, 17, 23, 0.95);
             border: 1px solid rgba(50, 50, 50, 0.5);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        .crt::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-        
-        /* Classe de erro para debug */
-        #error-display {
-            display: none;
+        #loading-msg {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #1a0000;
-            color: #ff3333;
-            padding: 2rem;
-            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0033;
             font-family: monospace;
-            white-space: pre-wrap;
-            overflow: auto;
-        }
-        .blink-danger {
-            animation: blink 1s step-end infinite;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 0;
         }
     </style>
 </head>
-<body class="font-mono crt text-sm sm:text-base">
-    <!-- Container de Erro -->
-    <div id="error-display"></div>
-    
-    <!-- Container React -->
-    <div id="root"></div>
+<body class="font-mono">
 
-    <!-- Script de Captura de Erros -->
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            const display = document.getElementById('error-display');
-            display.style.display = 'block';
-            display.innerHTML = `<h1>SYSTEM CRITICAL FAILURE</h1><hr/><p>Error: ${message}</p><p>Source: ${source}:${lineno}:${colno}</p><p>Stack: ${error ? error.stack : 'N/A'}</p>`;
-        };
-    </script>
+    <!-- Mensagem de carregamento (desaparece quando o React monta) -->
+    <div id="loading-msg">
+        INITIALIZING SYSTEM...<br>
+        <span style="font-size: 0.8rem; color: #666;">If this persists, JavaScript is disabled or failed.</span>
+    </div>
+
+    <!-- Onde o React vai montar -->
+    <div id="root" style="position: relative; z-index: 10;"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        // Captura de erro global dentro do contexto do React
+        try {
+            const { useState, useEffect, useRef } = React;
 
-        // --- DADOS REAIS ---
-        const SITE_DATA = {
-            alias: "Tr0p",
-            realName: "Marcos Tolosa",
-            role: "Red Teamer | Exploit Dev | Bug Hunter",
-            tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
-            location: "São Paulo, BR",
-            email: "marcostolosa@mindsecurity.org",
-            social: {
+            // --- DADOS DO SITE ---
+            const SITE_DATA = {
+                alias: "Tr0p",
+                realName: "Marcos Tolosa",
+                role: "Red Teamer | Exploit Dev",
+                tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
+                email: "marcostolosa@mindsecurity.org",
                 github: "https://github.com/marcostolosa",
                 linkedin: "https://linkedin.com/in/marcos-tolosa",
-            },
-            skills: [
-                { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
-                { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
-                { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
-                { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
-                { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
-                { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
-            ],
-            projects: [
-                { 
-                    id: 1, 
-                    title: "manw-ng", 
-                    desc: "Ferramenta de automação para análise de malware e monitoramento de redes. Focado em stealth e eficiência.", 
-                    tech: ["Python", "Networking"],
-                    type: "Tool"
-                },
-                { 
-                    id: 2, 
-                    title: "OCRack", 
-                    desc: "Ferramenta ofensiva baseada em OCR para extração de dados e bypass de controles visuais em avaliações de segurança.", 
-                    tech: ["Python", "OCR", "Automation"],
-                    type: "Offensive"
-                },
-                { 
-                    id: 3, 
-                    title: "REload.Me", 
-                    desc: "Plataforma de ensino simplificada para Engenharia Reversa. 'The most easy reverse engineer classroom'.", 
-                    tech: ["Python", "Education", "RE"],
-                    type: "Education"
-                },
-                { 
-                    id: 4, 
-                    title: "arctax", 
-                    desc: "Framework modular para automação de tarefas de pós-exploração e reconhecimento.", 
-                    tech: ["Python", "Recon"],
-                    type: "Framework"
-                },
-                {
-                    id: 5,
-                    title: "LeakHound",
-                    desc: "Scanner automatizado para detectar vazamento de segredos e credenciais em repositórios e logs.",
-                    tech: ["Python", "OSINT"],
-                    type: "Scanner"
-                }
-            ],
-            cves: [
-                { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "Vulnerabilidade crítica de execução remota de código descoberta oculta por 13 anos." },
-                { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Cross-Site Scripting refletido permitindo hijacking de sessão." },
-                { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Remote Command Execution não autenticado em infraestrutura governamental dos EUA." }
-            ]
-        };
-
-        const GlitchText = ({ text, color = "text-red-team" }) => (
-            <span className={`relative inline-block ${color}`}>
-                <span className="relative z-10">{text}</span>
-                <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-70 animate-pulse translate-x-[2px]">{text}</span>
-            </span>
-        );
-
-        const Terminal = ({ onNavigate }) => {
-            const [input, setInput] = useState("");
-            const [history, setHistory] = useState([
-                { type: 'info', content: 'MindSecurity OS v3.0 [Kernel 6.8.0-kali3-amd64]' },
-                { type: 'success', content: 'Authenticated as Tr0p. Access Level: ROOT' },
-                { type: 'info', content: 'Type "help" for payload list.' },
-            ]);
-            const scrollRef = useRef(null);
-
-            useEffect(() => {
-                if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            }, [history]);
-
-            const handleCommand = (e) => {
-                if (e.key === 'Enter') {
-                    const cmd = input.trim().toLowerCase();
-                    const newHistory = [...history, { type: 'user', content: cmd }];
-
-                    switch(cmd) {
-                        case 'help':
-                            newHistory.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear, exploit' });
-                            break;
-                        case 'whoami':
-                            newHistory.push({ type: 'success', content: 'uid=0(root) gid=0(root) groups=0(root) // Red Teamer & Exploit Dev' });
-                            break;
-                        case 'tools':
-                            newHistory.push({ type: 'info', content: 'Listing repos: manw-ng, OCRack, arctax, REload.Me...' });
-                            onNavigate('projects');
-                            break;
-                        case 'cves':
-                            newHistory.push({ type: 'danger', content: 'CRITICAL VULNS FOUND: CVE-2025-10230, CVE-2025-67503...' });
-                            onNavigate('cves');
-                            break;
-                        case 'contact':
-                            onNavigate('contact');
-                            break;
-                        case 'clear':
-                            setHistory([]);
-                            setInput("");
-                            return;
-                        default:
-                            newHistory.push({ type: 'error', content: `bash: ${cmd}: command not found` });
-                    }
-                    setHistory(newHistory);
-                    setInput("");
-                }
+                skills: [
+                    { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
+                    { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
+                    { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
+                    { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
+                    { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
+                    { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
+                ],
+                projects: [
+                    { id: 1, title: "manw-ng", desc: "Malware analysis automation & network monitoring tool focused on stealth.", tech: ["Python", "Networking"] },
+                    { id: 2, title: "OCRack", desc: "Offensive tool using OCR for data extraction and visual captcha bypass.", tech: ["Python", "OCR"] },
+                    { id: 3, title: "REload.Me", desc: "Simplified reverse engineering learning platform.", tech: ["Python", "Education"] },
+                    { id: 4, title: "arctax", desc: "Modular framework for post-exploitation recon.", tech: ["Python", "Recon"] },
+                    { id: 5, title: "LeakHound", desc: "Secret scanning for repositories and logs.", tech: ["Python", "OSINT"] }
+                ],
+                cves: [
+                    { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "13-year-old hidden RCE vulnerability." },
+                    { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Reflected Cross-Site Scripting." },
+                    { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Unauthenticated Remote Command Execution." }
+                ]
             };
 
-            return (
-                <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded-lg overflow-hidden border border-red-900/50 shadow-[0_0_30px_rgba(255,0,51,0.1)]">
-                    <div className="bg-neutral-900/90 px-4 py-2 flex items-center justify-between border-b border-white/10">
-                        <div className="flex gap-2">
-                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                            <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                            <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                        </div>
-                        <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
-                    </div>
-                    <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black/90 text-gray-300">
-                        {history.map((line, i) => (
-                            <div key={i} className="mb-1 break-words">
-                                {line.type === 'user' && <span className="text-red-500 font-bold">root@Tr0p:~# </span>}
-                                <span className={
-                                    line.type === 'error' ? 'text-red-500' : 
-                                    line.type === 'success' ? 'text-green-500' : 
-                                    line.type === 'danger' ? 'text-red-400 font-bold blink-danger' :
-                                    'text-gray-300'
-                                }>{line.content}</span>
-                            </div>
-                        ))}
-                        <div className="flex items-center mt-2">
-                            <span className="text-red-500 font-bold mr-2">root@Tr0p:~#</span>
-                            <input 
-                                type="text" 
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleCommand}
-                                className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
-                                autoFocus
-                                spellCheck="false"
-                            />
-                        </div>
-                    </div>
-                </div>
+            const GlitchText = ({ text }) => (
+                <span className="relative inline-block text-red-team">
+                    <span className="relative z-10">{text}</span>
+                    <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-50 animate-pulse">{text}</span>
+                </span>
             );
-        };
 
-        const NavBar = ({ active, setActive }) => (
-            <nav className="fixed top-0 w-full z-50 glass-panel border-b border-red-500/20">
-                <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex-shrink-0 font-bold text-xl tracking-wider cursor-pointer font-mono" onClick={() => setActive('home')}>
-                            <span className="text-red-500">./</span>Tr0p
+            const Terminal = ({ onNavigate }) => {
+                const [input, setInput] = useState("");
+                const [history, setHistory] = useState([
+                    { type: 'info', content: 'MindSecurity OS v3.3 [Stable]' },
+                    { type: 'success', content: 'Authenticated: Tr0p (UID 0)' },
+                    { type: 'info', content: 'Type "help" to start.' },
+                ]);
+                const scrollRef = useRef(null);
+
+                useEffect(() => {
+                    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }, [history]);
+
+                const handleCommand = (e) => {
+                    if (e.key === 'Enter') {
+                        const cmd = input.trim().toLowerCase();
+                        let newLines = [{ type: 'user', content: cmd }];
+
+                        switch(cmd) {
+                            case 'help':
+                                newLines.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear' });
+                                break;
+                            case 'whoami':
+                                newLines.push({ type: 'success', content: 'Red Teamer | Exploit Dev | Bug Hunter' });
+                                break;
+                            case 'tools':
+                                newLines.push({ type: 'info', content: 'Navigating to tools...' });
+                                onNavigate('projects');
+                                break;
+                            case 'cves':
+                                newLines.push({ type: 'info', content: 'Accessing vulnerability database...' });
+                                onNavigate('cves');
+                                break;
+                            case 'contact':
+                                onNavigate('contact');
+                                break;
+                            case 'clear':
+                                setHistory([]);
+                                setInput("");
+                                return;
+                            default:
+                                newLines.push({ type: 'error', content: 'Command not found.' });
+                        }
+                        setHistory(prev => [...prev, ...newLines]);
+                        setInput("");
+                    }
+                };
+
+                return (
+                    <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded overflow-hidden border border-red-900/30">
+                        <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex justify-between">
+                            <div className="flex gap-2 items-center">
+                                <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                                <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
+                                <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                            </div>
+                            <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
                         </div>
-                        <div className="hidden md:block">
-                            <div className="ml-10 flex items-baseline space-x-8">
-                                {[
-                                  {id: 'home', label: '~/home'},
-                                  {id: 'about', label: './whoami'},
-                                  {id: 'projects', label: './tools'},
-                                  {id: 'cves', label: './pwned'},
-                                  {id: 'contact', label: './connect'}
-                                ].map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => setActive(item.id)}
-                                        className={`px-3 py-2 rounded-md text-sm font-bold transition-colors font-mono ${
-                                            active === item.id 
-                                            ? 'text-red-500 bg-red-900/10 border border-red-500/30' 
-                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                        }`}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
+                        <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black text-gray-300">
+                            {history.map((line, i) => (
+                                <div key={i} className="mb-1">
+                                    {line.type === 'user' && <span className="text-red-500 mr-2">root@Tr0p:~#</span>}
+                                    <span className={line.type === 'error' ? 'text-red-500' : line.type === 'success' ? 'text-green-500' : 'text-gray-300'}>
+                                        {line.content}
+                                    </span>
+                                </div>
+                            ))}
+                            <div className="flex items-center mt-2">
+                                <span className="text-red-500 mr-2">root@Tr0p:~#</span>
+                                <input 
+                                    className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={handleCommand}
+                                    autoFocus
+                                    spellCheck="false"
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
-            </nav>
-        );
+                );
+            };
 
-        const SectionTitle = ({ title, subtitle }) => (
-            <div className="mb-12 text-center">
-                <h2 className="text-3xl md:text-5xl font-bold mb-4 flex justify-center items-center gap-2 tracking-tighter">
-                    <span className="text-red-600 text-xl align-top">root@server:~$</span> 
-                    <GlitchText text={title} color="text-white" />
-                </h2>
-                <div className="h-0.5 w-32 bg-red-600 mx-auto mb-4"></div>
-                <p className="text-gray-400 max-w-2xl mx-auto font-mono text-sm">{subtitle}</p>
-            </div>
-        );
+            const App = () => {
+                const [section, setSection] = useState('home');
 
-        const CVECard = ({ cve }) => (
-            <div className="glass-panel border-l-4 border-l-red-600 p-6 relative overflow-hidden group hover:bg-red-900/10 transition-colors">
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20">
-                    <i className="fa-solid fa-bug text-6xl"></i>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-red-500 font-mono">{cve.id}</h3>
-                    <span className="text-xs font-bold px-2 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded">{cve.score}</span>
-                </div>
-                <h4 className="text-white font-bold mb-2">{cve.title}</h4>
-                <p className="text-gray-400 text-sm">{cve.desc}</p>
-            </div>
-        );
+                const NavButton = ({ id, label }) => (
+                    <button 
+                        onClick={() => setSection(id)}
+                        className={`px-3 py-2 text-sm font-mono font-bold transition-colors ${section === id ? 'text-red-500 border border-red-500/20 bg-red-500/10 rounded' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        {label}
+                    </button>
+                );
 
-        const App = () => {
-            const [activeSection, setActiveSection] = useState('home');
-
-            return (
-                <div className="min-h-screen pb-12 bg-[#050505]">
-                    <NavBar active={activeSection} setActive={setActiveSection} />
-                    
-                    {/* Hero Section */}
-                    {activeSection === 'home' && (
-                        <div className="pt-32 pb-16 px-4 min-h-screen flex flex-col items-center justify-center relative">
-                            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 opacity-10 pointer-events-none">
-                                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-600 rounded-full blur-[150px]"></div>
-                            </div>
-
-                            <div className="text-center space-y-6 max-w-4xl mx-auto z-10">
-                                <div className="inline-block border border-red-500/30 bg-red-950/30 px-4 py-1 rounded text-red-500 text-xs font-mono mb-4">
-                                    <i className="fa-solid fa-skull mr-2"></i>
-                                    Red Team Operative Active
+                return (
+                    <div className="min-h-screen pb-12">
+                        {/* Nav */}
+                        <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 backdrop-blur-md bg-black/80">
+                            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                                <div className="font-bold text-xl cursor-pointer font-mono" onClick={() => setSection('home')}>
+                                    <span className="text-red-500">./</span>Tr0p
                                 </div>
-                                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-2">
-                                    TR0P
-                                </h1>
-                                <p className="text-xl md:text-2xl text-gray-400 font-mono">
-                                    {SITE_DATA.realName} <span className="text-red-600 mx-2">///</span> {SITE_DATA.role}
-                                </p>
-                                <p className="max-w-2xl mx-auto text-gray-500 leading-relaxed font-mono text-sm border-l-2 border-red-900 pl-4 py-2 bg-white/5">
-                                    "{SITE_DATA.tagline}"
-                                </p>
-                                
-                                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-                                    <button onClick={() => setActiveSection('projects')} className="bg-red-600 text-black px-8 py-3 font-bold hover:bg-white transition-all uppercase tracking-widest text-sm skew-x-[-10deg]">
-                                        <span className="skew-x-[10deg] inline-block">Ver Tools</span>
-                                    </button>
-                                    <button onClick={() => setActiveSection('cves')} className="border border-red-600/50 text-red-500 px-8 py-3 font-bold hover:bg-red-900/20 transition-all uppercase tracking-widest text-sm skew-x-[-10deg]">
-                                        <span className="skew-x-[10deg] inline-block">CVEs & Research</span>
-                                    </button>
+                                <div className="hidden md:flex space-x-4">
+                                    <NavButton id="home" label="~/home" />
+                                    <NavButton id="about" label="./whoami" />
+                                    <NavButton id="projects" label="./tools" />
+                                    <NavButton id="cves" label="./cves" />
+                                    <NavButton id="contact" label="./connect" />
                                 </div>
                             </div>
+                        </nav>
 
-                            <div className="w-full mt-16 px-4">
-                                <Terminal onNavigate={setActiveSection} />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* About Section */}
-                    {activeSection === 'about' && (
-                        <div className="pt-32 px-4 max-w-5xl mx-auto animate-fade-in">
-                            <SectionTitle title="whoami" subtitle="The person behind the shell." />
-                            <div className="grid md:grid-cols-2 gap-12">
-                                <div className="glass-panel p-6 border-t-4 border-t-red-600">
-                                    <h3 className="text-2xl font-bold text-white mb-4">Bio</h3>
-                                    <p className="text-gray-400 mb-4 leading-relaxed">
-                                        Olá, sou o <strong className="text-white">Marcos Tolosa (aka Tr0p)</strong>. 
-                                        Red Teamer, Pentester, Bug Bounty Hunter e Engenheiro Reverso.
-                                    </p>
-                                    <p className="text-gray-400 mb-4 leading-relaxed">
-                                        Meu cérebro funciona de forma diferente <strong className="text-white">(ASD Level 1)</strong>, o que me dá o hiperfoco necessário para desmontar ameaças complexas e entender como elas funcionam linha por linha.
-                                    </p>
-                                    <p className="text-gray-400">
-                                        Quando não estou em um engagement, estou pesquisando novas vulnerabilidades no <strong className="text-green-500">BugCrowd/HackerOne</strong> ou escrevendo automações em Python para eliminar tarefas repetitivas.
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white mb-4 font-mono">./skills --verbose</h3>
-                                    <div className="space-y-4">
-                                        {SITE_DATA.skills.map((skill, idx) => (
-                                            <div key={idx}>
-                                                <div className="flex justify-between text-xs font-mono mb-1">
-                                                    <span className="text-gray-300"><i className={`fa-solid ${skill.icon} mr-2 w-4`}></i>{skill.name}</span>
-                                                    <span className={skill.color}>{skill.level}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-800 h-2 rounded-sm overflow-hidden">
-                                                    <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
-                                                </div>
-                                            </div>
-                                        ))}
+                        {/* Content */}
+                        <main className="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
+                            
+                            {/* HOME */}
+                            {section === 'home' && (
+                                <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
+                                    <div className="mb-6 inline-block px-4 py-1 rounded bg-red-900/20 border border-red-500/30 text-red-500 text-xs font-mono">
+                                        SYSTEM STATUS: OPERATIONAL
                                     </div>
-                                    
-                                    <div className="mt-8 p-4 border border-dashed border-gray-700 rounded bg-black/50">
-                                        <h4 className="text-gray-500 text-xs font-mono uppercase mb-2">Stack Ofensiva</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {['BurpSuite Pro', 'Frida', 'Cobalt Strike', 'Ghidra', 'Impacket', 'Nuclei', 'Metasploit'].map(tool => (
-                                                <span key={tool} className="text-xs bg-red-900/20 text-red-400 px-2 py-1 rounded border border-red-900/30">{tool}</span>
+                                    <h1 className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
+                                        TR0P
+                                    </h1>
+                                    <p className="text-xl text-gray-400 font-mono mb-8">
+                                        {SITE_DATA.role}
+                                    </p>
+                                    <div className="max-w-2xl bg-white/5 p-4 rounded border-l-4 border-red-600 mb-12 text-gray-300 text-sm font-mono">
+                                        "{SITE_DATA.tagline}"
+                                    </div>
+                                    <Terminal onNavigate={setSection} />
+                                </div>
+                            )}
+
+                            {/* ABOUT */}
+                            {section === 'about' && (
+                                <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                        <span className="text-red-500">./</span>whoami
+                                    </h2>
+                                    <div className="grid md:grid-cols-2 gap-12">
+                                        <div className="text-gray-300 space-y-4 leading-relaxed">
+                                            <p>Hello, I'm <strong className="text-white">Marcos Tolosa</strong>.</p>
+                                            <p>I focus on dismantling complex threats and understanding how they work line by line.</p>
+                                            <p>When not on an engagement, I'm hunting bugs or writing automation scripts.</p>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {SITE_DATA.skills.map((skill, idx) => (
+                                                <div key={idx}>
+                                                    <div className="flex justify-between text-xs font-mono mb-1 text-gray-400">
+                                                        <span>{skill.name}</span>
+                                                        <span>{skill.level}%</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-800 h-2 rounded overflow-hidden">
+                                                        <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
+                            )}
 
-                    {/* Projects Section */}
-                    {activeSection === 'projects' && (
-                        <div className="pt-32 px-4 max-w-6xl mx-auto animate-fade-in">
-                            <SectionTitle title="./tools_dev" subtitle="Open source arsenal & scripts." />
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {SITE_DATA.projects.map(project => (
-                                    <div key={project.id} className="glass-panel p-6 flex flex-col hover:border-red-500/50 transition-colors group">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-xl font-bold text-white font-mono group-hover:text-red-500 transition-colors">{project.title}</h3>
-                                            <i className="fa-brands fa-github text-2xl text-gray-600 group-hover:text-white"></i>
-                                        </div>
-                                        <p className="text-gray-400 text-sm mb-6 flex-1">{project.desc}</p>
-                                        <div className="border-t border-gray-800 pt-4 mt-auto">
-                                            <div className="flex flex-wrap gap-2">
-                                                {project.tech.map(t => (
-                                                    <span key={t} className="text-[10px] font-mono bg-white/5 text-gray-400 px-2 py-1">{t}</span>
-                                                ))}
+                            {/* PROJECTS */}
+                            {section === 'projects' && (
+                                <div className="animate-pulse-fast">
+                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                        <span className="text-red-500">./</span>tools_dev
+                                    </h2>
+                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {SITE_DATA.projects.map(p => (
+                                            <div key={p.id} className="glass-panel p-6 hover:border-red-500/50 transition-colors">
+                                                <div className="flex justify-between mb-4">
+                                                    <h3 className="text-lg font-bold text-white font-mono">{p.title}</h3>
+                                                    <i className="fa-brands fa-github text-gray-500"></i>
+                                                </div>
+                                                <p className="text-sm text-gray-400 mb-4 h-20">{p.desc}</p>
+                                                <div className="flex gap-2">
+                                                    {p.tech.map(t => (
+                                                        <span key={t} className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 border border-white/10">{t}</span>
+                                                    ))}
+                                                </div>
                                             </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-8 text-center">
+                                        <a href={SITE_DATA.github} className="text-red-500 hover:text-white underline decoration-red-500/30 underline-offset-4">
+                                            View all on GitHub
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CVES */}
+                            {section === 'cves' && (
+                                <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                        <span className="text-red-500">./</span>cve_database
+                                    </h2>
+                                    <div className="space-y-6">
+                                        {SITE_DATA.cves.map((cve, idx) => (
+                                            <div key={idx} className="border-l-4 border-red-600 bg-white/5 p-6">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className="text-red-500 font-bold font-mono">{cve.id}</span>
+                                                    <span className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded border border-red-900/50">{cve.score}</span>
+                                                </div>
+                                                <h3 className="text-white font-bold mb-2">{cve.title}</h3>
+                                                <p className="text-gray-400 text-sm">{cve.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CONTACT */}
+                            {section === 'contact' && (
+                                <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                        <span className="text-red-500">./</span>connect
+                                    </h2>
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <a href={`mailto:${SITE_DATA.email}`} className="block glass-panel p-4 hover:border-red-500 transition-colors">
+                                                <div className="text-xs text-gray-500 font-mono">EMAIL</div>
+                                                <div className="text-white">{SITE_DATA.email}</div>
+                                            </a>
+                                            <a href={SITE_DATA.linkedin} className="block glass-panel p-4 hover:border-blue-500 transition-colors">
+                                                <div className="text-xs text-gray-500 font-mono">LINKEDIN</div>
+                                                <div className="text-white">/in/marcos-tolosa</div>
+                                            </a>
+                                            <a href={SITE_DATA.github} className="block glass-panel p-4 hover:border-white transition-colors">
+                                                <div className="text-xs text-gray-500 font-mono">GITHUB</div>
+                                                <div className="text-white">/marcostolosa</div>
+                                            </a>
+                                        </div>
+                                        <div className="glass-panel p-6">
+                                            <p className="text-gray-400 text-sm mb-4">
+                                                Open for Red Team engagements and research collaborations.
+                                            </p>
+                                            <button className="w-full bg-red-600 text-black font-bold py-2 hover:bg-white transition-colors">
+                                                INITIATE HANDSHAKE
+                                            </button>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                            <div className="mt-12 text-center">
-                                <a href={SITE_DATA.social.github} target="_blank" className="bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded font-mono text-sm border border-white/10 transition-colors">
-                                    <i className="fa-brands fa-github mr-2"></i> github.com/marcostolosa
-                                </a>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* CVEs Section */}
-                    {activeSection === 'cves' && (
-                        <div className="pt-32 px-4 max-w-4xl mx-auto animate-fade-in">
-                            <SectionTitle title="CVE_DATABASE" subtitle="Vulnerabilities found & disclosed." />
-                            <div className="space-y-6">
-                                {SITE_DATA.cves.map((cve, idx) => (
-                                    <CVECard key={idx} cve={cve} />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Contact Section */}
-                    {activeSection === 'contact' && (
-                        <div className="pt-32 px-4 max-w-4xl mx-auto animate-fade-in">
-                            <SectionTitle title="./connect" subtitle="Secure communication channels." />
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div className="glass-panel p-8">
-                                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                                        <div>
-                                            <label className="text-xs font-mono text-red-500 mb-1 block">TARGET</label>
-                                            <input type="text" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="Nome / Empresa" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-mono text-red-500 mb-1 block">CALLBACK</label>
-                                            <input type="email" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="seu@email.com" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-mono text-red-500 mb-1 block">DATA</label>
-                                            <textarea rows="5" className="w-full bg-black/50 border border-gray-800 p-3 text-white focus:border-red-500 focus:outline-none" placeholder="Detalhes do projeto..."></textarea>
-                                        </div>
-                                        <button className="w-full bg-red-600 text-black font-bold py-3 hover:bg-white transition-colors uppercase tracking-widest text-sm">
-                                            Send Packet
-                                        </button>
-                                    </form>
                                 </div>
-                                <div className="flex flex-col justify-center space-y-6">
-                                    <a href={`mailto:${SITE_DATA.email}`} className="glass-panel p-6 flex items-center gap-4 hover:border-red-500 transition-colors group">
-                                        <div className="w-12 h-12 bg-red-900/20 flex items-center justify-center rounded text-red-500 group-hover:bg-red-600 group-hover:text-black transition-colors">
-                                            <i className="fa-solid fa-envelope text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 uppercase font-mono">Email</div>
-                                            <div className="text-white text-sm break-all">{SITE_DATA.email}</div>
-                                        </div>
-                                    </a>
-                                    <a href={SITE_DATA.social.linkedin} target="_blank" className="glass-panel p-6 flex items-center gap-4 hover:border-blue-500 transition-colors group">
-                                        <div className="w-12 h-12 bg-blue-900/20 flex items-center justify-center rounded text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                            <i className="fa-brands fa-linkedin-in text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 uppercase font-mono">LinkedIn</div>
-                                            <div className="text-white text-sm">/in/marcos-tolosa</div>
-                                        </div>
-                                    </a>
-                                    <a href={SITE_DATA.social.github} target="_blank" className="glass-panel p-6 flex items-center gap-4 hover:border-white transition-colors group">
-                                        <div className="w-12 h-12 bg-gray-800 flex items-center justify-center rounded text-white group-hover:bg-white group-hover:text-black transition-colors">
-                                            <i className="fa-brands fa-github text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 uppercase font-mono">GitHub</div>
-                                            <div className="text-white text-sm">/marcostolosa</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    <footer className="fixed bottom-0 w-full py-1 bg-neutral-900 border-t border-white/5 z-40 text-[10px] text-gray-600 font-mono flex justify-between px-4">
-                        <span>TR0P SECURITY OS v3.0</span>
-                        <span>SYSTEM STATUS: STABLE</span>
-                    </footer>
-                </div>
-            );
-        };
+                            )}
+                        </main>
+                        
+                        <footer className="fixed bottom-0 w-full bg-black border-t border-gray-800 py-2 text-center text-[10px] text-gray-600 font-mono">
+                            MINDSECURITY v3.3 // STABLE
+                        </footer>
+                    </div>
+                );
+            };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<App />);
+                
+                // Remove o loader se renderizou com sucesso
+                setTimeout(() => {
+                    const loader = document.getElementById('loading-msg');
+                    if(loader) loader.style.display = 'none';
+                }, 100);
+            } else {
+                console.error("Root element not found");
+            }
+
+        } catch (err) {
+            console.error("FATAL REACT ERROR:", err);
+            document.body.innerHTML = `<div style="color:red; padding:20px;"><h1>FATAL ERROR</h1><pre>${err.message}</pre></div>`;
+        }
     </script>
 </body>
 </html>

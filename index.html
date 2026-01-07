@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcos (Tr0p) Tolosa | Red Team Operator</title>
-    
-    <!-- ANTI-CLOUDFLARE ROCKET LOADER FIX -->
-    
+        
     <!-- React & ReactDOM -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js" data-cfasync="false"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js" data-cfasync="false"></script>
@@ -58,10 +56,17 @@
 
     <style>
         body { background-color: #050505; color: #e5e5e5; overflow-x: hidden; }
-        ::-webkit-scrollbar { width: 6px; }
+        
+        /* Custom Scrollbar Global */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
+        
+        /* Utility para esconder scrollbar mantendo funcionalidade */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .operator-panel { background: #0f0f0f; border: 1px solid #262626; position: relative; transition: border-color 0.2s; }
         .operator-panel:hover { border-color: #404040; }
         .section-header { border-left: 3px solid #b91c1c; padding-left: 1rem; margin-bottom: 2rem; }
@@ -87,7 +92,7 @@
                 email: "marcos.tolosa@owasp.org",
                 github: "https://github.com/marcostolosa",
                 linkedin: "https://linkedin.com/in/marcos-tolosa",
-                youtube: "https://youtube.com/@Tr0p",
+                youtube: "https://youtube.com/@Marcos.Tolosa",
                 bio: "I'm a Red Teamer, Pentester, Bug Bounty Hunter, and Reverse Engineer with a passion for automating the boring stuff. My brain is wired differently (ASD Level 1), giving me the hyperfocus needed to dismantle complex threats and understand their core. I don't just find vulnerabilities; I tear them apart to understand how they tick.",
                 stack_summary: "If it can be scripted, I automate it. Advanced Regex, Semgrep, CodeQL, and custom scripts are part of my workflow."
             },
@@ -167,7 +172,6 @@
             ],
             certs: [
                 "CRTA - Certified Red Team Analyst",
-                "OSCP (OffSec Certified Professional)",
                 "CCEP - Certified CyberSecurity Educator",
                 "Advanced Prompt Hacking",
                 "Certified Kubernetes Security Specialist",
@@ -186,19 +190,32 @@
             ];
             return (
                 <nav className="fixed top-0 w-full bg-bg/95 border-b border-border z-50 h-16 backdrop-blur-md">
-                    <div className="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
-                        <div className="font-mono font-bold tracking-tighter text-lg">
+                    <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+                        {/* LOGO (Esquerda) */}
+                        <div className="font-mono font-bold tracking-tighter text-lg shrink-0 w-[140px]">
                             <span className="text-primary">./</span>TR0P
                         </div>
-                        <div className="flex gap-1 md:gap-6 overflow-x-auto no-scrollbar">
-                            {tabs.map(t => (
-                                <button key={t.id} onClick={() => set(t.id)} 
-                                    className={`flex items-center gap-2 px-3 py-2 text-xs font-bold font-mono transition-colors border-b-2 whitespace-nowrap ${active === t.id ? 'border-primary text-white' : 'border-transparent text-muted hover:text-white'}`}>
-                                    <i className={`fa-solid ${t.icon}`}></i>
-                                    <span className="hidden md:inline">{t.label}</span>
-                                </button>
-                            ))}
+
+                        {/* MENU CENTRALIZADO */}
+                        <div className="flex-1 flex justify-center overflow-hidden mx-2">
+                            <div className="flex gap-2 md:gap-6 overflow-x-auto no-scrollbar mask-gradient px-4">
+                                {tabs.map(t => (
+                                    <button key={t.id} onClick={() => set(t.id)} 
+                                        className={`flex items-center gap-2 px-3 py-2 text-xs font-bold font-mono transition-colors border-b-2 whitespace-nowrap ${active === t.id ? 'border-primary text-white' : 'border-transparent text-muted hover:text-white'}`}>
+                                        <i className={`fa-solid ${t.icon}`}></i>
+                                        <span className="hidden md:inline">{t.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
+
+                        {/* SOCIALS (Direita - para balancear) */}
+                        <div className="hidden md:flex justify-end gap-4 w-[140px] shrink-0">
+                            <a href={DATA.profile.github} target="_blank" className="text-muted hover:text-white transition-colors"><i className="fa-brands fa-github text-lg"></i></a>
+                            <a href={DATA.profile.linkedin} target="_blank" className="text-muted hover:text-white transition-colors"><i className="fa-brands fa-linkedin text-lg"></i></a>
+                        </div>
+                        {/* Mobile Spacer (se precisar) */}
+                        <div className="md:hidden w-8"></div>
                     </div>
                 </nav>
             );
@@ -227,22 +244,23 @@
                         <div className="grid md:grid-cols-12 gap-8 animate-fade-in">
                             <div className="md:col-span-4 space-y-6">
                                 <div className="operator-panel p-6 text-center md:text-left">
-                                    <div className="w-24 h-24 bg-panel border-2 border-primary rounded-full mx-auto md:mx-0 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-user-secret text-4xl text-muted"></i>
+                                    <div className="w-24 h-24 bg-panel border-2 border-primary rounded-full mx-auto md:mx-0 flex items-center justify-center mb-4 relative overflow-hidden group">
+                                         {/* Placeholder Icon */}
+                                        <i className="fa-solid fa-user-secret text-4xl text-muted group-hover:scale-110 transition-transform duration-300"></i>
                                     </div>
                                     <h1 className="text-2xl font-bold text-white tracking-tight">{DATA.profile.name}</h1>
                                     <p className="text-primary font-mono text-xs mt-1 uppercase tracking-wide">{DATA.profile.role}</p>
                                     
                                     <div className="mt-6 space-y-3 text-sm text-muted">
-                                        <div className="flex items-center gap-3"><i className="fa-solid fa-location-dot w-4 text-center"></i> {DATA.profile.location}</div>
-                                        <div className="flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center"></i> <a href={`mailto:${DATA.profile.email}`} className="hover:text-white">{DATA.profile.email}</a></div>
-                                        <div className="flex items-center gap-3"><i className="fa-brands fa-github w-4 text-center"></i> <a href={DATA.profile.github} target="_blank" className="hover:text-white">/marcostolosa</a></div>
+                                        <div className="flex items-center gap-3"><i className="fa-solid fa-location-dot w-4 text-center text-primary"></i> {DATA.profile.location}</div>
+                                        <div className="flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center text-primary"></i> <a href={`mailto:${DATA.profile.email}`} className="hover:text-white transition-colors">{DATA.profile.email}</a></div>
+                                        <div className="flex items-center gap-3"><i className="fa-brands fa-github w-4 text-center text-primary"></i> <a href={DATA.profile.github} target="_blank" className="hover:text-white transition-colors">/marcostolosa</a></div>
                                     </div>
 
                                     <div className="flex gap-4 mt-6 justify-center md:justify-start">
-                                        <a href={DATA.profile.github} target="_blank" className="text-xl text-muted hover:text-white"><i className="fa-brands fa-github"></i></a>
-                                        <a href={DATA.profile.linkedin} target="_blank" className="text-xl text-muted hover:text-blue-500"><i className="fa-brands fa-linkedin"></i></a>
-                                        <a href={DATA.profile.youtube} target="_blank" className="text-xl text-muted hover:text-red-500"><i className="fa-brands fa-youtube"></i></a>
+                                        <a href={DATA.profile.github} target="_blank" className="text-xl text-muted hover:text-white transition-colors"><i className="fa-brands fa-github"></i></a>
+                                        <a href={DATA.profile.linkedin} target="_blank" className="text-xl text-muted hover:text-blue-500 transition-colors"><i className="fa-brands fa-linkedin"></i></a>
+                                        <a href={DATA.profile.youtube} target="_blank" className="text-xl text-muted hover:text-red-500 transition-colors"><i className="fa-brands fa-youtube"></i></a>
                                     </div>
                                 </div>
                                 
@@ -257,16 +275,20 @@
                             <div className="md:col-span-8 space-y-8">
                                 <div className="operator-panel p-8">
                                     <div className="section-header"><h2 className="text-xl font-bold text-white">WHOAMI</h2></div>
-                                    <p className="text-gray-400 leading-relaxed mb-4">{DATA.profile.bio}</p>
-                                    <p className="text-gray-400 leading-relaxed border-l-2 border-accent pl-4 italic text-sm">{DATA.profile.stack_summary}</p>
+                                    <p className="text-gray-400 leading-relaxed mb-4 text-sm md:text-base">{DATA.profile.bio}</p>
+                                    <div className="bg-primary/5 border-l-2 border-accent pl-4 py-2">
+                                        <p className="text-gray-300 italic text-sm">{DATA.profile.stack_summary}</p>
+                                    </div>
                                 </div>
 
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     {Object.entries(DATA.skills).map(([cat, list]) => (
-                                        <div key={cat} className="operator-panel p-5">
-                                            <h3 className="text-xs font-bold text-primary uppercase mb-3">{cat}</h3>
+                                        <div key={cat} className="operator-panel p-5 hover:border-muted/50 transition-colors">
+                                            <h3 className="text-xs font-bold text-primary uppercase mb-3 flex items-center gap-2">
+                                                <i className="fa-solid fa-angle-right text-[10px]"></i> {cat}
+                                            </h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {list.map(i => <span key={i} className="text-[11px] bg-white/5 px-2 py-1 rounded text-gray-300">{i}</span>)}
+                                                {list.map(i => <span key={i} className="text-[11px] bg-white/5 px-2 py-1 rounded text-gray-300 border border-transparent hover:border-border transition-colors">{i}</span>)}
                                             </div>
                                         </div>
                                     ))}
@@ -282,12 +304,12 @@
                                 <div className="space-y-6">
                                     <div className="section-header"><h2 className="text-xl font-bold text-white">HALL OF FAME & CVEs</h2></div>
                                     {DATA.hall_of_fame.map((item, idx) => (
-                                        <div key={idx} className="operator-panel p-5 border-l-4 border-l-primary hover:border-l-primaryLight transition-all">
+                                        <div key={idx} className="operator-panel p-5 border-l-4 border-l-primary hover:border-l-primaryLight transition-all group">
                                             <div className="flex justify-between items-start mb-2">
                                                 <Tag text={item.tag} type={item.tag === 'CRITICAL' ? 'critical' : 'cve'} />
                                                 <span className="text-[10px] text-muted font-mono">{item.date}</span>
                                             </div>
-                                            <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
+                                            <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primaryLight transition-colors">{item.title}</h3>
                                             <p className="text-xs text-primary font-mono mb-2 uppercase">{item.issuer}</p>
                                             <p className="text-sm text-gray-400">{item.desc}</p>
                                         </div>
@@ -297,7 +319,7 @@
                                 <div className="space-y-6">
                                     <div className="section-header"><h2 className="text-xl font-bold text-white">VOLUNTEER WORK</h2></div>
                                     {DATA.volunteer.map((v, idx) => (
-                                        <div key={idx} className="operator-panel p-5">
+                                        <div key={idx} className="operator-panel p-5 hover:border-muted/50 transition-colors">
                                             <div className="flex justify-between mb-1">
                                                 <h3 className="font-bold text-white">{v.org}</h3>
                                                 <span className="text-[10px] text-muted bg-white/5 px-2 py-0.5 rounded">{v.period}</span>
@@ -317,9 +339,9 @@
                             <div className="section-header"><h2 className="text-xl font-bold text-white">ACTIVE ENGAGEMENTS</h2></div>
                             <div className="space-y-6 border-l border-border ml-3 pl-8 relative">
                                 {DATA.experience.map((exp, idx) => (
-                                    <div key={idx} className="relative">
-                                        <div className="absolute -left-[39px] top-0 w-4 h-4 bg-primary rounded-full border-2 border-bg"></div>
-                                        <div className="operator-panel p-6">
+                                    <div key={idx} className="relative group">
+                                        <div className="absolute -left-[39px] top-0 w-4 h-4 bg-primary rounded-full border-2 border-bg group-hover:scale-125 transition-transform"></div>
+                                        <div className="operator-panel p-6 hover:border-muted/50 transition-colors">
                                             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
                                                 <h3 className="text-xl font-bold text-white">{exp.company}</h3>
                                                 <span className="text-xs text-muted font-mono bg-white/5 px-2 py-1 rounded mt-2 sm:mt-0 w-fit">{exp.period}</span>
@@ -342,7 +364,7 @@
                                     <a key={idx} href={proj.url} target="_blank" className="operator-panel p-6 flex flex-col group hover:-translate-y-1 transition-transform">
                                         <div className="flex justify-between items-start mb-4">
                                             <h3 className="text-lg font-bold text-white font-mono group-hover:text-primary transition-colors">{proj.title}</h3>
-                                            <i className="fa-brands fa-github text-muted group-hover:text-white"></i>
+                                            <i className="fa-brands fa-github text-muted group-hover:text-white transition-colors"></i>
                                         </div>
                                         <p className="text-sm text-gray-400 mb-6 flex-1">{proj.desc}</p>
                                         <div className="flex flex-wrap gap-2 pt-4 border-t border-border mt-auto">
@@ -362,8 +384,8 @@
                                     <div className="section-header"><h2 className="text-xl font-bold text-white">CERTIFICATIONS</h2></div>
                                     <div className="space-y-3">
                                         {DATA.certs.map((c, i) => (
-                                            <div key={i} className="operator-panel p-3 border-l-2 border-transparent hover:border-primary transition-colors flex items-center justify-between">
-                                                <span className="text-sm text-gray-300">{c}</span>
+                                            <div key={i} className="operator-panel p-3 border-l-2 border-transparent hover:border-primary transition-colors flex items-center justify-between group">
+                                                <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{c}</span>
                                                 <i className="fa-solid fa-check text-green-600 text-xs"></i>
                                             </div>
                                         ))}
@@ -373,7 +395,7 @@
                                     <div className="section-header"><h2 className="text-xl font-bold text-white">ACADEMIC BACKGROUND</h2></div>
                                     <div className="space-y-4">
                                         {DATA.education.map((edu, i) => (
-                                            <div key={i} className="operator-panel p-4">
+                                            <div key={i} className="operator-panel p-4 hover:border-muted/50 transition-colors">
                                                 <h4 className="font-bold text-white text-sm">{edu.school}</h4>
                                                 <p className="text-xs text-primary font-mono mt-1">{edu.course}</p>
                                                 <div className="text-[10px] text-muted mt-2 text-right">{edu.year}</div>

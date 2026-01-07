@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tr0p | MindSecurity - Red Team</title>
     
-    <!-- React & ReactDOM (Versão Production para estabilidade) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- FIX CLOUDFLARE: data-cfasync="false" impede o Rocket Loader de quebrar os scripts -->
     
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js" data-cfasync="false"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js" data-cfasync="false"></script>
+    
+    <!-- Babel Standalone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" data-cfasync="false"></script>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" data-cfasync="false"></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,7 +23,7 @@
     <!-- Fontes Google -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <script>
+    <script data-cfasync="false">
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -75,335 +77,381 @@
             text-align: center;
             z-index: 0;
         }
+        
+        #debug-console {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #110000;
+            color: #ff5555;
+            z-index: 9999;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow: auto;
+        }
     </style>
 </head>
 <body class="font-mono">
 
-    <!-- Mensagem de carregamento (desaparece quando o React monta) -->
+    <!-- Console de Debug (Aparece se houver erro crítico) -->
+    <div id="debug-console"></div>
+
+    <!-- Mensagem de carregamento -->
     <div id="loading-msg">
         INITIALIZING SYSTEM...<br>
-        <span style="font-size: 0.8rem; color: #666;">If this persists, JavaScript is disabled or failed.</span>
+        <span style="font-size: 0.8rem; color: #666;">Bypassing Cloudflare Rocket Loader...</span>
     </div>
 
     <!-- Onde o React vai montar -->
     <div id="root" style="position: relative; z-index: 10;"></div>
 
-    <script type="text/babel">
-        // Captura de erro global dentro do contexto do React
-        try {
-            const { useState, useEffect, useRef } = React;
+    <!-- Captura Global de Erros (Antes do Babel) -->
+    <script data-cfasync="false">
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const consoleDiv = document.getElementById('debug-console');
+            const loader = document.getElementById('loading-msg');
+            if (consoleDiv) {
+                consoleDiv.style.display = 'block';
+                if(loader) loader.style.display = 'none';
+                consoleDiv.innerHTML += `<h3>CRITICAL ERROR DETECTED</h3><hr/>
+                <p><strong>Message:</strong> ${msg}</p>
+                <p><strong>Line:</strong> ${lineNo} : ${columnNo}</p>
+                <p><strong>URL:</strong> ${url}</p>
+                <p><strong>Stack:</strong> ${error ? error.stack : 'N/A'}</p>`;
+            }
+            return false;
+        };
+        
+        // Timeout de segurança
+        setTimeout(() => {
+            const root = document.getElementById('root');
+            if (root && root.innerHTML.trim() === '') {
+                const consoleDiv = document.getElementById('debug-console');
+                const loader = document.getElementById('loading-msg');
+                if (consoleDiv && consoleDiv.style.display === 'none') {
+                     consoleDiv.style.display = 'block';
+                     if(loader) loader.style.display = 'none';
+                     consoleDiv.innerHTML += `<h3>CLOUDFLARE/TIMEOUT ERROR</h3><hr/>
+                     <p>React failed to mount. Since you are using Cloudflare, please check:</p>
+                     <ul>
+                        <li>1. Purge your Cloudflare Cache (Caching > Configuration > Purge Everything).</li>
+                        <li>2. Disable 'Rocket Loader' in Cloudflare (Speed > Optimization).</li>
+                     </ul>`;
+                }
+            }
+        }, 5000);
+    </script>
 
-            // --- DADOS DO SITE ---
-            const SITE_DATA = {
-                alias: "Tr0p",
-                realName: "Marcos Tolosa",
-                role: "Red Teamer | Exploit Dev",
-                tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
-                email: "marcostolosa@mindsecurity.org",
-                github: "https://github.com/marcostolosa",
-                linkedin: "https://linkedin.com/in/marcos-tolosa",
-                skills: [
-                    { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
-                    { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
-                    { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
-                    { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
-                    { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
-                    { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
-                ],
-                projects: [
-                    { id: 1, title: "manw-ng", desc: "Malware analysis automation & network monitoring tool focused on stealth.", tech: ["Python", "Networking"] },
-                    { id: 2, title: "OCRack", desc: "Offensive tool using OCR for data extraction and visual captcha bypass.", tech: ["Python", "OCR"] },
-                    { id: 3, title: "REload.Me", desc: "Simplified reverse engineering learning platform.", tech: ["Python", "Education"] },
-                    { id: 4, title: "arctax", desc: "Modular framework for post-exploitation recon.", tech: ["Python", "Recon"] },
-                    { id: 5, title: "LeakHound", desc: "Secret scanning for repositories and logs.", tech: ["Python", "OSINT"] }
-                ],
-                cves: [
-                    { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "13-year-old hidden RCE vulnerability." },
-                    { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Reflected Cross-Site Scripting." },
-                    { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Unauthenticated Remote Command Execution." }
-                ]
+    <script type="text/babel" data-cfasync="false">
+        // --- DADOS DO SITE ---
+        const SITE_DATA = {
+            alias: "Tr0p",
+            realName: "Marcos Tolosa",
+            role: "Red Teamer | Exploit Dev",
+            tagline: "My brain is wired differently. I automate the boring stuff and break the complex stuff.",
+            email: "marcostolosa@mindsecurity.org",
+            github: "https://github.com/marcostolosa",
+            linkedin: "https://linkedin.com/in/marcos-tolosa",
+            skills: [
+                { name: "Python Automation", icon: "fa-python", level: 98, color: "text-yellow-400" },
+                { name: "Red Teaming", icon: "fa-user-ninja", level: 95, color: "text-red-team" },
+                { name: "Exploit Dev", icon: "fa-bug", level: 90, color: "text-purple-team" },
+                { name: "Reverse Eng", icon: "fa-microchip", level: 85, color: "text-blue-500" },
+                { name: "Bash/Scripting", icon: "fa-terminal", level: 92, color: "text-gray-300" },
+                { name: "C/C++", icon: "fa-code", level: 80, color: "text-gray-400" }
+            ],
+            projects: [
+                { id: 1, title: "manw-ng", desc: "Malware analysis automation & network monitoring tool focused on stealth.", tech: ["Python", "Networking"] },
+                { id: 2, title: "OCRack", desc: "Offensive tool using OCR for data extraction and visual captcha bypass.", tech: ["Python", "OCR"] },
+                { id: 3, title: "REload.Me", desc: "Simplified reverse engineering learning platform.", tech: ["Python", "Education"] },
+                { id: 4, title: "arctax", desc: "Modular framework for post-exploitation recon.", tech: ["Python", "Recon"] },
+                { id: 5, title: "LeakHound", desc: "Secret scanning for repositories and logs.", tech: ["Python", "OSINT"] }
+            ],
+            cves: [
+                { id: "CVE-2025-10230", title: "Samba OS Command Injection", score: "10.0 (Critical)", desc: "13-year-old hidden RCE vulnerability." },
+                { id: "CVE-2025-67503", title: "WeGIA XSS Reflected", score: "8.2 (High)", desc: "Reflected Cross-Site Scripting." },
+                { id: "US GOV (NCUA)", title: "Unauth RCE (P1)", score: "Critical", desc: "Unauthenticated Remote Command Execution." }
+            ]
+        };
+
+        const { useState, useEffect, useRef } = React;
+
+        const GlitchText = ({ text }) => (
+            <span className="relative inline-block text-red-team">
+                <span className="relative z-10">{text}</span>
+                <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-50 animate-pulse">{text}</span>
+            </span>
+        );
+
+        const Terminal = ({ onNavigate }) => {
+            const [input, setInput] = useState("");
+            const [history, setHistory] = useState([
+                { type: 'info', content: 'MindSecurity OS v3.3 [Stable]' },
+                { type: 'success', content: 'Authenticated: Tr0p (UID 0)' },
+                { type: 'info', content: 'Type "help" to start.' },
+            ]);
+            const scrollRef = useRef(null);
+
+            useEffect(() => {
+                if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }, [history]);
+
+            const handleCommand = (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = input.trim().toLowerCase();
+                    let newLines = [{ type: 'user', content: cmd }];
+
+                    switch(cmd) {
+                        case 'help':
+                            newLines.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear' });
+                            break;
+                        case 'whoami':
+                            newLines.push({ type: 'success', content: 'Red Teamer | Exploit Dev | Bug Hunter' });
+                            break;
+                        case 'tools':
+                            newLines.push({ type: 'info', content: 'Navigating to tools...' });
+                            onNavigate('projects');
+                            break;
+                        case 'cves':
+                            newLines.push({ type: 'info', content: 'Accessing vulnerability database...' });
+                            onNavigate('cves');
+                            break;
+                        case 'contact':
+                            onNavigate('contact');
+                            break;
+                        case 'clear':
+                            setHistory([]);
+                            setInput("");
+                            return;
+                        default:
+                            newLines.push({ type: 'error', content: 'Command not found.' });
+                    }
+                    setHistory(prev => [...prev, ...newLines]);
+                    setInput("");
+                }
             };
 
-            const GlitchText = ({ text }) => (
-                <span className="relative inline-block text-red-team">
-                    <span className="relative z-10">{text}</span>
-                    <span className="absolute top-0 left-0 -z-10 w-full h-full text-white opacity-50 animate-pulse">{text}</span>
-                </span>
+            return (
+                <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded overflow-hidden border border-red-900/30">
+                    <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex justify-between">
+                        <div className="flex gap-2 items-center">
+                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                        </div>
+                        <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
+                    </div>
+                    <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black text-gray-300">
+                        {history.map((line, i) => (
+                            <div key={i} className="mb-1">
+                                {line.type === 'user' && <span className="text-red-500 mr-2">root@Tr0p:~#</span>}
+                                <span className={line.type === 'error' ? 'text-red-500' : line.type === 'success' ? 'text-green-500' : 'text-gray-300'}>
+                                    {line.content}
+                                </span>
+                            </div>
+                        ))}
+                        <div className="flex items-center mt-2">
+                            <span className="text-red-500 mr-2">root@Tr0p:~#</span>
+                            <input 
+                                className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={handleCommand}
+                                autoFocus
+                                spellCheck="false"
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [section, setSection] = useState('home');
+
+            const NavButton = ({ id, label }) => (
+                <button 
+                    onClick={() => setSection(id)}
+                    className={`px-3 py-2 text-sm font-mono font-bold transition-colors ${section === id ? 'text-red-500 border border-red-500/20 bg-red-500/10 rounded' : 'text-gray-400 hover:text-white'}`}
+                >
+                    {label}
+                </button>
             );
 
-            const Terminal = ({ onNavigate }) => {
-                const [input, setInput] = useState("");
-                const [history, setHistory] = useState([
-                    { type: 'info', content: 'MindSecurity OS v3.3 [Stable]' },
-                    { type: 'success', content: 'Authenticated: Tr0p (UID 0)' },
-                    { type: 'info', content: 'Type "help" to start.' },
-                ]);
-                const scrollRef = useRef(null);
-
-                useEffect(() => {
-                    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-                }, [history]);
-
-                const handleCommand = (e) => {
-                    if (e.key === 'Enter') {
-                        const cmd = input.trim().toLowerCase();
-                        let newLines = [{ type: 'user', content: cmd }];
-
-                        switch(cmd) {
-                            case 'help':
-                                newLines.push({ type: 'info', content: 'COMMANDS: whoami, tools, cves, contact, clear' });
-                                break;
-                            case 'whoami':
-                                newLines.push({ type: 'success', content: 'Red Teamer | Exploit Dev | Bug Hunter' });
-                                break;
-                            case 'tools':
-                                newLines.push({ type: 'info', content: 'Navigating to tools...' });
-                                onNavigate('projects');
-                                break;
-                            case 'cves':
-                                newLines.push({ type: 'info', content: 'Accessing vulnerability database...' });
-                                onNavigate('cves');
-                                break;
-                            case 'contact':
-                                onNavigate('contact');
-                                break;
-                            case 'clear':
-                                setHistory([]);
-                                setInput("");
-                                return;
-                            default:
-                                newLines.push({ type: 'error', content: 'Command not found.' });
-                        }
-                        setHistory(prev => [...prev, ...newLines]);
-                        setInput("");
-                    }
-                };
-
-                return (
-                    <div className="w-full max-w-4xl mx-auto my-8 font-mono text-sm glass-panel rounded overflow-hidden border border-red-900/30">
-                        <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex justify-between">
-                            <div className="flex gap-2 items-center">
-                                <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                                <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-600"></div>
+            return (
+                <div className="min-h-screen pb-12">
+                    {/* Nav */}
+                    <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 backdrop-blur-md bg-black/80">
+                        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="font-bold text-xl cursor-pointer font-mono" onClick={() => setSection('home')}>
+                                <span className="text-red-500">./</span>Tr0p
                             </div>
-                            <div className="text-gray-500 text-xs">root@mindsecurity:~</div>
-                        </div>
-                        <div ref={scrollRef} className="p-4 h-64 overflow-y-auto bg-black text-gray-300">
-                            {history.map((line, i) => (
-                                <div key={i} className="mb-1">
-                                    {line.type === 'user' && <span className="text-red-500 mr-2">root@Tr0p:~#</span>}
-                                    <span className={line.type === 'error' ? 'text-red-500' : line.type === 'success' ? 'text-green-500' : 'text-gray-300'}>
-                                        {line.content}
-                                    </span>
-                                </div>
-                            ))}
-                            <div className="flex items-center mt-2">
-                                <span className="text-red-500 mr-2">root@Tr0p:~#</span>
-                                <input 
-                                    className="bg-transparent border-none outline-none flex-1 text-white focus:ring-0"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={handleCommand}
-                                    autoFocus
-                                    spellCheck="false"
-                                />
+                            <div className="hidden md:flex space-x-4">
+                                <NavButton id="home" label="~/home" />
+                                <NavButton id="about" label="./whoami" />
+                                <NavButton id="projects" label="./tools" />
+                                <NavButton id="cves" label="./cves" />
+                                <NavButton id="contact" label="./connect" />
                             </div>
                         </div>
-                    </div>
-                );
-            };
+                    </nav>
 
-            const App = () => {
-                const [section, setSection] = useState('home');
-
-                const NavButton = ({ id, label }) => (
-                    <button 
-                        onClick={() => setSection(id)}
-                        className={`px-3 py-2 text-sm font-mono font-bold transition-colors ${section === id ? 'text-red-500 border border-red-500/20 bg-red-500/10 rounded' : 'text-gray-400 hover:text-white'}`}
-                    >
-                        {label}
-                    </button>
-                );
-
-                return (
-                    <div className="min-h-screen pb-12">
-                        {/* Nav */}
-                        <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 backdrop-blur-md bg-black/80">
-                            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                                <div className="font-bold text-xl cursor-pointer font-mono" onClick={() => setSection('home')}>
-                                    <span className="text-red-500">./</span>Tr0p
+                    {/* Content */}
+                    <main className="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
+                        
+                        {/* HOME */}
+                        {section === 'home' && (
+                            <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
+                                <div className="mb-6 inline-block px-4 py-1 rounded bg-red-900/20 border border-red-500/30 text-red-500 text-xs font-mono">
+                                    SYSTEM STATUS: OPERATIONAL
                                 </div>
-                                <div className="hidden md:flex space-x-4">
-                                    <NavButton id="home" label="~/home" />
-                                    <NavButton id="about" label="./whoami" />
-                                    <NavButton id="projects" label="./tools" />
-                                    <NavButton id="cves" label="./cves" />
-                                    <NavButton id="contact" label="./connect" />
+                                <h1 className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
+                                    TR0P
+                                </h1>
+                                <p className="text-xl text-gray-400 font-mono mb-8">
+                                    {SITE_DATA.role}
+                                </p>
+                                <div className="max-w-2xl bg-white/5 p-4 rounded border-l-4 border-red-600 mb-12 text-gray-300 text-sm font-mono">
+                                    "{SITE_DATA.tagline}"
                                 </div>
+                                <Terminal onNavigate={setSection} />
                             </div>
-                        </nav>
+                        )}
 
-                        {/* Content */}
-                        <main className="pt-24 px-4 max-w-6xl mx-auto min-h-screen">
-                            
-                            {/* HOME */}
-                            {section === 'home' && (
-                                <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-                                    <div className="mb-6 inline-block px-4 py-1 rounded bg-red-900/20 border border-red-500/30 text-red-500 text-xs font-mono">
-                                        SYSTEM STATUS: OPERATIONAL
+                        {/* ABOUT */}
+                        {section === 'about' && (
+                            <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                    <span className="text-red-500">./</span>whoami
+                                </h2>
+                                <div className="grid md:grid-cols-2 gap-12">
+                                    <div className="text-gray-300 space-y-4 leading-relaxed">
+                                        <p>Hello, I'm <strong className="text-white">Marcos Tolosa</strong>.</p>
+                                        <p>I focus on dismantling complex threats and understanding how they work line by line.</p>
+                                        <p>When not on an engagement, I'm hunting bugs or writing automation scripts.</p>
                                     </div>
-                                    <h1 className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
-                                        TR0P
-                                    </h1>
-                                    <p className="text-xl text-gray-400 font-mono mb-8">
-                                        {SITE_DATA.role}
-                                    </p>
-                                    <div className="max-w-2xl bg-white/5 p-4 rounded border-l-4 border-red-600 mb-12 text-gray-300 text-sm font-mono">
-                                        "{SITE_DATA.tagline}"
-                                    </div>
-                                    <Terminal onNavigate={setSection} />
-                                </div>
-                            )}
-
-                            {/* ABOUT */}
-                            {section === 'about' && (
-                                <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                        <span className="text-red-500">./</span>whoami
-                                    </h2>
-                                    <div className="grid md:grid-cols-2 gap-12">
-                                        <div className="text-gray-300 space-y-4 leading-relaxed">
-                                            <p>Hello, I'm <strong className="text-white">Marcos Tolosa</strong>.</p>
-                                            <p>I focus on dismantling complex threats and understanding how they work line by line.</p>
-                                            <p>When not on an engagement, I'm hunting bugs or writing automation scripts.</p>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {SITE_DATA.skills.map((skill, idx) => (
-                                                <div key={idx}>
-                                                    <div className="flex justify-between text-xs font-mono mb-1 text-gray-400">
-                                                        <span>{skill.name}</span>
-                                                        <span>{skill.level}%</span>
-                                                    </div>
-                                                    <div className="w-full bg-gray-800 h-2 rounded overflow-hidden">
-                                                        <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
-                                                    </div>
+                                    <div className="space-y-4">
+                                        {SITE_DATA.skills.map((skill, idx) => (
+                                            <div key={idx}>
+                                                <div className="flex justify-between text-xs font-mono mb-1 text-gray-400">
+                                                    <span>{skill.name}</span>
+                                                    <span>{skill.level}%</span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* PROJECTS */}
-                            {section === 'projects' && (
-                                <div className="animate-pulse-fast">
-                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                        <span className="text-red-500">./</span>tools_dev
-                                    </h2>
-                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {SITE_DATA.projects.map(p => (
-                                            <div key={p.id} className="glass-panel p-6 hover:border-red-500/50 transition-colors">
-                                                <div className="flex justify-between mb-4">
-                                                    <h3 className="text-lg font-bold text-white font-mono">{p.title}</h3>
-                                                    <i className="fa-brands fa-github text-gray-500"></i>
-                                                </div>
-                                                <p className="text-sm text-gray-400 mb-4 h-20">{p.desc}</p>
-                                                <div className="flex gap-2">
-                                                    {p.tech.map(t => (
-                                                        <span key={t} className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 border border-white/10">{t}</span>
-                                                    ))}
+                                                <div className="w-full bg-gray-800 h-2 rounded overflow-hidden">
+                                                    <div className={`h-full ${skill.color.replace('text-', 'bg-')}`} style={{width: `${skill.level}%`}}></div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="mt-8 text-center">
-                                        <a href={SITE_DATA.github} className="text-red-500 hover:text-white underline decoration-red-500/30 underline-offset-4">
-                                            View all on GitHub
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PROJECTS */}
+                        {section === 'projects' && (
+                            <div className="animate-pulse-fast">
+                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                    <span className="text-red-500">./</span>tools_dev
+                                </h2>
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {SITE_DATA.projects.map(p => (
+                                        <div key={p.id} className="glass-panel p-6 hover:border-red-500/50 transition-colors">
+                                            <div className="flex justify-between mb-4">
+                                                <h3 className="text-lg font-bold text-white font-mono">{p.title}</h3>
+                                                <i className="fa-brands fa-github text-gray-500"></i>
+                                            </div>
+                                            <p className="text-sm text-gray-400 mb-4 h-20">{p.desc}</p>
+                                            <div className="flex gap-2">
+                                                {p.tech.map(t => (
+                                                    <span key={t} className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 border border-white/10">{t}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-8 text-center">
+                                    <a href={SITE_DATA.github} className="text-red-500 hover:text-white underline decoration-red-500/30 underline-offset-4">
+                                        View all on GitHub
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CVES */}
+                        {section === 'cves' && (
+                            <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                    <span className="text-red-500">./</span>cve_database
+                                </h2>
+                                <div className="space-y-6">
+                                    {SITE_DATA.cves.map((cve, idx) => (
+                                        <div key={idx} className="border-l-4 border-red-600 bg-white/5 p-6">
+                                            <div className="flex justify-between mb-2">
+                                                <span className="text-red-500 font-bold font-mono">{cve.id}</span>
+                                                <span className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded border border-red-900/50">{cve.score}</span>
+                                            </div>
+                                            <h3 className="text-white font-bold mb-2">{cve.title}</h3>
+                                            <p className="text-gray-400 text-sm">{cve.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CONTACT */}
+                        {section === 'contact' && (
+                            <div className="max-w-4xl mx-auto animate-pulse-fast">
+                                <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
+                                    <span className="text-red-500">./</span>connect
+                                    </h2>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="space-y-4">
+                                        <a href={`mailto:${SITE_DATA.email}`} className="block glass-panel p-4 hover:border-red-500 transition-colors">
+                                            <div className="text-xs text-gray-500 font-mono">EMAIL</div>
+                                            <div className="text-white">{SITE_DATA.email}</div>
+                                        </a>
+                                        <a href={SITE_DATA.linkedin} className="block glass-panel p-4 hover:border-blue-500 transition-colors">
+                                            <div className="text-xs text-gray-500 font-mono">LINKEDIN</div>
+                                            <div className="text-white">/in/marcos-tolosa</div>
+                                        </a>
+                                        <a href={SITE_DATA.github} className="block glass-panel p-4 hover:border-white transition-colors">
+                                            <div className="text-xs text-gray-500 font-mono">GITHUB</div>
+                                            <div className="text-white">/marcostolosa</div>
                                         </a>
                                     </div>
-                                </div>
-                            )}
-
-                            {/* CVES */}
-                            {section === 'cves' && (
-                                <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                        <span className="text-red-500">./</span>cve_database
-                                    </h2>
-                                    <div className="space-y-6">
-                                        {SITE_DATA.cves.map((cve, idx) => (
-                                            <div key={idx} className="border-l-4 border-red-600 bg-white/5 p-6">
-                                                <div className="flex justify-between mb-2">
-                                                    <span className="text-red-500 font-bold font-mono">{cve.id}</span>
-                                                    <span className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded border border-red-900/50">{cve.score}</span>
-                                                </div>
-                                                <h3 className="text-white font-bold mb-2">{cve.title}</h3>
-                                                <p className="text-gray-400 text-sm">{cve.desc}</p>
-                                            </div>
-                                        ))}
+                                    <div className="glass-panel p-6">
+                                        <p className="text-gray-400 text-sm mb-4">
+                                            Open for Red Team engagements and research collaborations.
+                                        </p>
+                                        <button className="w-full bg-red-600 text-black font-bold py-2 hover:bg-white transition-colors">
+                                            INITIATE HANDSHAKE
+                                        </button>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
+                    </main>
+                    
+                    <footer className="fixed bottom-0 w-full bg-black border-t border-gray-800 py-2 text-center text-[10px] text-gray-600 font-mono">
+                        MINDSECURITY v3.3 // STABLE
+                    </footer>
+                </div>
+            );
+        };
 
-                            {/* CONTACT */}
-                            {section === 'contact' && (
-                                <div className="max-w-4xl mx-auto animate-pulse-fast">
-                                    <h2 className="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-2">
-                                        <span className="text-red-500">./</span>connect
-                                    </h2>
-                                    <div className="grid md:grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                            <a href={`mailto:${SITE_DATA.email}`} className="block glass-panel p-4 hover:border-red-500 transition-colors">
-                                                <div className="text-xs text-gray-500 font-mono">EMAIL</div>
-                                                <div className="text-white">{SITE_DATA.email}</div>
-                                            </a>
-                                            <a href={SITE_DATA.linkedin} className="block glass-panel p-4 hover:border-blue-500 transition-colors">
-                                                <div className="text-xs text-gray-500 font-mono">LINKEDIN</div>
-                                                <div className="text-white">/in/marcos-tolosa</div>
-                                            </a>
-                                            <a href={SITE_DATA.github} className="block glass-panel p-4 hover:border-white transition-colors">
-                                                <div className="text-xs text-gray-500 font-mono">GITHUB</div>
-                                                <div className="text-white">/marcostolosa</div>
-                                            </a>
-                                        </div>
-                                        <div className="glass-panel p-6">
-                                            <p className="text-gray-400 text-sm mb-4">
-                                                Open for Red Team engagements and research collaborations.
-                                            </p>
-                                            <button className="w-full bg-red-600 text-black font-bold py-2 hover:bg-white transition-colors">
-                                                INITIATE HANDSHAKE
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </main>
-                        
-                        <footer className="fixed bottom-0 w-full bg-black border-t border-gray-800 py-2 text-center text-[10px] text-gray-600 font-mono">
-                            MINDSECURITY v3.3 // STABLE
-                        </footer>
-                    </div>
-                );
-            };
-
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                const root = ReactDOM.createRoot(rootElement);
-                root.render(<App />);
-                
-                // Remove o loader se renderizou com sucesso
-                setTimeout(() => {
-                    const loader = document.getElementById('loading-msg');
-                    if(loader) loader.style.display = 'none';
-                }, 100);
-            } else {
-                console.error("Root element not found");
-            }
-
-        } catch (err) {
-            console.error("FATAL REACT ERROR:", err);
-            document.body.innerHTML = `<div style="color:red; padding:20px;"><h1>FATAL ERROR</h1><pre>${err.message}</pre></div>`;
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<App />);
+            
+            // Remove o loader se renderizou com sucesso
+            setTimeout(() => {
+                const loader = document.getElementById('loading-msg');
+                if(loader) loader.style.display = 'none';
+            }, 100);
+        } else {
+            console.error("Root element not found");
         }
     </script>
 </body>

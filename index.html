@@ -4,22 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcos (Tr0p) Tolosa | Red Team Operator</title>
-        
+    <meta name="description" content="Marcos (Tr0p) Tolosa — Offensive Security, Red Team, Pentester & AppSec. CVE hunter, Bug Bounty researcher and reverse engineer based in Rio de Janeiro." />
+    <meta property="og:title" content="Marcos (Tr0p) Tolosa | Red Team Operator" />
+    <meta property="og:description" content="Offensive Security · Red Team · Bug Bounty · Reverse Engineering. CVE-2025-10230 (CVSS 10.0), U.S. GOV recognition and more." />
+    <meta property="og:type" content="website" />
+
     <!-- React & ReactDOM -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js" data-cfasync="false"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js" data-cfasync="false"></script>
-    
+
     <!-- Babel Standalone -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" data-cfasync="false"></script>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com" data-cfasync="false"></script>
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script data-cfasync="false">
         tailwind.config = {
@@ -27,26 +33,34 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Inter"', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
                     },
                     colors: {
-                        bg: '#050505',
-                        panel: '#0f0f0f',
-                        border: '#262626',
-                        primary: '#b91c1c', /* Red 700 */
-                        primaryLight: '#ef4444', /* Red 500 */
-                        accent: '#d97706', /* Amber 600 */
-                        text: '#e5e5e5',
-                        muted: '#737373',
+                        bg: '#0a0505',
+                        panel: '#140b0b',
+                        border: '#2a1818',
+                        primary: '#dc2626',   /* Red 600 */
+                        primaryLight: '#f87171', /* Red 400 */
+                        accent: '#f59e0b',    /* Amber 500 */
+                        text: '#f5f0f0',
+                        muted: '#9a8383',
+                    },
+                    boxShadow: {
+                        glow: '0 0 0 1px rgba(220,38,38,0.15), 0 12px 40px -12px rgba(220,38,38,0.35)',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out both',
+                        'pulse-dot': 'pulseDot 2.4s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseDot: {
+                            '0%,100%': { opacity: '1' },
+                            '50%': { opacity: '0.35' },
                         }
                     }
                 }
@@ -55,29 +69,92 @@
     </script>
 
     <style>
-        body { background-color: #050505; color: #e5e5e5; overflow-x: hidden; }
-        
-        /* Custom Scrollbar Global */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
-        
-        /* Utility para esconder scrollbar mantendo funcionalidade */
+        :root {
+            --bg: #0a0505;
+            --primary: #dc2626;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg);
+            color: #f5f0f0;
+            overflow-x: hidden;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient glow background */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(680px circle at 15% -5%, rgba(220,38,38,0.12), transparent 55%),
+                radial-gradient(720px circle at 90% 5%, rgba(245,158,11,0.06), transparent 55%),
+                radial-gradient(900px circle at 50% 105%, rgba(220,38,38,0.07), transparent 60%);
+        }
+        /* Subtle grid overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 46px 46px;
+            -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 30%, transparent 78%);
+            mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 30%, transparent 78%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #0a0505; }
+        ::-webkit-scrollbar-thumb { background: #3a2020; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .operator-panel { background: #0f0f0f; border: 1px solid #262626; position: relative; transition: border-color 0.2s; }
-        .operator-panel:hover { border-color: #404040; }
-        .section-header { border-left: 3px solid #b91c1c; padding-left: 1rem; margin-bottom: 2rem; }
+        /* Panels with gradient + hover glow */
+        .operator-panel {
+            background: linear-gradient(180deg, #160909, #0f0707);
+            border: 1px solid #2a1818;
+            border-radius: 14px;
+            position: relative;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.3s ease;
+        }
+        .operator-panel:hover {
+            border-color: #4a2626;
+            box-shadow: 0 22px 44px -26px rgba(0,0,0,0.85);
+        }
+        .section-header {
+            border-left: 3px solid #dc2626;
+            padding-left: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: -1px 0 12px -4px rgba(220,38,38,0.6);
+        }
+        .glow-text { text-shadow: 0 0 22px rgba(220,38,38,0.45); }
+
+        .mask-gradient {
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        }
+
+        /* Terminal card */
+        .terminal { background: #0b0606; border: 1px solid #3a2020; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 70px -30px rgba(0,0,0,0.85); }
+        .term-bar { display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: #140909; border-bottom: 1px solid #2a1818; }
+        .term-dot { width: 11px; height: 11px; border-radius: 50%; }
+        .term-body { padding: 18px 20px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12.8px; line-height: 1.9; }
+        .term-body .line { display: block; white-space: pre-wrap; }
     </style>
 </head>
-<body class="font-sans antialiased selection:bg-primary selection:text-white">
+<body class="antialiased selection:bg-primary selection:text-white">
 
     <div id="root"></div>
 
-    <!-- Fallback de Erro -->
-    <div id="loading-msg" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#b91c1c;font-family:monospace;">
+    <!-- Fallback -->
+    <div id="loading-msg" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#dc2626;font-family:'JetBrains Mono',monospace;font-size:13px;">
         INITIALIZING OPERATOR PROFILE...
     </div>
 
@@ -152,9 +229,9 @@
                 }
             ],
             projects: [
-                { title: "OCRack", desc: "High-performance PDF translation/extraction tool using PaddleOCR & GPT-4.", url: "https://github.com/marcostolosa/OCRack", tech: ["Python", "AI", "OCR"] },
-                { title: "ARCTAX", desc: "AI bypass prompt generator with ML classifier and Uncensored local LLM.", url: "https://github.com/marcostolosa/arctax", tech: ["ML", "Prompt Injection"] },
-                { title: "MANW-NG", desc: "Dynamic Windows API (Win32/Native) documentation scraper for RE.", url: "https://github.com/marcostolosa/manw-ng", tech: ["Python", "WinInternals"] },
+                { title: "OCRack", desc: "AI-powered PDF translation & OCR pipeline preserving layout, built on PaddleOCR, PyMuPDF & GPT.", url: "https://github.com/marcostolosa/OCRack", landing: "./ocrack.html", tech: ["Python", "AI", "OCR"], featured: true },
+                { title: "MANW-NG", desc: "Windows API (Win32/NTAPI) docs scraper + live ctypes execution engine for reverse engineers.", url: "https://github.com/marcostolosa/manw-ng", landing: "./man-ng.html", tech: ["Python", "WinInternals"], featured: true },
+                { title: "ARCTAX", desc: "AI bypass prompt generator with ML classifier and uncensored local LLM.", url: "https://github.com/marcostolosa/arctax", tech: ["ML", "Prompt Injection"] },
                 { title: "REload.Me", desc: "Simplified reverse engineering learning platform.", url: "https://github.com/mindsecurity/REload.Me", tech: ["RE", "Education"] },
                 { title: "riskIA-service", desc: "FastAPI ML-based application risk classifier.", url: "https://github.com/marcostolosa/riskIA-service", tech: ["FastAPI", "ML"] },
                 { title: "OSCP Insights", desc: "AI-driven analysis of OSCP success stories.", url: "https://github.com/marcostolosa/study-insights", tech: ["Python", "AI Analysis"] }
@@ -181,6 +258,7 @@
         };
 
         const Nav = ({ active, set }) => {
+            const [open, setOpen] = useState(false);
             const tabs = [
                 { id: 'profile', icon: 'fa-user', label: 'PROFILE' },
                 { id: 'research', icon: 'fa-flask', label: 'RESEARCH & DISCLOSURE' },
@@ -189,18 +267,17 @@
                 { id: 'certs', icon: 'fa-certificate', label: 'CREDENTIALS' }
             ];
             return (
-                <nav className="fixed top-0 w-full bg-bg/95 border-b border-border z-50 h-16 backdrop-blur-md">
+                <nav className="fixed top-0 w-full bg-bg/80 border-b border-border z-50 h-16 backdrop-blur-md">
                     <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-                        {/* LOGO (Esquerda) */}
-                        <div className="font-mono font-bold tracking-tighter text-lg shrink-0 w-[140px]">
-                            <span className="text-primary">./</span>TR0P
+                        <div className="font-mono font-bold tracking-tighter text-lg shrink-0 w-[130px] flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse-dot shadow-[0_0_8px_#dc2626]"></span>
+                            <span><span className="text-primary">./</span>TR0P</span>
                         </div>
 
-                        {/* MENU CENTRALIZADO */}
                         <div className="flex-1 flex justify-center overflow-hidden mx-2">
-                            <div className="flex gap-2 md:gap-6 overflow-x-auto no-scrollbar mask-gradient px-4">
+                            <div className="flex gap-2 md:gap-5 overflow-x-auto no-scrollbar mask-gradient px-4">
                                 {tabs.map(t => (
-                                    <button key={t.id} onClick={() => set(t.id)} 
+                                    <button key={t.id} onClick={() => set(t.id)}
                                         className={`flex items-center gap-2 px-3 py-2 text-xs font-bold font-mono transition-colors border-b-2 whitespace-nowrap ${active === t.id ? 'border-primary text-white' : 'border-transparent text-muted hover:text-white'}`}>
                                         <i className={`fa-solid ${t.icon}`}></i>
                                         <span className="hidden md:inline">{t.label}</span>
@@ -209,12 +286,11 @@
                             </div>
                         </div>
 
-                        {/* SOCIALS (Direita - para balancear) */}
-                        <div className="hidden md:flex justify-end gap-4 w-[140px] shrink-0">
+                        <div className="hidden md:flex justify-end gap-4 w-[130px] shrink-0">
                             <a href={DATA.profile.github} target="_blank" className="text-muted hover:text-white transition-colors"><i className="fa-brands fa-github text-lg"></i></a>
-                            <a href={DATA.profile.linkedin} target="_blank" className="text-muted hover:text-white transition-colors"><i className="fa-brands fa-linkedin text-lg"></i></a>
+                            <a href={DATA.profile.linkedin} target="_blank" className="text-muted hover:text-primaryLight transition-colors"><i className="fa-brands fa-linkedin text-lg"></i></a>
+                            <a href={DATA.profile.youtube} target="_blank" className="text-muted hover:text-primaryLight transition-colors"><i className="fa-brands fa-youtube text-lg"></i></a>
                         </div>
-                        {/* Mobile Spacer (se precisar) */}
                         <div className="md:hidden w-8"></div>
                     </div>
                 </nav>
@@ -224,74 +300,133 @@
         const Tag = ({ text, type = 'default' }) => {
             const colors = {
                 default: 'border-border text-muted',
-                critical: 'border-primary text-primary bg-primary/5',
-                cve: 'border-purple-500 text-purple-500 bg-purple-500/5'
+                critical: 'border-primary text-primaryLight bg-primary/10',
+                cve: 'border-purple-500/60 text-purple-400 bg-purple-500/10'
             };
             return <span className={`text-[10px] font-mono px-2 py-0.5 border rounded uppercase tracking-wider ${colors[type] || colors.default}`}>{text}</span>;
         };
 
+        const StatChip = ({ n, l }) => (
+            <div className="operator-panel px-4 py-3 text-center">
+                <div className="font-mono font-bold text-xl text-white">{n}</div>
+                <div className="text-[10px] text-muted uppercase tracking-wider mt-1">{l}</div>
+            </div>
+        );
+
         const App = () => {
             const [tab, setTab] = useState('profile');
-            
+
             useEffect(() => { document.getElementById('loading-msg').style.display = 'none'; }, []);
 
             return (
-                <div className="min-h-screen pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto">
+                <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto">
                     <Nav active={tab} set={setTab} />
 
                     {/* PROFILE TAB */}
                     {tab === 'profile' && (
-                        <div className="grid md:grid-cols-12 gap-8 animate-fade-in">
-                            <div className="md:col-span-4 space-y-6">
-                                <div className="operator-panel p-6 text-center md:text-left">
-                                    <div className="w-24 h-24 bg-panel border-2 border-primary rounded-full mx-auto md:mx-0 flex items-center justify-center mb-4 relative overflow-hidden group">
-                                         {/* Placeholder Icon */}
-                                        <i className="fa-solid fa-user-secret text-4xl text-muted group-hover:scale-110 transition-transform duration-300"></i>
+                        <div className="animate-fade-in space-y-8">
+                            {/* HERO */}
+                            <div className="grid lg:grid-cols-12 gap-6">
+                                <div className="lg:col-span-7 operator-panel p-8 flex flex-col justify-center">
+                                    <div className="inline-flex items-center gap-2 self-start font-mono text-[11px] text-primaryLight bg-primary/10 border border-primary/25 px-3 py-1 rounded-full mb-6">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-dot"></span>
+                                        AVAILABLE FOR ENGAGEMENTS
                                     </div>
-                                    <h1 className="text-2xl font-bold text-white tracking-tight">{DATA.profile.name}</h1>
-                                    <p className="text-primary font-mono text-xs mt-1 uppercase tracking-wide">{DATA.profile.role}</p>
-                                    
-                                    <div className="mt-6 space-y-3 text-sm text-muted">
-                                        <div className="flex items-center gap-3"><i className="fa-solid fa-location-dot w-4 text-center text-primary"></i> {DATA.profile.location}</div>
-                                        <div className="flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center text-primary"></i> <a href={`mailto:${DATA.profile.email}`} className="hover:text-white transition-colors">{DATA.profile.email}</a></div>
-                                        <div className="flex items-center gap-3"><i className="fa-brands fa-github w-4 text-center text-primary"></i> <a href={DATA.profile.github} target="_blank" className="hover:text-white transition-colors">/marcostolosa</a></div>
-                                    </div>
-
-                                    <div className="flex gap-4 mt-6 justify-center md:justify-start">
-                                        <a href={DATA.profile.github} target="_blank" className="text-xl text-muted hover:text-white transition-colors"><i className="fa-brands fa-github"></i></a>
-                                        <a href={DATA.profile.linkedin} target="_blank" className="text-xl text-muted hover:text-blue-500 transition-colors"><i className="fa-brands fa-linkedin"></i></a>
-                                        <a href={DATA.profile.youtube} target="_blank" className="text-xl text-muted hover:text-red-500 transition-colors"><i className="fa-brands fa-youtube"></i></a>
+                                    <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05]">
+                                        Marcos <span className="text-primary glow-text">"Tr0p"</span> Tolosa
+                                    </h1>
+                                    <p className="text-primaryLight font-mono text-sm mt-4 uppercase tracking-wide">{DATA.profile.role}</p>
+                                    <p className="text-muted mt-5 max-w-xl leading-relaxed text-sm md:text-base">
+                                        Offensive security researcher turning deep hyperfocus into critical CVEs, kill chains and open-source tooling.
+                                    </p>
+                                    <div className="flex flex-wrap gap-3 mt-7">
+                                        <a href={DATA.profile.github} target="_blank" className="inline-flex items-center gap-2 bg-primary text-white font-mono text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primaryLight transition-colors shadow-glow">
+                                            <i className="fa-brands fa-github"></i> GitHub
+                                        </a>
+                                        <a href={`mailto:${DATA.profile.email}`} className="inline-flex items-center gap-2 bg-white/5 border border-border text-white font-mono text-sm px-4 py-2.5 rounded-lg hover:border-muted transition-colors">
+                                            <i className="fa-solid fa-envelope"></i> Contact
+                                        </a>
+                                        <a href={DATA.profile.linkedin} target="_blank" className="inline-flex items-center gap-2 bg-white/5 border border-border text-white font-mono text-sm px-4 py-2.5 rounded-lg hover:border-muted transition-colors">
+                                            <i className="fa-brands fa-linkedin"></i> LinkedIn
+                                        </a>
                                     </div>
                                 </div>
-                                
-                                <div className="operator-panel p-4">
-                                    <h3 className="text-xs font-bold text-white uppercase mb-3 border-b border-border pb-2">Primary Focus</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {['Red Team', 'Pentest', 'Exploit Dev', 'AI Security', 'Reverse Eng'].map(s => <Tag key={s} text={s} />)}
+
+                                {/* Terminal whoami */}
+                                <div className="lg:col-span-5 terminal self-stretch flex flex-col">
+                                    <div className="term-bar">
+                                        <span className="term-dot" style={{background:'#ff5f57'}}></span>
+                                        <span className="term-dot" style={{background:'#febc2e'}}></span>
+                                        <span className="term-dot" style={{background:'#28c840'}}></span>
+                                        <span className="ml-2 font-mono text-[11px] text-muted">tr0p@kali: ~</span>
+                                    </div>
+                                    <div className="term-body flex-1">
+                                        <span className="line"><span className="text-primary">$</span> whoami</span>
+                                        <span className="line text-gray-300">marcos.tolosa &rarr; red_team_operator</span>
+                                        <span className="line">&nbsp;</span>
+                                        <span className="line"><span className="text-primary">$</span> cat ./focus.txt</span>
+                                        <span className="line text-gray-400">Red Team · Pentest · Exploit Dev</span>
+                                        <span className="line text-gray-400">Reverse Engineering · AI Security</span>
+                                        <span className="line">&nbsp;</span>
+                                        <span className="line"><span className="text-primary">$</span> ./stats --recent</span>
+                                        <span className="line text-gray-300"><span className="text-accent">[+]</span> CVE-2025-10230 &middot; <span className="text-primaryLight">CVSS 10.0</span></span>
+                                        <span className="line text-gray-300"><span className="text-accent">[+]</span> U.S. GOV (NCUA) recognition</span>
+                                        <span className="line"><span className="text-primary">$</span> <span className="inline-block w-2 h-4 bg-primary align-text-bottom animate-pulse"></span></span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="md:col-span-8 space-y-8">
-                                <div className="operator-panel p-8">
-                                    <div className="section-header"><h2 className="text-xl font-bold text-white">WHOAMI</h2></div>
-                                    <p className="text-gray-400 leading-relaxed mb-4 text-sm md:text-base">{DATA.profile.bio}</p>
-                                    <div className="bg-primary/5 border-l-2 border-accent pl-4 py-2">
-                                        <p className="text-gray-300 italic text-sm">{DATA.profile.stack_summary}</p>
+                            {/* QUICK STATS */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <StatChip n="10.0" l="Highest CVSS" />
+                                <StatChip n="3+" l="CVEs / Reports" />
+                                <StatChip n="U.S. GOV" l="Recognition" />
+                                <StatChip n="OWASP" l="Member since 2021" />
+                            </div>
+
+                            <div className="grid md:grid-cols-12 gap-6">
+                                <div className="md:col-span-4 space-y-6">
+                                    <div className="operator-panel p-6">
+                                        <div className="w-20 h-20 bg-panel border-2 border-primary/60 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden group shadow-glow">
+                                            <i className="fa-solid fa-user-secret text-3xl text-muted group-hover:scale-110 group-hover:text-primaryLight transition-all duration-300"></i>
+                                        </div>
+                                        <h3 className="text-white font-bold">{DATA.profile.name}</h3>
+                                        <div className="mt-4 space-y-3 text-sm text-muted">
+                                            <div className="flex items-center gap-3"><i className="fa-solid fa-location-dot w-4 text-center text-primary"></i> {DATA.profile.location}</div>
+                                            <div className="flex items-center gap-3"><i className="fa-solid fa-envelope w-4 text-center text-primary"></i> <a href={`mailto:${DATA.profile.email}`} className="hover:text-white transition-colors break-all">{DATA.profile.email}</a></div>
+                                            <div className="flex items-center gap-3"><i className="fa-brands fa-github w-4 text-center text-primary"></i> <a href={DATA.profile.github} target="_blank" className="hover:text-white transition-colors">/marcostolosa</a></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="operator-panel p-5">
+                                        <h3 className="text-xs font-bold text-white uppercase mb-3 border-b border-border pb-2 tracking-wider">Primary Focus</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['Red Team', 'Pentest', 'Exploit Dev', 'AI Security', 'Reverse Eng'].map(s => <Tag key={s} text={s} />)}
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                    {Object.entries(DATA.skills).map(([cat, list]) => (
-                                        <div key={cat} className="operator-panel p-5 hover:border-muted/50 transition-colors">
-                                            <h3 className="text-xs font-bold text-primary uppercase mb-3 flex items-center gap-2">
-                                                <i className="fa-solid fa-angle-right text-[10px]"></i> {cat}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {list.map(i => <span key={i} className="text-[11px] bg-white/5 px-2 py-1 rounded text-gray-300 border border-transparent hover:border-border transition-colors">{i}</span>)}
-                                            </div>
+                                <div className="md:col-span-8 space-y-6">
+                                    <div className="operator-panel p-8">
+                                        <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">WHOAMI</h2></div>
+                                        <p className="text-gray-400 leading-relaxed mb-4 text-sm md:text-base">{DATA.profile.bio}</p>
+                                        <div className="bg-primary/5 border-l-2 border-accent pl-4 py-3 rounded-r">
+                                            <p className="text-gray-300 italic text-sm">{DATA.profile.stack_summary}</p>
                                         </div>
-                                    ))}
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                        {Object.entries(DATA.skills).map(([cat, list]) => (
+                                            <div key={cat} className="operator-panel p-5">
+                                                <h3 className="text-xs font-bold text-primaryLight uppercase mb-3 flex items-center gap-2 tracking-wider">
+                                                    <i className="fa-solid fa-angle-right text-[10px]"></i> {cat}
+                                                </h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {list.map(i => <span key={i} className="text-[11px] bg-white/5 px-2 py-1 rounded text-gray-300 border border-transparent hover:border-border transition-colors">{i}</span>)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -302,11 +437,11 @@
                         <div className="max-w-5xl mx-auto animate-fade-in">
                             <div className="grid md:grid-cols-2 gap-8">
                                 <div className="space-y-6">
-                                    <div className="section-header"><h2 className="text-xl font-bold text-white">HALL OF FAME & CVEs</h2></div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">HALL OF FAME & CVEs</h2></div>
                                     {DATA.hall_of_fame.map((item, idx) => (
                                         <div key={idx} className="operator-panel p-5 border-l-4 border-l-primary hover:border-l-primaryLight transition-all group">
                                             <div className="flex justify-between items-start mb-2">
-                                                <Tag text={item.tag} type={item.tag === 'CRITICAL' ? 'critical' : 'cve'} />
+                                                <Tag text={item.tag} type={item.tag === 'CRITICAL' ? 'critical' : item.tag === 'CVE' ? 'cve' : 'default'} />
                                                 <span className="text-[10px] text-muted font-mono">{item.date}</span>
                                             </div>
                                             <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primaryLight transition-colors">{item.title}</h3>
@@ -315,16 +450,16 @@
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <div className="space-y-6">
-                                    <div className="section-header"><h2 className="text-xl font-bold text-white">VOLUNTEER WORK</h2></div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">VOLUNTEER WORK</h2></div>
                                     {DATA.volunteer.map((v, idx) => (
-                                        <div key={idx} className="operator-panel p-5 hover:border-muted/50 transition-colors">
+                                        <div key={idx} className="operator-panel p-5">
                                             <div className="flex justify-between mb-1">
                                                 <h3 className="font-bold text-white">{v.org}</h3>
                                                 <span className="text-[10px] text-muted bg-white/5 px-2 py-0.5 rounded">{v.period}</span>
                                             </div>
-                                            <p className="text-primary font-mono text-xs mb-2">{v.role}</p>
+                                            <p className="text-primaryLight font-mono text-xs mb-2">{v.role}</p>
                                             <p className="text-sm text-gray-400">{v.desc}</p>
                                         </div>
                                     ))}
@@ -336,17 +471,17 @@
                     {/* OPERATIONS TAB */}
                     {tab === 'ops' && (
                         <div className="max-w-4xl mx-auto animate-fade-in">
-                            <div className="section-header"><h2 className="text-xl font-bold text-white">ACTIVE ENGAGEMENTS</h2></div>
+                            <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">ACTIVE ENGAGEMENTS</h2></div>
                             <div className="space-y-6 border-l border-border ml-3 pl-8 relative">
                                 {DATA.experience.map((exp, idx) => (
                                     <div key={idx} className="relative group">
-                                        <div className="absolute -left-[39px] top-0 w-4 h-4 bg-primary rounded-full border-2 border-bg group-hover:scale-125 transition-transform"></div>
-                                        <div className="operator-panel p-6 hover:border-muted/50 transition-colors">
+                                        <div className="absolute -left-[39px] top-6 w-4 h-4 bg-primary rounded-full border-2 border-bg group-hover:scale-125 transition-transform shadow-[0_0_10px_#dc2626]"></div>
+                                        <div className="operator-panel p-6">
                                             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
                                                 <h3 className="text-xl font-bold text-white">{exp.company}</h3>
                                                 <span className="text-xs text-muted font-mono bg-white/5 px-2 py-1 rounded mt-2 sm:mt-0 w-fit">{exp.period}</span>
                                             </div>
-                                            <p className="text-primary font-mono text-sm mb-4">{exp.role}</p>
+                                            <p className="text-primaryLight font-mono text-sm mb-4">{exp.role}</p>
                                             <p className="text-gray-400 text-sm">{exp.desc}</p>
                                         </div>
                                     </div>
@@ -358,19 +493,27 @@
                     {/* ARSENAL TAB */}
                     {tab === 'arsenal' && (
                         <div className="animate-fade-in">
-                            <div className="section-header"><h2 className="text-xl font-bold text-white">TOOL DEVELOPMENT</h2></div>
+                            <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">TOOL DEVELOPMENT</h2></div>
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {DATA.projects.map((proj, idx) => (
-                                    <a key={idx} href={proj.url} target="_blank" className="operator-panel p-6 flex flex-col group hover:-translate-y-1 transition-transform">
+                                    <div key={idx} className="operator-panel p-6 flex flex-col group hover:-translate-y-1">
                                         <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-lg font-bold text-white font-mono group-hover:text-primary transition-colors">{proj.title}</h3>
-                                            <i className="fa-brands fa-github text-muted group-hover:text-white transition-colors"></i>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-lg font-bold text-white font-mono group-hover:text-primaryLight transition-colors">{proj.title}</h3>
+                                                {proj.featured && <span className="text-[9px] font-mono uppercase tracking-wider text-accent border border-accent/40 bg-accent/10 px-1.5 py-0.5 rounded">live</span>}
+                                            </div>
+                                            <a href={proj.url} target="_blank" className="text-muted hover:text-white transition-colors" aria-label="GitHub repo"><i className="fa-brands fa-github"></i></a>
                                         </div>
                                         <p className="text-sm text-gray-400 mb-6 flex-1">{proj.desc}</p>
-                                        <div className="flex flex-wrap gap-2 pt-4 border-t border-border mt-auto">
+                                        <div className="flex flex-wrap gap-2 pt-4 border-t border-border mt-auto items-center">
                                             {proj.tech.map(t => <span key={t} className="text-[10px] font-mono text-muted bg-bg px-2 py-1 border border-border rounded">{t}</span>)}
+                                            {proj.landing && (
+                                                <a href={proj.landing} className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-mono text-primaryLight hover:text-white transition-colors">
+                                                    Landing <i className="fa-solid fa-arrow-right text-[9px]"></i>
+                                                </a>
+                                            )}
                                         </div>
-                                    </a>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -381,23 +524,23 @@
                         <div className="max-w-5xl mx-auto animate-fade-in">
                             <div className="grid md:grid-cols-2 gap-8">
                                 <div>
-                                    <div className="section-header"><h2 className="text-xl font-bold text-white">CERTIFICATIONS</h2></div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">CERTIFICATIONS</h2></div>
                                     <div className="space-y-3">
                                         {DATA.certs.map((c, i) => (
-                                            <div key={i} className="operator-panel p-3 border-l-2 border-transparent hover:border-primary transition-colors flex items-center justify-between group">
+                                            <div key={i} className="operator-panel p-3.5 border-l-2 border-transparent hover:border-primary flex items-center justify-between group">
                                                 <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{c}</span>
-                                                <i className="fa-solid fa-check text-green-600 text-xs"></i>
+                                                <i className="fa-solid fa-check text-green-500 text-xs"></i>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="section-header"><h2 className="text-xl font-bold text-white">ACADEMIC BACKGROUND</h2></div>
+                                    <div className="section-header"><h2 className="text-xl font-bold text-white font-mono">ACADEMIC BACKGROUND</h2></div>
                                     <div className="space-y-4">
                                         {DATA.education.map((edu, i) => (
-                                            <div key={i} className="operator-panel p-4 hover:border-muted/50 transition-colors">
+                                            <div key={i} className="operator-panel p-4">
                                                 <h4 className="font-bold text-white text-sm">{edu.school}</h4>
-                                                <p className="text-xs text-primary font-mono mt-1">{edu.course}</p>
+                                                <p className="text-xs text-primaryLight font-mono mt-1">{edu.course}</p>
                                                 <div className="text-[10px] text-muted mt-2 text-right">{edu.year}</div>
                                             </div>
                                         ))}
@@ -406,6 +549,16 @@
                             </div>
                         </div>
                     )}
+
+                    {/* FOOTER */}
+                    <footer className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-muted">
+                        <span className="font-mono text-xs">© 2026 Marcos Tolosa · <span className="text-primary">Tr0p</span></span>
+                        <div className="flex gap-5">
+                            <a href={DATA.profile.github} target="_blank" className="hover:text-white transition-colors"><i className="fa-brands fa-github"></i></a>
+                            <a href={DATA.profile.linkedin} target="_blank" className="hover:text-primaryLight transition-colors"><i className="fa-brands fa-linkedin"></i></a>
+                            <a href={DATA.profile.youtube} target="_blank" className="hover:text-primaryLight transition-colors"><i className="fa-brands fa-youtube"></i></a>
+                        </div>
+                    </footer>
 
                 </div>
             );

@@ -1,0 +1,183 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { disclosures, hallOfFame, imports, links, profile, tools } from '../data/profile';
+
+const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const hex = (base: number, i: number, step: number) => (base + i * step).toString(16).toUpperCase().padStart(8, '0');
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base
+  title="Marcos Tolosa (Tr0p) — red team, exploit dev, reverse engineering"
+  description="Red teamer, exploit developer and reverse engineer. CVE-2025-10230 (CVSS 10.0, Samba). 6× U.S. Government Hall of Fame. Available for pentest and red team engagements."
+  current="whoami"
+>
+  <header class="hero" id="whoami">
+    <p class="c">; sub_401000 whoami() · {profile.base}</p>
+    <h1>{profile.name}<br /><span class="k">{profile.handle}</span></h1>
+    <p class="lede">{profile.lede}</p>
+    <p class="method c">; {profile.method}<span class="caret" aria-hidden="true"></span></p>
+    <div class="actions">
+      <a class="btn" href={`mailto:${profile.email}?subject=Engagement%20inquiry`}>Open an engagement</a>
+      <a class="ghost" href="/writeups/">Read the writeups</a>
+    </div>
+  </header>
+
+  <section class="fn" id="disclosures" aria-labelledby="h-disc">
+    <div class="fn-h">
+      <h2 id="h-disc">disclosures</h2>
+      <span class="sig c">int __fastcall disclosures(void) ; {disclosures.length} public records</span>
+    </div>
+    <ol class="ls disc">
+      {disclosures.map((d, i) => (
+        <li>
+          <span class="a">{hex(0x401140, i, 0x28)}</span>
+          <a class="id" href={d.href} data-sym={d.id}>{d.id}</a>
+          <span class="body">
+            <span class="k" data-sym={d.sym}>{d.sym}</span>{' '}
+            <span class="s">"{d.cls}"</span>
+            {d.note && <span class="c"> ; {d.note}</span>}
+          </span>
+          <span class={d.crit ? 'sev crit' : 'sev'} aria-label={`severity ${d.sev}`}>{d.sev}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="fn" id="hall_of_fame" aria-labelledby="h-hof">
+    <div class="fn-h">
+      <h2 id="h-hof">hall_of_fame</h2>
+      <span class="sig c">; {hallOfFame.summary}</span>
+    </div>
+    <ol class="ls">
+      {hallOfFame.agencies.map((a, i) => (
+        <li>
+          <span class="a">{hex(0x401300, i, 5)}</span>
+          <span><span class="k">push</span> <span class="s" data-sym={a === 'NCUA' ? 'us_gov' : undefined}>"{a}"</span></span>
+        </li>
+      ))}
+      <li>
+        <span class="a">{hex(0x401300, hallOfFame.agencies.length, 5)}</span>
+        <span><span class="k">call</span> <a href={hallOfFame.record}>bugcrowd.com/h/Tr0p</a> <span class="c">; full record · plus {hallOfFame.also}</span></span>
+      </li>
+    </ol>
+  </section>
+
+  <section class="fn" id="tools" aria-labelledby="h-tools">
+    <div class="fn-h">
+      <h2 id="h-tools">tools</h2>
+      <span class="sig c">; if it can be scripted, I automate it</span>
+    </div>
+    <div class="tools">
+      {tools.map((t) => (
+        <article>
+          <h3><a href={t.href}>{t.name}</a></h3>
+          <p>{t.desc}</p>
+          <p class="tags a">{t.tags}{t.repo && <> · <a href={t.repo}>source</a></>}</p>
+        </article>
+      ))}
+    </div>
+    <p class="imports"><span class="c">; imports</span> {imports.join(' · ')}</p>
+  </section>
+
+  <section class="fn" id="writeups" aria-labelledby="h-wr">
+    <div class="fn-h">
+      <h2 id="h-wr">writeups</h2>
+      <span class="sig c">; root cause, step by step</span>
+    </div>
+    {writeups.length > 0 ? (
+      <ol class="ls">
+        {writeups.slice(0, 5).map((w, i) => (
+          <li>
+            <span class="a">{hex(0x401520, i, 0x10)}</span>
+            <span><a href={`/writeups/${w.id}/`}>{w.data.title}</a> <span class="c">; {fmt(w.data.date)}</span></span>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty"><span class="c">; nothing published here yet.</span> The advisories in <a href="#disclosures">disclosures()</a> are the primary sources until then.</p>
+    )}
+  </section>
+
+  <section class="contact" id="connect" aria-labelledby="h-con">
+    <p class="c">; sub_401600 connect()</p>
+    <h2 id="h-con">Got something in scope?</h2>
+    <p class="lede">Pentests, red team engagements and security research. Authorized targets only.</p>
+    <div class="actions">
+      <a class="btn" href={`mailto:${profile.email}?subject=Engagement%20inquiry`}>{profile.email}</a>
+    </div>
+    <ul class="links">
+      {links.map((l) => <li><a href={l.href} rel="me">{l.label}</a></li>)}
+    </ul>
+    <p class="foot c">; OWASP member since 2021 · CVE Hunters · mindsecurity.org</p>
+  </section>
+</Base>
+
+<style>
+  .hero { padding: clamp(56px, 10vh, 104px) var(--pad) 56px; border-bottom: 1px solid var(--line); }
+  h1 {
+    font: 900 clamp(2.9rem, 7.5vw, 6rem)/0.95 var(--disp);
+    letter-spacing: -0.035em; color: var(--fg-hi); margin: 18px 0 20px; text-wrap: balance;
+  }
+  .lede { font: 500 clamp(1.1rem, 1.6vw, 1.3rem)/1.5 var(--disp); color: var(--fg); max-width: 44ch; }
+  .method { margin-top: 14px; }
+  .caret { display: inline-block; width: 0.6em; height: 1.1em; background: var(--kw); vertical-align: -0.2em; margin-left: 4px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 32px; }
+  .btn {
+    display: inline-block; background: var(--kw); color: var(--bg); text-decoration: none;
+    font: 700 15px/1 var(--disp); letter-spacing: 0.01em; padding: 15px 20px; border-radius: 4px;
+    box-shadow: 0 6px 18px -8px rgba(232, 184, 97, 0.55);
+    transition: transform 180ms var(--ease), background-color 180ms var(--ease);
+  }
+  .btn:hover { background: #f1c77a; color: var(--bg); transform: translateY(-1px); }
+  .ghost { font: 500 15px/1 var(--disp); }
+
+  .fn { border-bottom: 1px solid var(--line); padding: 44px 0; }
+  .fn-h { padding: 0 var(--pad) 18px; display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; }
+  h2 { font: 800 1.65rem/1.2 var(--disp); color: var(--fg-hi); letter-spacing: -0.02em; }
+  .sig { font-size: 13px; }
+
+  .ls { list-style: none; padding: 0; }
+  .ls li {
+    display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; padding: 5px var(--pad);
+    transition: background-color 180ms var(--ease);
+  }
+  .ls li:hover { background: var(--hl); }
+  .disc li { grid-template-columns: 112px 170px minmax(0, 1fr) auto; align-items: baseline; padding-top: 7px; padding-bottom: 7px; }
+  .sev {
+    font: 700 12.5px/1 var(--mono); color: var(--bg); background: var(--num);
+    padding: 4px 7px; border-radius: 3px; min-width: 48px; text-align: center;
+  }
+  .sev.crit { background: var(--crit); }
+
+  .tools {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line);
+    border: 1px solid var(--line); margin: 6px var(--pad) 0;
+  }
+  .tools article { background: var(--panel); padding: 22px 24px; transition: background-color 180ms var(--ease); }
+  .tools article:hover { background: var(--panel-2); }
+  .tools h3 { font: 800 1.25rem/1.2 var(--disp); }
+  .tools h3 a { color: var(--fg-hi); text-decoration: none; }
+  .tools h3 a:hover { color: var(--kw); }
+  .tools p { color: var(--dim); font-size: 14px; line-height: 1.6; margin-top: 8px; max-width: 60ch; }
+  .tools .tags { font-size: 12.5px; }
+  .imports { padding: 18px var(--pad) 0; font-size: 13.5px; color: var(--dim); }
+  .empty { padding: 0 var(--pad); color: var(--dim); }
+
+  .contact { padding: 64px var(--pad) 80px; }
+  .contact h2 { font: 900 clamp(2.2rem, 5vw, 3.6rem)/1 var(--disp); letter-spacing: -0.03em; margin: 10px 0 14px; }
+  .links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 28px; }
+  .foot { margin-top: 56px; font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .ls li, .disc li { grid-template-columns: 1fr; gap: 2px; padding-top: 10px; padding-bottom: 10px; }
+    .ls .a { font-size: 12px; }
+    .disc .sev { justify-self: start; margin-top: 4px; }
+    .tools { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,122 @@
+---
+import '../styles/global.css';
+import { functions, links, profile } from '../data/profile';
+
+interface Props {
+  title: string;
+  description: string;
+  current?: string;
+}
+const { title, description, current } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#17191e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="shell">
+      <aside class="rail" aria-label="Site">
+        <a class="brand" href="/">{profile.handle.toUpperCase()}<span class="a">.bin</span></a>
+        <p class="c">; Functions</p>
+        <nav aria-label="Sections">
+          <ul>
+            {functions.map((f) => (
+              <li>
+                <a href={f.href} aria-current={current === f.name ? 'page' : undefined}>
+                  <span class="a">{f.addr}</span>{f.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <p class="c xr-t">; XREFS</p>
+        <ul class="xr">
+          {links.slice(0, 4).map((l) => <li><a href={l.href} rel="me">{l.label}</a></li>)}
+        </ul>
+      </aside>
+
+      <header class="mbar">
+        <a class="brand" href="/">{profile.handle.toUpperCase()}<span class="a">.bin</span></a>
+        <nav aria-label="Sections (mobile)">
+          <a href="/#disclosures">disclosures</a>
+          <a href="/writeups/">writeups</a>
+          <a href="/#connect">connect</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      // IDA-style xref highlight: hovering or focusing a symbol lights up every occurrence.
+      const groups = new Map<string, Element[]>();
+      document.querySelectorAll('[data-sym]').forEach((el) => {
+        const k = (el as HTMLElement).dataset.sym!;
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k)!.push(el);
+      });
+      const set = (el: Element, on: boolean) =>
+        groups.get((el as HTMLElement).dataset.sym!)?.forEach((n) => n.classList.toggle('xref', on));
+      groups.forEach((els) =>
+        els.forEach((el) => {
+          el.addEventListener('pointerenter', () => set(el, true));
+          el.addEventListener('pointerleave', () => set(el, false));
+          el.addEventListener('focusin', () => set(el, true));
+          el.addEventListener('focusout', () => set(el, false));
+        }),
+      );
+    </script>
+
+    <style>
+      .shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
+      .rail {
+        background: var(--gutter); border-right: 1px solid var(--line);
+        padding: 28px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto; font-size: 13px;
+      }
+      .brand { display: inline-block; font: 800 18px/1 var(--disp); color: var(--fg-hi); text-decoration: none; letter-spacing: 0.02em; margin: 0 8px 28px; }
+      .brand .a { font: 400 13px/1 var(--mono); margin-left: 2px; }
+      .rail .c { margin: 0 8px 10px; }
+      .rail ul { list-style: none; padding: 0; }
+      .rail nav a {
+        display: block; color: var(--fg); text-decoration: none; padding: 5px 8px; border-radius: 3px;
+        transition: background-color 180ms var(--ease), color 180ms var(--ease);
+      }
+      .rail nav a .a { margin-right: 10px; }
+      .rail nav a:hover { background: var(--panel); color: var(--kw); }
+      .rail nav a[aria-current='page'] { background: var(--hl); color: var(--kw); }
+      .xr-t { margin-top: 32px !important; }
+      .xr li { padding: 2px 8px; }
+      .mbar { display: none; }
+      main { min-width: 0; }
+
+      @media (max-width: 900px) {
+        .shell { grid-template-columns: 1fr; }
+        .rail { display: none; }
+        .mbar {
+          display: flex; justify-content: space-between; align-items: center; gap: 12px;
+          padding: 14px var(--pad); border-bottom: 1px solid var(--line); background: var(--gutter);
+          position: sticky; top: 0; z-index: 5;
+        }
+        .mbar .brand { margin: 0; font-size: 16px; }
+        .mbar nav { display: flex; gap: 14px; font-size: 13px; }
+        .mbar nav a { color: var(--fg); text-decoration: none; padding: 6px 0; }
+      }
+    </style>
+  </body>
+</html>

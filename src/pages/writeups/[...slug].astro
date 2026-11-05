@@ -11,7 +11,7 @@ const { Content, headings } = await render(w);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const toc = headings.filter((h) => h.depth === 2);
 ---
-<Base title={`${w.data.title} — Tr0p`} description={w.data.summary} current="writeups">
+<Base title={`${w.data.title} — Tr0p`} description={w.data.summary} where="writeups">
   <article class="pane">
     <header>
       <p class="c">; decompiled · {fmt(w.data.date)}{w.data.target && <> · target: {w.data.target}</>}</p>

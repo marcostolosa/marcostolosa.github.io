@@ -17,10 +17,12 @@ OWN-WORLD: Warm graphite ground (#17191E), parchment-grey text, amber mnemonics,
 
 STORY: Visitor sees who and what in one line, sees the CVSS 10.0 finding immediately, understands every claim is a followable xref, and emails or reads a writeup.
 
-FIRST VIEWPORT: Left 240px function rail (whoami, disclosures, hall_of_fame, tools, writeups, connect) with addresses. Main: comment line `; sub_401000 whoami()` + location, name at display scale with Tr0p in amber, one-line method, primary action "Open an engagement" (mailto) plus secondary "Read writeups", then the first disclosure row (CVE-2025-10230, 10.0) visible above the fold.
+FIRST VIEWPORT: A debugger paused at a breakpoint. Sticky toolbar (brand TR0P.dbg, Run F9 -> connect, Step F8 -> next section, Writeups, state 'Paused in whoami()'). Left CPU pane: breakpoint comment, name at display scale with Tr0p in amber, one-line method, primary action 'Open an engagement', then the disclosures listing with the instruction pointer on CVE-2025-10230 (10.0) and the next line pre-marked. Right column: Registers pane carrying the numbers (RIP = CVE-2025-10230 CVSS 10.0, RAX = 6 HoF, RBX = 15 valid, RCX = 93.75%), Stack pane carrying the tools. Log pane and status bar close the frame.
 
-FORM: Disassembler listing, position 1 on the ordered list (IMPECCABLE'S PICK, chosen by the user over the assigned Declassified Dossier). seed:9d98c709b0bef3c2
+FORM: Disassembler world (user-chosen over the assigned Declassified Dossier); surface structure 'debugger session', dealt lead (THE ROLL) of the surface round, candidate 4 of 7, locked by the user. seed:9d98c709b0bef3c2
 
-Signature interaction: xref highlight — hovering/focusing any symbol highlights every other occurrence of that symbol on the page (as in IDA), e.g. "samba" lights up both Samba findings. Motion grammar: one caret blink in the hero (disabled under reduced motion), 180ms exponential ease-out on row highlight; nothing else animates.
+Raises: from algorave-source-floor (declined) the next instruction is visibly queued before Step executes it; from nixie-laboratory-counter (declined) every quantity sits in a fixed-width tabular register.
+
+Signature interaction: Step/Run debugger control (F8/n steps the instruction pointer section by section, F9 runs to connect, status bar tracks the current function on scroll). Secondary: xref highlight — hovering/focusing any symbol highlights every other occurrence of that symbol on the page (as in IDA), e.g. "samba" lights up both Samba findings. Motion grammar: one caret blink in the hero (disabled under reduced motion), 180ms exponential ease-out on row highlight; nothing else animates.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

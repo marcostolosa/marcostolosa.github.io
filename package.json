@@ -7,5 +7,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check"
+  },
+  "dependencies": {
+    "@fontsource-variable/red-hat-display": "5.3.0",
+    "@fontsource-variable/red-hat-mono": "5.3.0",
+    "astro": "7.4.2"
   }
 }

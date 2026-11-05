@@ -130,12 +130,12 @@ export const links = [
   { label: 'discord', href: 'https://discord.gg/T9RVG3re2J' },
 ];
 
-// Function rail. Addresses are decorative but stable.
-export const functions = [
-  { addr: '00401000', name: 'whoami', href: '/#whoami' },
-  { addr: '00401140', name: 'disclosures', href: '/#disclosures' },
-  { addr: '00401300', name: 'hall_of_fame', href: '/#hall_of_fame' },
-  { addr: '00401480', name: 'tools', href: '/#tools' },
-  { addr: '00401520', name: 'writeups', href: '/writeups/' },
-  { addr: '00401600', name: 'connect', href: '/#connect' },
+// Debugger sections, in step order. `id` is the anchor on the home page.
+export const sections = [
+  { id: 'whoami', addr: '00401000' },
+  { id: 'disclosures', addr: '00401140' },
+  { id: 'registers', addr: '00401300' },
+  { id: 'hall_of_fame', addr: '00401380' },
+  { id: 'writeups', addr: '00401520' },
+  { id: 'connect', addr: '00401600' },
 ];

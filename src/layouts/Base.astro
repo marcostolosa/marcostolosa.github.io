@@ -1,13 +1,16 @@
 ---
 import '../styles/global.css';
-import { functions, links, profile } from '../data/profile';
+import { profile } from '../data/profile';
 
 interface Props {
   title: string;
   description: string;
-  current?: string;
+  /** Function name shown in the toolbar state, e.g. "whoami" */
+  where?: string;
+  /** Home page only: enables Step / Run debugger controls */
+  debugger?: boolean;
 }
-const { title, description, current } = Astro.props;
+const { title, description, where = 'whoami', debugger: dbg = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <!doctype html>
@@ -18,7 +21,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#17191e" />
+    <meta name="theme-color" content="#0f1013" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -28,94 +31,157 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <div class="shell">
-      <aside class="rail" aria-label="Site">
-        <a class="brand" href="/">{profile.handle.toUpperCase()}<span class="a">.bin</span></a>
-        <p class="c">; Functions</p>
-        <nav aria-label="Sections">
-          <ul>
-            {functions.map((f) => (
-              <li>
-                <a href={f.href} aria-current={current === f.name ? 'page' : undefined}>
-                  <span class="a">{f.addr}</span>{f.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <p class="c xr-t">; XREFS</p>
-        <ul class="xr">
-          {links.slice(0, 4).map((l) => <li><a href={l.href} rel="me">{l.label}</a></li>)}
-        </ul>
-      </aside>
 
-      <header class="mbar">
-        <a class="brand" href="/">{profile.handle.toUpperCase()}<span class="a">.bin</span></a>
-        <nav aria-label="Sections (mobile)">
-          <a href="/#disclosures">disclosures</a>
-          <a href="/writeups/">writeups</a>
-          <a href="/#connect">connect</a>
-        </nav>
-      </header>
+    <header class="tb">
+      <a class="brand" href="/" translate="no">{profile.handle.toUpperCase()}<span>.dbg</span></a>
+      <div class="tools" role="toolbar" aria-label="Debugger controls">
+        {dbg ? (
+          <button type="button" id="run" title="Run to connect() (F9)">
+            <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z" fill="currentColor" /></svg>
+            Run <kbd>F9</kbd>
+          </button>
+          <button type="button" id="step" title="Step to the next section (F8 or n)">
+            <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5h8M6 1.5 9.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
+            Step <kbd>F8</kbd>
+          </button>
+        ) : (
+          <a class="tbtn" href="/">
+            <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M11 5H3M6 1.5 2.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
+            whoami()
+          </a>
+        )}
+        <a class="tbtn" href="/writeups/">Writeups</a>
+      </div>
+      <p class="state" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="lbl">Paused in</span> <b id="where">{where}()</b>
+      </p>
+    </header>
 
-      <main id="main">
-        <slot />
-      </main>
-    </div>
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="status" translate="no">
+      <span id="st-where">Paused · {where}()</span>
+      <span>tr0p.bin · x64</span>
+      <span class="c">; break → understand → automate → teach</span>
+      <span class="c auth">; authorized targets only</span>
+    </footer>
 
     <script>
-      // IDA-style xref highlight: hovering or focusing a symbol lights up every occurrence.
+      // --- xref highlight: hovering or focusing a symbol lights up every occurrence (IDA-style).
       const groups = new Map<string, Element[]>();
-      document.querySelectorAll('[data-sym]').forEach((el) => {
-        const k = (el as HTMLElement).dataset.sym!;
+      document.querySelectorAll<HTMLElement>('[data-sym]').forEach((el) => {
+        const k = el.dataset.sym!;
         if (!groups.has(k)) groups.set(k, []);
         groups.get(k)!.push(el);
       });
-      const set = (el: Element, on: boolean) =>
-        groups.get((el as HTMLElement).dataset.sym!)?.forEach((n) => n.classList.toggle('xref', on));
+      const lit = (el: HTMLElement, on: boolean) =>
+        groups.get(el.dataset.sym!)?.forEach((n) => n.classList.toggle('xref', on));
       groups.forEach((els) =>
         els.forEach((el) => {
-          el.addEventListener('pointerenter', () => set(el, true));
-          el.addEventListener('pointerleave', () => set(el, false));
-          el.addEventListener('focusin', () => set(el, true));
-          el.addEventListener('focusout', () => set(el, false));
+          const h = el as HTMLElement;
+          h.addEventListener('pointerenter', () => lit(h, true));
+          h.addEventListener('pointerleave', () => lit(h, false));
+          h.addEventListener('focusin', () => lit(h, true));
+          h.addEventListener('focusout', () => lit(h, false));
         }),
       );
+
+      // --- debugger controls (home page only)
+      const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
+      if (steps.length) {
+        const whereEl = document.getElementById('where')!;
+        const stWhere = document.getElementById('st-where')!;
+        const nextEl = document.getElementById('next-hint');
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let cur = 0;
+
+        const paint = (i: number) => {
+          cur = i;
+          const name = steps[i].dataset.step!;
+          whereEl.textContent = `${name}()`;
+          stWhere.textContent = `Paused · ${name}()`;
+          steps.forEach((s, j) => s.toggleAttribute('data-ip', j === i));
+          if (nextEl) nextEl.textContent = `${steps[(i + 1) % steps.length].dataset.step}()`;
+        };
+
+        let lockUntil = 0;
+        const go = (i: number) => {
+          const t = steps[i];
+          lockUntil = performance.now() + (reduce ? 100 : 1000);
+          t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+          const focusable = t.querySelector<HTMLElement>('h1, h2') ?? t;
+          focusable.setAttribute('tabindex', '-1');
+          focusable.focus({ preventScroll: true });
+          paint(i);
+        };
+        const step = () => go((cur + 1) % steps.length);
+        const run = () => {
+          go(steps.length - 1);
+          document.getElementById('mail')?.focus({ preventScroll: true });
+        };
+
+        document.getElementById('step')?.addEventListener('click', step);
+        document.getElementById('run')?.addEventListener('click', run);
+        addEventListener('keydown', (e) => {
+          const tag = (e.target as HTMLElement).tagName;
+          if (e.altKey || e.ctrlKey || e.metaKey || tag === 'INPUT' || tag === 'TEXTAREA') return;
+          if (e.key === 'F8' || e.key === 'n') { e.preventDefault(); step(); }
+          else if (e.key === 'F9') { e.preventDefault(); run(); }
+        });
+
+        // Track the section in view so Step always continues from where the visitor is.
+        const visible = new Set<HTMLElement>();
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => (e.isIntersecting ? visible.add(e.target as HTMLElement) : visible.delete(e.target as HTMLElement)));
+            if (performance.now() < lockUntil || !visible.size) return;
+            const top = [...visible].sort((a, b) => steps.indexOf(a) - steps.indexOf(b))[0];
+            paint(steps.indexOf(top));
+          },
+          { rootMargin: '-64px 0px -60% 0px' },
+        );
+        steps.forEach((s) => io.observe(s));
+        paint(0);
+      }
     </script>
 
     <style>
-      .shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
-      .rail {
-        background: var(--gutter); border-right: 1px solid var(--line);
-        padding: 28px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto; font-size: 13px;
+      .tb {
+        position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 18px;
+        padding: 10px var(--pad); background: color-mix(in srgb, var(--gutter) 92%, transparent);
+        backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); font-size: 13px;
       }
-      .brand { display: inline-block; font: 800 18px/1 var(--disp); color: var(--fg-hi); text-decoration: none; letter-spacing: 0.02em; margin: 0 8px 28px; }
-      .brand .a { font: 400 13px/1 var(--mono); margin-left: 2px; }
-      .rail .c { margin: 0 8px 10px; }
-      .rail ul { list-style: none; padding: 0; }
-      .rail nav a {
-        display: block; color: var(--fg); text-decoration: none; padding: 5px 8px; border-radius: 3px;
-        transition: background-color 180ms var(--ease), color 180ms var(--ease);
+      .brand { flex: none; font: 800 17px/1 var(--disp); color: var(--fg-hi); text-decoration: none; letter-spacing: 0.02em; }
+      .brand span { font: 400 13px/1 var(--mono); color: var(--addr); margin-left: 1px; }
+      .tools { display: flex; gap: 6px; flex: none; }
+      .tools button, .tbtn {
+        all: unset; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 4px;
+        color: var(--fg); border: 1px solid var(--line); font: 500 12.5px/1 var(--mono);
+        transition: background-color 180ms var(--ease), border-color 180ms var(--ease), color 180ms var(--ease);
       }
-      .rail nav a .a { margin-right: 10px; }
-      .rail nav a:hover { background: var(--panel); color: var(--kw); }
-      .rail nav a[aria-current='page'] { background: var(--hl); color: var(--kw); }
-      .xr-t { margin-top: 32px !important; }
-      .xr li { padding: 2px 8px; }
-      .mbar { display: none; }
-      main { min-width: 0; }
+      .tools button:hover, .tbtn:hover { background: var(--panel-2); border-color: var(--addr); color: var(--fg-hi); }
+      .tools button:focus-visible, .tbtn:focus-visible { outline: 2px solid var(--kw); outline-offset: 2px; }
+      .tools button:active { transform: translateY(1px); }
+      kbd { font: 500 11px/1 var(--mono); padding: 3px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim); }
+      .state { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--dim); white-space: nowrap; min-width: 0; overflow: hidden; }
+      .state b { overflow: hidden; text-overflow: ellipsis; }
+      .state b { color: var(--kw); font-weight: 500; }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--kw); }
 
-      @media (max-width: 900px) {
-        .shell { grid-template-columns: 1fr; }
-        .rail { display: none; }
-        .mbar {
-          display: flex; justify-content: space-between; align-items: center; gap: 12px;
-          padding: 14px var(--pad); border-bottom: 1px solid var(--line); background: var(--gutter);
-          position: sticky; top: 0; z-index: 5;
-        }
-        .mbar .brand { margin: 0; font-size: 16px; }
-        .mbar nav { display: flex; gap: 14px; font-size: 13px; }
-        .mbar nav a { color: var(--fg); text-decoration: none; padding: 6px 0; }
+      .status {
+        display: flex; flex-wrap: wrap; gap: 6px 24px; padding: 10px var(--pad); background: var(--gutter);
+        border-top: 1px solid var(--line); font-size: 12px; color: var(--addr);
+      }
+      .status .auth { margin-left: auto; }
+
+      @media (max-width: 760px) {
+        .tb { gap: 10px; }
+        .tools #run, .tools kbd, .state .lbl { display: none; }
+        .tb:not(:has(#step)) .state { display: none; }
+        .status .auth { margin-left: 0; }
       }
     </style>
   </body>

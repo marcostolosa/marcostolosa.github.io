@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { profile } from '../data/profile';
+import { defaultLang, htmlLang, langLabel, langName, localize, locales, tr, ui, unlocalize, type Lang } from '../i18n/ui';
 
 interface Props {
   title: string;
@@ -9,12 +10,18 @@ interface Props {
   where?: string;
   /** Home page only: enables Step / Run debugger controls */
   debugger?: boolean;
+  lang?: Lang;
+  /** Per-locale URL of this page. Defaults to the same path in each locale; pass when a translation does not exist. */
+  alternates?: Partial<Record<Lang, string>>;
 }
-const { title, description, where = 'whoami', debugger: dbg = false } = Astro.props;
+const { title, description, where = 'whoami', debugger: dbg = false, lang = defaultLang, alternates } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const base = unlocalize(Astro.url.pathname);
+const alt = Object.fromEntries(locales.map((l) => [l, alternates?.[l] ?? localize(base, l)])) as Record<Lang, string>;
+const t = (k: keyof typeof ui) => tr(ui[k], lang);
 ---
 <!doctype html>
-<html lang="en">
+<html lang={htmlLang[lang]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -27,46 +34,71 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary" />
+    <meta property="og:locale" content={htmlLang[lang].replace('-', '_')} />
+    {!alternates && locales.map((l) => <link rel="alternate" hreflang={htmlLang[l]} href={new URL(alt[l], Astro.site)} />)}
+    {!alternates && <link rel="alternate" hreflang="x-default" href={new URL(alt.en, Astro.site)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      // First visit to the English home from a Portuguese browser: offer PT-BR once. An explicit choice always wins.
+      try {
+        var pref = localStorage.getItem('lang');
+        if (!pref && location.pathname === '/' && /^pt\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '')) {
+          localStorage.setItem('lang', 'pt-br');
+          location.replace('/pt-br/' + location.hash);
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">{t('skip')}</a>
 
     <header class="tb">
-      <a class="brand" href="/" translate="no">{profile.handle.toUpperCase()}<span>.dbg</span></a>
-      <div class="tools" role="toolbar" aria-label="Debugger controls">
+      <a class="brand" href={localize('/', lang)} translate="no">{profile.handle.toUpperCase()}<span>.dbg</span></a>
+      <div class="tools" role="toolbar" aria-label={t('controls')}>
         {dbg ? (
-          <button type="button" id="run" title="Run to connect() (F9)">
+          <button type="button" id="run" title={t('runTitle')}>
             <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z" fill="currentColor" /></svg>
-            Run <kbd>F9</kbd>
+            {t('run')} <kbd>F9</kbd>
           </button>
-          <button type="button" id="step" title="Step to the next section (F8 or n)">
+          <button type="button" id="step" title={t('stepTitle')}>
             <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5h8M6 1.5 9.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
-            Step <kbd>F8</kbd>
+            {t('step')} <kbd>F8</kbd>
           </button>
         ) : (
-          <a class="tbtn" href="/">
+          <a class="tbtn" href={localize('/', lang)}>
             <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M11 5H3M6 1.5 2.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
             whoami()
           </a>
         )}
-        <a class="tbtn" href="/writeups/">Writeups</a>
+        <a class="tbtn" href={localize('/writeups/', lang)}>{t('writeups')}</a>
       </div>
-      <p class="state" aria-live="polite">
+      <p class="state">
         <span class="dot" aria-hidden="true"></span>
-        <span class="lbl">Paused in</span> <b id="where">{where}()</b>
+        <span class="lbl">{t('pausedIn')}</span> <b id="where" translate="no">{where}()</b>
       </p>
+      <nav class="lang" aria-label={t('language')}>
+        {locales.map((l) => (
+          <a
+            href={alt[l]}
+            hreflang={htmlLang[l]}
+            lang={htmlLang[l]}
+            aria-current={l === lang ? 'true' : undefined}
+            title={langName[l]}
+            data-lang={l}
+          ><span class="visually-hidden">{langName[l]}</span><span aria-hidden="true">{langLabel[l]}</span></a>
+        ))}
+      </nav>
     </header>
 
     <main id="main">
       <slot />
     </main>
 
-    <footer class="status" translate="no">
-      <span id="st-where">Paused · {where}()</span>
+    <footer class="status" translate="no" data-paused={t('paused')}>
+      <span id="st-where">{t('paused')} · {where}()</span>
       <span>tr0p.bin · x64</span>
-      <span class="c">; break → understand → automate → teach</span>
-      <span class="c auth">; authorized targets only</span>
+      <span class="c">; {t('method')}</span>
+      <span class="c auth">; {t('authorized')}</span>
     </footer>
 
     <script>
@@ -89,6 +121,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         }),
       );
 
+      // --- language switch: remember the explicit choice
+      document.querySelectorAll<HTMLAnchorElement>('.lang a[data-lang]').forEach((a) =>
+        a.addEventListener('click', () => {
+          try { localStorage.setItem('lang', a.dataset.lang!); } catch {}
+        }),
+      );
+
       // --- debugger controls (home page only)
       const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
       if (steps.length) {
@@ -102,7 +141,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           cur = i;
           const name = steps[i].dataset.step!;
           whereEl.textContent = `${name}()`;
-          stWhere.textContent = `Paused · ${name}()`;
+          stWhere.textContent = `${stWhere.parentElement!.dataset.paused} · ${name}()`;
           steps.forEach((s, j) => s.toggleAttribute('data-ip', j === i));
           if (nextEl) nextEl.textContent = `${steps[(i + 1) % steps.length].dataset.step}()`;
         };
@@ -111,7 +150,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         const go = (i: number) => {
           const t = steps[i];
           lockUntil = performance.now() + (reduce ? 100 : 1000);
-          t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+          // Absolute target: a new Step cleanly replaces a smooth scroll still in flight.
+          const bar = document.querySelector<HTMLElement>('.tb')?.offsetHeight ?? 0;
+          const top = Math.min(t.getBoundingClientRect().top + scrollY - bar, document.documentElement.scrollHeight - innerHeight);
+          scrollTo({ top, behavior: reduce ? 'instant' : 'smooth' });
           const focusable = t.querySelector<HTMLElement>('h1, h2') ?? t;
           focusable.setAttribute('tabindex', '-1');
           focusable.focus({ preventScroll: true });
@@ -170,6 +212,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       .state b { overflow: hidden; text-overflow: ellipsis; }
       .state b { color: var(--kw); font-weight: 500; }
       .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--kw); }
+
+      .lang { display: flex; flex: none; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+      .lang a {
+        display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 30px; padding: 0 8px;
+        font: 600 12px/1 var(--mono); letter-spacing: 0.04em; color: var(--dim); text-decoration: none;
+        transition: background-color 180ms var(--ease), color 180ms var(--ease);
+      }
+      .lang a + a { border-left: 1px solid var(--line); }
+      .lang a:hover { background: var(--panel-2); color: var(--fg-hi); }
+      .lang a[aria-current='true'] { background: var(--hl); color: var(--kw); }
+      .lang a:focus-visible { outline-offset: -2px; }
 
       .status {
         display: flex; flex-wrap: wrap; gap: 6px 24px; padding: 10px var(--pad); background: var(--gutter);

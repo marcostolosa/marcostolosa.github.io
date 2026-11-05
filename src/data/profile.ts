@@ -1,12 +1,15 @@
 // Single source of truth for the home page. Every entry must link to a public record.
+// Bilingual fields use { en, 'pt-br' }; identifiers, product names and vuln classes stay in English.
+import type { T } from '../i18n/ui';
 
 export const profile = {
   name: 'Marcos Tolosa',
   handle: 'Tr0p',
-  base: 'Rio de Janeiro, BR',
-  method: 'Break it, understand it, automate it, teach it.',
-  lede:
-    'Red teamer, exploit developer and reverse engineer. I take every finding apart to its root cause, turn it into tooling, and write it up so you can follow.',
+  base: { en: 'Rio de Janeiro, BR', 'pt-br': 'Rio de Janeiro, BR' } as T,
+  lede: {
+    en: 'Red teamer, exploit developer and reverse engineer. I take every finding apart to its root cause, turn it into tooling, and write it up so you can follow.',
+    'pt-br': 'Red teamer, exploit developer e engenheiro reverso. Desmonto cada achado até a causa raiz, transformo em ferramenta e documento pra você conseguir seguir.',
+  } as T,
   email: 'marcos.tolosa@owasp.org',
 };
 
@@ -15,7 +18,7 @@ export type Disclosure = {
   href: string;
   sym: string; // target symbol, used for xref highlighting
   cls: string;
-  note?: string;
+  note?: T;
   sev: string;
   crit?: boolean;
 };
@@ -26,7 +29,7 @@ export const disclosures: Disclosure[] = [
     href: 'https://aisle.com/blog/cve-2025-10230-the-cvss-100-vulnerability-that-hid-in-samba-for-13-years',
     sym: 'samba',
     cls: 'OS command injection',
-    note: 'hidden for 13 years',
+    note: { en: 'hidden for 13 years', 'pt-br': 'escondida por 13 anos' },
     sev: '10.0',
     crit: true,
   },
@@ -50,7 +53,7 @@ export const disclosures: Disclosure[] = [
     href: 'https://bugcrowd.com/engagements/ncua-vdp/crowdstream',
     sym: 'us_gov',
     cls: 'unauthenticated OS command injection',
-    note: 'federal infrastructure',
+    note: { en: 'federal infrastructure', 'pt-br': 'infraestrutura federal' },
     sev: 'P1',
     crit: true,
   },
@@ -59,7 +62,7 @@ export const disclosures: Disclosure[] = [
     href: 'https://yeswehack.com/programs/digital-flanders-vulnerability-disclosure-program#program-activity',
     sym: 'be_gov',
     cls: 'blind XXE → internal SSRF',
-    note: 'reached Tomcat Manager',
+    note: { en: 'reached Tomcat Manager', 'pt-br': 'chegou ao Tomcat Manager' },
     sev: 'HIGH',
   },
   {
@@ -67,7 +70,7 @@ export const disclosures: Disclosure[] = [
     href: 'https://gitlab.com/samba-team/samba/-/merge_requests/4240/diffs?commit_id=caa2ac41bf25c524cbe5079a450d87f30a25b0a2',
     sym: 'samba',
     cls: 'buffer overflow',
-    note: 'unsafe sprintf() in the InfiniBand wrapper',
+    note: { en: 'unsafe sprintf() in the InfiniBand wrapper', 'pt-br': 'sprintf() inseguro no wrapper InfiniBand' },
     sev: 'MEM',
   },
 ];
@@ -81,36 +84,48 @@ export const hallOfFame = {
     'EPA',
     'U.S. Fish & Wildlife Service',
   ],
-  summary: '6× U.S. Government · 15 valid · 93.75% accuracy',
-  also: 'Digital Flanders (Belgian Government)',
+  summary: {
+    en: '6× U.S. Government · 15 valid · 93.75% accuracy',
+    'pt-br': '6× Governo dos EUA · 15 válidas · 93,75% de precisão',
+  } as T,
+  also: { en: 'Digital Flanders (Belgian Government)', 'pt-br': 'Digital Flanders (Governo da Bélgica)' } as T,
   record: 'https://bugcrowd.com/h/Tr0p',
 };
 
-export const tools = [
+export const tools: { name: string; href: string; repo?: string; desc: T; tags: string }[] = [
   {
     name: 'MANW-NG',
     href: '/manw-ng.html',
     repo: 'https://github.com/marcostolosa/manw-ng',
-    desc: 'Win32/NTAPI docs scraper plus a live ctypes execution engine, built for reversers who never leave the terminal.',
+    desc: {
+      en: 'Win32/NTAPI docs scraper plus a live ctypes execution engine, built for reversers who never leave the terminal.',
+      'pt-br': 'Scraper de docs Win32/NTAPI com engine de execução ctypes ao vivo, feito pra quem reversa sem sair do terminal.',
+    },
     tags: 'python · windows internals',
   },
   {
     name: 'OCRack',
     href: '/ocrack.html',
     repo: 'https://github.com/marcostolosa/OCRack',
-    desc: 'Translate and OCR any PDF while keeping its layout. PaddleOCR, PyMuPDF and an LLM.',
+    desc: {
+      en: 'Translate and OCR any PDF while keeping its layout. PaddleOCR, PyMuPDF and an LLM.',
+      'pt-br': 'Traduz e faz OCR de qualquer PDF mantendo o layout. PaddleOCR, PyMuPDF e um LLM.',
+    },
     tags: 'python · ocr · ai',
   },
   {
     name: 'ARCTAX',
     href: 'https://github.com/marcostolosa/arctax',
-    desc: 'Prompt-injection research generator with an ML classifier and a local LLM.',
+    desc: {
+      en: 'Prompt-injection research generator with an ML classifier and a local LLM.',
+      'pt-br': 'Gerador de pesquisa em prompt injection com classificador de ML e LLM local.',
+    },
     tags: 'ai red teaming',
   },
   {
     name: 'REload.Me',
     href: 'https://github.com/mindsecurity/REload.Me',
-    desc: 'A simpler way to learn reverse engineering.',
+    desc: { en: 'A simpler way to learn reverse engineering.', 'pt-br': 'Um jeito mais simples de aprender engenharia reversa.' },
     tags: 're · education',
   },
 ];
@@ -130,12 +145,5 @@ export const links = [
   { label: 'discord', href: 'https://discord.gg/T9RVG3re2J' },
 ];
 
-// Debugger sections, in step order. `id` is the anchor on the home page.
-export const sections = [
-  { id: 'whoami', addr: '00401000' },
-  { id: 'disclosures', addr: '00401140' },
-  { id: 'registers', addr: '00401300' },
-  { id: 'hall_of_fame', addr: '00401380' },
-  { id: 'writeups', addr: '00401520' },
-  { id: 'connect', addr: '00401600' },
-];
+/** Home page sections in Step order; ids are the anchors. Tests import this list. */
+export const stepSections = ['whoami', 'disclosures', 'hall_of_fame', 'writeups', 'connect'] as const;

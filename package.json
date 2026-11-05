@@ -6,11 +6,18 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "build:test": "WRITEUP_FIXTURES=1 astro build",
+    "test": "playwright test",
+    "test:a11y": "playwright test tests/a11y.spec.ts"
   },
   "dependencies": {
     "@fontsource-variable/red-hat-display": "5.3.0",
     "@fontsource-variable/red-hat-mono": "5.3.0",
     "astro": "7.4.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.63.0"
   }
 }

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { localize, type Lang } from '../../i18n/ui';
 
 export async function getStaticPaths() {
   const writeups = await getCollection('writeups', (w) => !w.data.draft);
@@ -10,24 +11,29 @@ const { w } = Astro.props;
 const { Content, headings } = await render(w);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const toc = headings.filter((h) => h.depth === 2);
+const lang = w.data.lang as Lang;
+const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
+const self = `/writeups/${w.id}/`;
+// Articles exist in one language; the switch leads to the other language's writeup index.
+const alternates = { en: lang === 'en' ? self : localize('/writeups/', 'en'), 'pt-br': lang === 'pt-br' ? self : localize('/writeups/', 'pt-br') };
 ---
-<Base title={`${w.data.title} — Tr0p`} description={w.data.summary} where="writeups">
+<Base title={`${w.data.title} — Tr0p`} description={w.data.summary} where="writeups" lang={lang} alternates={alternates}>
   <article class="pane">
     <header>
-      <p class="c">; decompiled · {fmt(w.data.date)}{w.data.target && <> · target: {w.data.target}</>}</p>
+      <p class="c">; {L('decompiled', 'decompilado')} · {fmt(w.data.date)}{w.data.target && <> · {L('target', 'alvo')}: {w.data.target}</>}</p>
       <h1>{w.data.title}</h1>
       <p class="lede">{w.data.summary}</p>
       {(w.data.cve || w.data.severity || w.data.tags.length > 0) && (
-        <dl class="facts">
+        <dl class="facts" translate="no">
           {w.data.cve && <div><dt>cve</dt><dd>{w.data.cve}</dd></div>}
-          {w.data.severity && <div><dt>severity</dt><dd>{w.data.severity}</dd></div>}
+          {w.data.severity && <div><dt>{L('severity', 'severidade')}</dt><dd>{w.data.severity}</dd></div>}
           {w.data.tags.length > 0 && <div><dt>tags</dt><dd>{w.data.tags.join(' · ')}</dd></div>}
         </dl>
       )}
     </header>
 
     {toc.length > 2 && (
-      <nav class="toc" aria-label="On this page">
+      <nav class="toc" aria-label={L('On this page', 'Nesta página')}>
         <p class="c">; locals</p>
         <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
       </nav>
@@ -39,7 +45,7 @@ const toc = headings.filter((h) => h.depth === 2);
 
     <footer class="end">
       <p class="c">; ret</p>
-      <a href="/writeups/">← all writeups</a>
+      <a href={localize('/writeups/', lang)}>← {L('all writeups', 'todos os writeups')}</a>
     </footer>
   </article>
 </Base>

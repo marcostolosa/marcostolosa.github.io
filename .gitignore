@@ -6,3 +6,5 @@ dist/
 .impeccable/questions/
 .impeccable/questions-payload.json
 .impeccable/review/
+test-results/
+playwright-report/

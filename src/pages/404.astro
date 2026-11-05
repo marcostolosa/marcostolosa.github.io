@@ -1,11 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="404 — Tr0p" description="Page not found." where="sub_404">
+<Base title="404 — Tr0p" description="Page not found. Página não encontrada." where="sub_404" alternates={{ en: '/', 'pt-br': '/pt-br/' }}>
   <section class="nf">
-    <p class="c">; sub_404 — unresolved xref</p>
+    <p class="c">; sub_404 · unresolved xref</p>
     <h1>Bad address.</h1>
     <p>Nothing is mapped here. Jump back to <a href="/">whoami()</a> or the <a href="/writeups/">writeups</a>.</p>
+    <p lang="pt-BR">Nada mapeado aqui. Volte para <a href="/pt-br/">whoami()</a> ou para os <a href="/pt-br/writeups/">writeups</a>.</p>
   </section>
 </Base>
 <style>

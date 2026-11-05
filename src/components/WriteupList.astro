@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { langLabel, localize, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
+
+const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base
+  lang={lang}
+  title={L('Writeups — Marcos Tolosa (Tr0p)', 'Writeups — Marcos Tolosa (Tr0p)')}
+  description={L(
+    'Technical writeups on vulnerability research, exploit development and reverse engineering by Marcos Tolosa (Tr0p).',
+    'Writeups técnicos de pesquisa de vulnerabilidades, desenvolvimento de exploits e engenharia reversa por Marcos Tolosa (Tr0p).',
+  )}
+  where="writeups"
+>
+  <header class="head">
+    <p class="c">; sub_401520 writeups() · {writeups.length} {L('entries', 'entradas')}</p>
+    <h1>Writeups</h1>
+    <p class="lede">{L(
+      'Root cause first, then the exploit, then how to find the next one. Step by step, nothing skipped.',
+      'Primeiro a causa raiz, depois o exploit, depois como achar o próximo. Passo a passo, sem pular nada.',
+    )}</p>
+  </header>
+
+  {writeups.length > 0 ? (
+    <ol class="list">
+      {writeups.map((w) => (
+        <li>
+          <a href={`/writeups/${w.id}/`} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>
+            <span class="meta a" translate="no">{fmt(w.data.date)} · {langLabel[w.data.lang]}{w.data.cve && <> · {w.data.cve}</>}{w.data.severity && <> · {w.data.severity}</>}</span>
+            <span class="t">{w.data.title}</span>
+            <span class="sum">{w.data.summary}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <div class="empty">
+      <p><span class="c">; {L('nothing published here yet.', 'nada publicado aqui ainda.')}</span></p>
+      <p>{L('Until the first writeup lands, the coordinated advisories are the primary sources: start at', 'Até o primeiro writeup sair, os advisories coordenados são as fontes primárias: comece em')} <a href={localize('/#disclosures', lang)}>disclosures()</a>.</p>
+    </div>
+  )}
+</Base>
+
+<style>
+  .head { padding: clamp(48px, 9vh, 96px) var(--pad) 40px; border-bottom: 1px solid var(--line); }
+  h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/1 var(--disp); color: var(--fg-hi); letter-spacing: -0.035em; margin: 16px 0 16px; }
+  .lede { font: 500 1.2rem/1.5 var(--disp); max-width: 46ch; }
+  .list { list-style: none; padding: 0; }
+  .list a {
+    display: grid; gap: 6px; padding: 26px var(--pad); border-bottom: 1px solid var(--line);
+    text-decoration: none; color: var(--fg); transition: background-color 180ms var(--ease);
+  }
+  .list a:hover { background: var(--hl); }
+  .meta { font-size: 12.5px; }
+  .t { font: 800 1.5rem/1.2 var(--disp); color: var(--fg-hi); letter-spacing: -0.015em; text-wrap: balance; }
+  .sum { font: 400 1.05rem/1.55 var(--disp); color: var(--dim); max-width: 68ch; }
+  .empty { padding: 40px var(--pad); color: var(--dim); display: grid; gap: 8px; max-width: 80ch; }
+</style>

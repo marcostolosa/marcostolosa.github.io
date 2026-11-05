@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="404 — Tr0p" description="Page not found.">
+  <section class="nf">
+    <p class="c">; sub_404 — unresolved xref</p>
+    <h1>Bad address.</h1>
+    <p>Nothing is mapped here. Jump back to <a href="/">whoami()</a> or the <a href="/writeups/">writeups</a>.</p>
+  </section>
+</Base>
+<style>
+  .nf { padding: clamp(56px, 12vh, 120px) var(--pad); display: grid; gap: 16px; }
+  h1 { font: 900 clamp(2.6rem, 7vw, 5rem)/1 var(--disp); color: var(--fg-hi); letter-spacing: -0.035em; }
+</style>

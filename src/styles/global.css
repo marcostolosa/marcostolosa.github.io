@@ -1,0 +1,82 @@
+@import '@fontsource-variable/red-hat-display';
+@import '@fontsource-variable/red-hat-mono';
+
+:root {
+  color-scheme: dark;
+  --bg: #17191e;
+  --panel: #1e2128;
+  --panel-2: #23262e;
+  --line: #2b2f38;
+  --gutter: #131519;
+  --fg: #dad6cb;
+  --fg-hi: #f2eee3;
+  --dim: #9aa1ad;
+  --addr: #727a8a;
+  --kw: #e8b861;
+  --str: #a6c98e;
+  --num: #e0a283;
+  --cmt: #8796ad;
+  --sym: #8cbde8;
+  --crit: #ec7b70;
+  --hl: rgba(232, 184, 97, 0.14);
+  --hl-strong: rgba(232, 184, 97, 0.28);
+  --mono: 'Red Hat Mono Variable', ui-monospace, monospace;
+  --disp: 'Red Hat Display Variable', system-ui, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --rail: 240px;
+  --pad: clamp(20px, 5vw, 64px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 15px/1.7 var(--mono);
+  scrollbar-color: var(--line) var(--bg);
+  scroll-padding-top: 24px;
+  -webkit-text-size-adjust: 100%;
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { background: var(--bg); min-height: 100vh; }
+
+::selection { background: var(--kw); color: var(--bg); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; border: 2px solid var(--bg); }
+
+a { color: var(--sym); text-decoration: underline dotted 1px; text-underline-offset: 0.25em; }
+a:hover { color: var(--fg-hi); text-decoration-style: solid; }
+:focus-visible { outline: 2px solid var(--kw); outline-offset: 2px; border-radius: 2px; }
+
+.skip { position: absolute; left: -999px; top: 8px; background: var(--kw); color: var(--bg); padding: 8px 12px; z-index: 10; }
+.skip:focus { left: 8px; }
+
+/* listing tokens */
+.k { color: var(--kw); }
+.s { color: var(--str); }
+.n { color: var(--num); }
+.c { color: var(--cmt); }
+.a { color: var(--addr); font-variant-numeric: tabular-nums; }
+
+/* xref highlight: the signature interaction */
+[data-sym] { border-radius: 2px; transition: background-color 180ms var(--ease), box-shadow 180ms var(--ease); }
+[data-sym].xref { background: var(--hl-strong); box-shadow: 0 0 0 2px var(--hl-strong); }
+@media (prefers-reduced-motion: reduce) { [data-sym] { transition: none; } }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Shiki css-variables theme, mapped to the listing palette */
+:root {
+  --astro-code-foreground: var(--fg);
+  --astro-code-background: var(--gutter);
+  --astro-code-token-constant: var(--num);
+  --astro-code-token-string: var(--str);
+  --astro-code-token-comment: var(--cmt);
+  --astro-code-token-keyword: var(--kw);
+  --astro-code-token-parameter: var(--fg);
+  --astro-code-token-function: var(--sym);
+  --astro-code-token-string-expression: var(--str);
+  --astro-code-token-punctuation: var(--dim);
+  --astro-code-token-link: var(--sym);
+}

@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const writeups = await getCollection('writeups', (w) => !w.data.draft);
+  return writeups.map((w) => ({ params: { slug: w.id }, props: { w } }));
+}
+const { w } = Astro.props;
+const { Content, headings } = await render(w);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const toc = headings.filter((h) => h.depth === 2);
+---
+<Base title={`${w.data.title} — Tr0p`} description={w.data.summary} current="writeups">
+  <article class="pane">
+    <header>
+      <p class="c">; decompiled · {fmt(w.data.date)}{w.data.target && <> · target: {w.data.target}</>}</p>
+      <h1>{w.data.title}</h1>
+      <p class="lede">{w.data.summary}</p>
+      {(w.data.cve || w.data.severity || w.data.tags.length > 0) && (
+        <dl class="facts">
+          {w.data.cve && <div><dt>cve</dt><dd>{w.data.cve}</dd></div>}
+          {w.data.severity && <div><dt>severity</dt><dd>{w.data.severity}</dd></div>}
+          {w.data.tags.length > 0 && <div><dt>tags</dt><dd>{w.data.tags.join(' · ')}</dd></div>}
+        </dl>
+      )}
+    </header>
+
+    {toc.length > 2 && (
+      <nav class="toc" aria-label="On this page">
+        <p class="c">; locals</p>
+        <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+      </nav>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="end">
+      <p class="c">; ret</p>
+      <a href="/writeups/">← all writeups</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .pane { padding: clamp(48px, 9vh, 88px) var(--pad) 80px; max-width: calc(72ch + 2 * var(--pad) + 120px); }
+  h1 { font: 900 clamp(2.2rem, 5vw, 3.8rem)/1.02 var(--disp); color: var(--fg-hi); letter-spacing: -0.03em; margin: 16px 0; text-wrap: balance; }
+  .lede { font: 500 1.25rem/1.5 var(--disp); max-width: 60ch; }
+  .facts { display: flex; flex-wrap: wrap; gap: 6px 28px; margin-top: 24px; font-size: 13px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .facts div { display: flex; gap: 8px; }
+  .facts dt { color: var(--addr); }
+  .facts dd { color: var(--kw); }
+  .toc { margin-top: 32px; font-size: 14px; }
+  .toc ol { padding-left: 2.2em; color: var(--addr); }
+
+  .prose { margin-top: 40px; font: 400 1.125rem/1.75 var(--disp); color: var(--fg); max-width: 70ch; }
+  .prose :global(> * + *) { margin-top: 1.1em; }
+  .prose :global(h2) { font: 800 1.7rem/1.2 var(--disp); color: var(--fg-hi); letter-spacing: -0.02em; margin-top: 2.2em; }
+  .prose :global(h3) { font: 700 1.3rem/1.3 var(--disp); color: var(--fg-hi); margin-top: 1.8em; }
+  .prose :global(strong) { color: var(--fg-hi); }
+  .prose :global(:not(pre) > code) { font: 500 0.88em var(--mono); color: var(--kw); background: var(--panel); padding: 0.12em 0.36em; border-radius: 3px; }
+  .prose :global(pre) {
+    font: 400 14px/1.65 var(--mono); padding: 18px 20px; border-radius: 6px; overflow-x: auto;
+    border: 1px solid var(--line); margin-left: -20px; margin-right: -20px;
+  }
+  .prose :global(blockquote) { border-left: 2px solid var(--kw); padding-left: 18px; color: var(--dim); }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.4em; }
+  .prose :global(li + li) { margin-top: 0.4em; }
+  .prose :global(img) { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); }
+  .prose :global(table) { width: 100%; border-collapse: collapse; font: 400 14px/1.5 var(--mono); }
+  .prose :global(th), .prose :global(td) { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); }
+  .prose :global(hr) { border: 0; border-top: 1px solid var(--line); margin: 2.5em 0; }
+  .end { margin-top: 64px; display: grid; gap: 6px; }
+
+  @media (max-width: 900px) { .prose :global(pre) { margin-left: 0; margin-right: 0; } }
+</style>

@@ -125,7 +125,7 @@ test.describe('language switch', () => {
     await page.locator('.lang a[data-lang="en"]').click();
     await expect(page).toHaveURL(/\/$/);
     await page.goto('/');
-    await expect(page).toHaveURL(/localhost:4321\/$/);
+    await expect(page).toHaveURL(new URL('/', test.info().project.use.baseURL).href);
     await ctx.close();
   });
 
@@ -133,12 +133,19 @@ test.describe('language switch', () => {
     const ctx = await browser.newContext({ locale: 'en-US' });
     const page = await ctx.newPage();
     await page.goto('/');
-    await expect(page).toHaveURL(/localhost:4321\/$/);
+    await expect(page).toHaveURL(new URL('/', test.info().project.use.baseURL).href);
     await ctx.close();
   });
 });
 
-test('every internal link resolves', async ({ page, request }) => {
+// Status checks go through the browser (page.goto) so they follow the same network path as a visitor.
+test('legacy tool landing pages still resolve', async ({ page }) => {
+  for (const path of ['/ocrack.html', '/manw-ng.html', '/favicon.svg']) {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+  }
+});
+
+test('every internal link resolves', async ({ page }) => {
   const seen = new Set<string>();
   for (const p of pages) {
     await page.goto(p.path);
@@ -146,7 +153,6 @@ test('every internal link resolves', async ({ page, request }) => {
     hrefs.forEach((h) => seen.add(h.split('#')[0] || '/'));
   }
   for (const href of seen) {
-    const res = await request.get(href);
-    expect(res.status(), href).toBe(200);
+    expect((await page.goto(href))?.status(), href).toBe(200);
   }
 });

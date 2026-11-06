@@ -100,13 +100,14 @@ test.describe('language switch', () => {
     });
     await page.goto('/writeups/');
     await page.locator('.lang a[data-lang="pt-br"]').click();
-    await expect(page).toHaveURL(/\/pt-br\/writeups\/$/);
+    await expect(page).toHaveURL((url) => url.pathname === '/pt-br/writeups/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.locator('.lang a[data-lang="pt-br"]')).toHaveAttribute('aria-current', 'true');
     await expect(page.locator('a.skip')).toHaveText('Pular para o conteúdo');
 
     await page.locator('.lang a[data-lang="en"]').click();
-    await expect(page).toHaveURL(/\/writeups\/$/);
+    // Exact path: a /\/writeups\/$/ regex would also match /pt-br/writeups/ and pass before navigating.
+    await expect(page).toHaveURL((url) => url.pathname === '/writeups/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
     expect(await page.evaluate(() => localStorage.getItem('lang'))).toBe('en');
   });
@@ -131,7 +132,7 @@ test.describe('language switch', () => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/pt-br\/$/);
     await page.locator('.lang a[data-lang="en"]').click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL((url) => url.pathname === "/");
     await page.goto('/');
     await expect(page).toHaveURL(new URL('/', test.info().project.use.baseURL).href);
     await ctx.close();

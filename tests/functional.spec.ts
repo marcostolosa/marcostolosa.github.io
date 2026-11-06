@@ -90,6 +90,14 @@ test.describe('keyboard and focus', () => {
 
 test.describe('language switch', () => {
   test('EN ⇄ PT keeps the page and updates lang', async ({ page }) => {
+    // Strip module scripts from every HTML response: the choice must be remembered even when
+    // the visitor clicks before the page's module JS has run (seen in production).
+    await page.route('**/*', async (route) => {
+      if (route.request().resourceType() !== 'document') return route.continue();
+      const res = await route.fetch();
+      const body = (await res.text()).replace(/<script type="module"[\s\S]*?<\/script>/g, '');
+      await route.fulfill({ response: res, body });
+    });
     await page.goto('/writeups/');
     await page.locator('.lang a[data-lang="pt-br"]').click();
     await expect(page).toHaveURL(/\/pt-br\/writeups\/$/);

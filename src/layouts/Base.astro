@@ -47,6 +47,11 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
           location.replace('/pt-br/' + location.hash);
         }
       } catch (e) {}
+      // Remember an explicit language choice. Delegated from <head> so it works before any module script loads.
+      document.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest && e.target.closest('.lang a[data-lang]');
+        if (a) try { localStorage.setItem('lang', a.getAttribute('data-lang')); } catch (err) {}
+      }, true);
     </script>
   </head>
   <body>
@@ -118,13 +123,6 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
           h.addEventListener('pointerleave', () => lit(h, false));
           h.addEventListener('focusin', () => lit(h, true));
           h.addEventListener('focusout', () => lit(h, false));
-        }),
-      );
-
-      // --- language switch: remember the explicit choice
-      document.querySelectorAll<HTMLAnchorElement>('.lang a[data-lang]').forEach((a) =>
-        a.addEventListener('click', () => {
-          try { localStorage.setItem('lang', a.dataset.lang!); } catch {}
         }),
       );
 

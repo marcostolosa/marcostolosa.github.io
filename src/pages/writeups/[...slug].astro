@@ -14,8 +14,10 @@ const toc = headings.filter((h) => h.depth === 2);
 const lang = w.data.lang as Lang;
 const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 const self = `/writeups/${w.id}/`;
-// Articles exist in one language; the switch leads to the other language's writeup index.
-const alternates = { en: lang === 'en' ? self : localize('/writeups/', 'en'), 'pt-br': lang === 'pt-br' ? self : localize('/writeups/', 'pt-br') };
+const otherLang: Lang = lang === 'en' ? 'pt-br' : 'en';
+// Paired translations link to each other; without a pair the switch goes to that language's index.
+const other = w.data.pair ? `/writeups/${w.data.pair}/` : localize('/writeups/', otherLang);
+const alternates = { [lang]: self, [otherLang]: other } as Record<Lang, string>;
 ---
 <Base title={`${w.data.title} — Tr0p`} description={w.data.summary} where="writeups" lang={lang} alternates={alternates}>
   <article class="pane">
@@ -51,7 +53,7 @@ const alternates = { en: lang === 'en' ? self : localize('/writeups/', 'en'), 'p
 </Base>
 
 <style>
-  .pane { padding: clamp(48px, 9vh, 88px) var(--pad) 80px; max-width: calc(72ch + 2 * var(--pad) + 120px); }
+  .pane { padding: clamp(48px, 9vh, 88px) var(--pad) 80px; max-width: calc(72ch + 2 * var(--pad) + 120px); margin-inline: auto; }
   h1 { font: 900 clamp(2.2rem, 5vw, 3.8rem)/1.02 var(--disp); color: var(--fg-hi); letter-spacing: -0.03em; margin: 16px 0; text-wrap: balance; }
   .lede { font: 500 1.25rem/1.5 var(--disp); max-width: 60ch; }
   .facts { display: flex; flex-wrap: wrap; gap: 6px 28px; margin-top: 24px; font-size: 13px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }

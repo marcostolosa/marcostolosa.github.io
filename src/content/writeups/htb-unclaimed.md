@@ -5,6 +5,7 @@ date: 2026-11-10
 lang: pt-br
 target: "HTB Unclaimed (10.129.26.50)"
 tags: ["prompt-injection", "mssql", "windows", "privesc", "llm"]
+pair: htb-unclaimed-en
 draft: false
 ---
 

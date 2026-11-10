@@ -22,6 +22,7 @@ const writeups = defineCollection({
     cve: z.string().optional(),
     severity: z.string().optional(),
     tags: z.array(z.string()).default([]),
+    pair: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

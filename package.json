@@ -13,12 +13,13 @@
     "test:live": "playwright test"
   },
   "dependencies": {
-    "@fontsource-variable/red-hat-display": "5.3.0",
     "@fontsource-variable/red-hat-mono": "5.3.0",
-    "astro": "7.4.2"
+    "astro": "7.4.2",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@playwright/test": "1.63.0"
+    "@playwright/test": "1.63.0",
+    "@types/three": "^0.180.0"
   }
 }

@@ -1,5 +1,5 @@
 ---
-version: 1
+version: 2
 slug: "src-pages-index-astro"
 primary_target: "src/pages/index.astro"
 related_targets: ["src/pages/writeups/index.astro"]
@@ -7,22 +7,30 @@ related_targets: ["src/pages/writeups/index.astro"]
 
 # Surface brief — home (mindsecurity.org /)
 
-Scope: home page + writeups index/article template. Visitor mode: Persuade (clients first, recruiters second, community third). Primary action: email to open an engagement. Proof: six linkable disclosures, 6× U.S. Gov HoF, tools.
+Scope: home page + writeups index/article template + 404. Visitor mode: Persuade (clients first, recruiters second, community third). Primary action: email to open an engagement. Proof: six linkable disclosures, 6x U.S. Gov HoF, tools.
+
+Replaces v1 (debugger / disassembler world). The user asked for a pentest / red team / bug bounty / OSINT identity and explicitly not reverse engineering, with three.js-level visual ambition.
 
 ## Direction contract
 
-THESIS: The site is a binary under analysis. Sections are functions, links are xrefs, proof is a listing you can follow. Refuses the category default of a typing-terminal hero with neon green, badge rows and same-size project cards.
+THESIS: Run OSINT on me. The site is a link-analysis investigation whose subject is Tr0p himself; every claim is a node, every node opens the public source that proves it.
 
-OWN-WORLD: Warm graphite ground (#17191E), parchment-grey text, amber mnemonics, sage strings, slate comments, sky-blue symbols/xrefs; address gutter in dim grey. One display grotesk (Red Hat Display) for names and function titles; Red Hat Mono for listings, data and code only. Function sidebar with addresses, hairline separators, selection in amber. Writeups read as a decompiler pane: proportional body, mono only for code.
+OWN-WORLD: Night navy ground (#0b1226), never neutral black. Colour encodes entity type and nothing else: person white, vulnerability coral (#ff6b5e), target gold (#ffc857), account cyan (#5fd4e6), tool violet (#a998ff), writeup green (#97e08a). One family, Bricolage Grotesque Variable, condensed (wdth 75) and heavy for names and headings, regular width for reading. Red Hat Mono only for identifiers, hosts, dates and code.
 
-STORY: Visitor sees who and what in one line, sees the CVSS 10.0 finding immediately, understands every claim is a followable xref, and emails or reads a writeup.
+STORY: Visitor sees the name and a living graph, reads "you don't have to take my word for it", clicks a node, lands on a real advisory, and emails.
 
-FIRST VIEWPORT: A debugger paused at a breakpoint. Sticky toolbar (brand TR0P.dbg, Run F9 -> connect, Step F8 -> next section, Writeups, state 'Paused in whoami()'). Left CPU pane: breakpoint comment, name at display scale with Tr0p in amber, one-line method, primary action 'Open an engagement', then the disclosures listing with the instruction pointer on CVE-2025-10230 (10.0) and the next line pre-marked. Right column: Registers pane carrying the numbers (RIP = CVE-2025-10230 CVSS 10.0, RAX = 6 HoF, RBX = 15 valid, RCX = 93.75%), Stack pane carrying the tools. Log pane and status bar close the frame.
+FIRST VIEWPORT: three.js scene (src/scripts/osint-graph.ts). Subject node in a rotating wireframe cage at the centre of three range rings; findings, targets, accounts, tools and writeups around it; packets travel along edges; bloom; distant dust. Copy on the left, node inspector bottom right (type, name, description, linked nodes, source), prev/next to walk the graph by keyboard. Opens on CVE-2025-10230.
 
-FORM: Disassembler world (user-chosen over the assigned Declassified Dossier); surface structure 'debugger session', dealt lead (THE ROLL) of the surface round, candidate 4 of 7, locked by the user. seed:9d98c709b0bef3c2
+DATA: src/data/graph.ts builds the graph from src/data/profile.ts, so hero and sections cannot disagree. Layout is computed at build time (seeded), which also yields the inline SVG fallback shown before WebGL loads and when it is unavailable.
 
-Raises: from algorave-source-floor (declined) the next instruction is visibly queued before Step executes it; from nixie-laboratory-counter (declined) every quantity sits in a fixed-width tabular register.
+Signature interaction: select a node (click, linked-node chip, prev/next): the graph turns to face it, a reticle locks on, its edges and neighbours light up, the inspector shows the source. Motion grammar: one intro (the graph grows outwards from the subject by graph depth), slow idle rotation, exponential ease-out everywhere; reduced motion gets the final state with no rotation or packets.
 
-Signature interaction: Step/Run debugger control (F8/n steps the instruction pointer section by section, F9 runs to connect, status bar tracks the current function on scroll). Secondary: xref highlight — hovering/focusing any symbol highlights every other occurrence of that symbol on the page (as in IDA), e.g. "samba" lights up both Samba findings. Motion grammar: one caret blink in the hero (disabled under reduced motion), 180ms exponential ease-out on row highlight; nothing else animates.
+Quality floor: adaptive rendering (bloom, then resolution, then a few frames per second) so slow GPUs keep responsive input; canvas is aria-hidden and every fact in it is repeated in the sections below.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+BACKDROP: no flat ground anywhere. src/scripts/backdrop.ts draws a site-wide recon map in a fragment shader (domain-warped terrain, contour lines with index lines, grain) fixed behind every page. It takes the colour of the section being read (data-tint), slides with scroll and carries a soft light under the pointer. Reading pages run it at about half strength (Base `quiet`). Without WebGL the <html> gradient remains.
+
+SCROLL: on wide screens the graph scene is fixed behind the whole home page. Each section declares data-focus (a node type); the scene flies to that cluster, lights it, and drops out of focus (blur + low opacity) so the text stays the subject. Back at the top it returns to the interactive view. The scene canvas zeroes its alpha in a final pass, so it composites additively over the backdrop.
+
+EMPHASIS: the CVSS 10.0 row is set at display scale; it is the strongest proof on the page.
+
+HACKER PASS (user: "quero mais com cara de hacker"): the OWN-WORLD palette and type above are superseded. Ground is terminal black with a green cast (#050a08); phosphor green (#35f29a) is the voice (links, primary action, prompts); entity colours stay as type coding (vuln red #ff4d5e, target amber #ffb627, account cyan #3fd7ff, tool violet #c08bff, writeup green). One family: Red Hat Mono for everything. Shell prompts (tr0p@mindsecurity:~$ cmd) name the command each block answers and are aria-hidden; headings keep plain-language text. Backdrop adds glyph rain to the contour terrain; CRT scanlines sit over the page; the name decrypts on load and glitches every few seconds (off under reduced motion). The node inspector is a terminal window.

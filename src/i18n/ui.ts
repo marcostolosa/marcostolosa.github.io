@@ -21,16 +21,13 @@ export const langFromPath = (path: string): Lang => (/^\/pt-br(\/|$)/.test(path)
 
 export const ui = {
   skip: { en: 'Skip to content', 'pt-br': 'Pular para o conteúdo' },
-  controls: { en: 'Debugger controls', 'pt-br': 'Controles do debugger' },
-  run: { en: 'Run', 'pt-br': 'Run' },
-  runTitle: { en: 'Run to connect() (F9)', 'pt-br': 'Run até connect() (F9)' },
-  step: { en: 'Step', 'pt-br': 'Step' },
-  stepTitle: { en: 'Step to the next section (F8 or n)', 'pt-br': 'Avança para a próxima seção (F8 ou n)' },
+  nav: { en: 'Sections', 'pt-br': 'Seções' },
+  findings: { en: 'Findings', 'pt-br': 'Achados' },
+  tools: { en: 'Tools', 'pt-br': 'Ferramentas' },
   writeups: { en: 'Writeups', 'pt-br': 'Writeups' },
-  pausedIn: { en: 'Paused in', 'pt-br': 'Pausado em' },
-  paused: { en: 'Paused', 'pt-br': 'Pausado' },
-  method: { en: 'break → understand → automate → teach', 'pt-br': 'quebrar → entender → automatizar → ensinar' },
-  authorized: { en: 'authorized targets only', 'pt-br': 'somente alvos autorizados' },
+  contact: { en: 'Contact', 'pt-br': 'Contato' },
+  method: { en: 'Break, understand, automate, teach.', 'pt-br': 'Quebrar, entender, automatizar, ensinar.' },
+  authorized: { en: 'Authorized targets only.', 'pt-br': 'Somente alvos autorizados.' },
   language: { en: 'Language', 'pt-br': 'Idioma' },
-  backHome: { en: 'whoami()', 'pt-br': 'whoami()' },
+  home: { en: 'Home', 'pt-br': 'Início' },
 } satisfies Record<string, T>;

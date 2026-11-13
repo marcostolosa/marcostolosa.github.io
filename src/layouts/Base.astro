@@ -6,15 +6,13 @@ import { defaultLang, htmlLang, langLabel, langName, localize, locales, tr, ui, 
 interface Props {
   title: string;
   description: string;
-  /** Function name shown in the toolbar state, e.g. "whoami" */
-  where?: string;
-  /** Home page only: enables Step / Run debugger controls */
-  debugger?: boolean;
   lang?: Lang;
   /** Per-locale URL of this page. Defaults to the same path in each locale; pass when a translation does not exist. */
   alternates?: Partial<Record<Lang, string>>;
+  /** Long-form reading pages keep the animated background at roughly half strength. */
+  quiet?: boolean;
 }
-const { title, description, where = 'whoami', debugger: dbg = false, lang = defaultLang, alternates } = Astro.props;
+const { title, description, lang = defaultLang, alternates, quiet = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const base = unlocalize(Astro.url.pathname);
 const alt = Object.fromEntries(locales.map((l) => [l, alternates?.[l] ?? localize(base, l)])) as Record<Lang, string>;
@@ -28,7 +26,7 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#0f1013" />
+    <meta name="theme-color" content="#050a08" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -54,33 +52,21 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
       }, true);
     </script>
   </head>
-  <body>
+  <body data-bg={quiet ? 'quiet' : undefined}>
+    <canvas id="backdrop" aria-hidden="true"></canvas>
     <a class="skip" href="#main">{t('skip')}</a>
 
     <header class="tb">
-      <a class="brand" href={localize('/', lang)} translate="no">{profile.handle.toUpperCase()}<span>.dbg</span></a>
-      <div class="tools" role="toolbar" aria-label={t('controls')}>
-        {dbg ? (
-          <button type="button" id="run" title={t('runTitle')}>
-            <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z" fill="currentColor" /></svg>
-            {t('run')} <kbd>F9</kbd>
-          </button>
-          <button type="button" id="step" title={t('stepTitle')}>
-            <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5h8M6 1.5 9.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
-            {t('step')} <kbd>F8</kbd>
-          </button>
-        ) : (
-          <a class="tbtn" href={localize('/', lang)}>
-            <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M11 5H3M6 1.5 2.5 5 6 8.5" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>
-            whoami()
-          </a>
-        )}
-        <a class="tbtn" href={localize('/writeups/', lang)}>{t('writeups')}</a>
-      </div>
-      <p class="state">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="lbl">{t('pausedIn')}</span> <b id="where" translate="no">{where}()</b>
-      </p>
+      <a class="brand" href={localize('/', lang)} translate="no">
+        <span class="at">root@</span>{profile.handle.toLowerCase()}<span class="at">:~#</span><span class="cur" aria-hidden="true"></span>
+        <span class="visually-hidden">{t('home')}</span>
+      </a>
+      <nav class="sec" aria-label={t('nav')}>
+        <a class="opt" href={localize('/#disclosures', lang)}>{t('findings')}</a>
+        <a class="opt" href={localize('/#tools', lang)}>{t('tools')}</a>
+        <a href={localize('/writeups/', lang)} aria-current={base.startsWith('/writeups') ? 'page' : undefined}>{t('writeups')}</a>
+        <a class="opt" href={localize('/#connect', lang)}>{t('contact')}</a>
+      </nav>
       <nav class="lang" aria-label={t('language')}>
         {locales.map((l) => (
           <a
@@ -99,140 +85,55 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
       <slot />
     </main>
 
-    <footer class="status" translate="no" data-paused={t('paused')}>
-      <span id="st-where">{t('paused')} · {where}()</span>
-      <span>tr0p.bin · x64</span>
-      <span class="c">; {t('method')}</span>
-      <span class="c auth">; {t('authorized')}</span>
+    <footer class="foot">
+      <p>{t('authorized')} <span>{t('method')}</span></p>
+      <p translate="no">{profile.name} ({profile.handle}), {tr(profile.base, lang)}</p>
     </footer>
 
     <script>
-      // --- xref highlight: hovering or focusing a symbol lights up every occurrence (IDA-style).
-      const groups = new Map<string, Element[]>();
-      document.querySelectorAll<HTMLElement>('[data-sym]').forEach((el) => {
-        const k = el.dataset.sym!;
-        if (!groups.has(k)) groups.set(k, []);
-        groups.get(k)!.push(el);
-      });
-      const lit = (el: HTMLElement, on: boolean) =>
-        groups.get(el.dataset.sym!)?.forEach((n) => n.classList.toggle('xref', on));
-      groups.forEach((els) =>
-        els.forEach((el) => {
-          const h = el as HTMLElement;
-          h.addEventListener('pointerenter', () => lit(h, true));
-          h.addEventListener('pointerleave', () => lit(h, false));
-          h.addEventListener('focusin', () => lit(h, true));
-          h.addEventListener('focusout', () => lit(h, false));
-        }),
-      );
-
-      // --- debugger controls (home page only)
-      const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
-      if (steps.length) {
-        const whereEl = document.getElementById('where')!;
-        const stWhere = document.getElementById('st-where')!;
-        const nextEl = document.getElementById('next-hint');
-        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        let cur = 0;
-
-        const paint = (i: number) => {
-          cur = i;
-          const name = steps[i].dataset.step!;
-          whereEl.textContent = `${name}()`;
-          stWhere.textContent = `${stWhere.parentElement!.dataset.paused} · ${name}()`;
-          steps.forEach((s, j) => s.toggleAttribute('data-ip', j === i));
-          if (nextEl) nextEl.textContent = `${steps[(i + 1) % steps.length].dataset.step}()`;
-        };
-
-        let lockUntil = 0;
-        const go = (i: number) => {
-          const t = steps[i];
-          lockUntil = performance.now() + (reduce ? 100 : 1000);
-          // Absolute target: a new Step cleanly replaces a smooth scroll still in flight.
-          const bar = document.querySelector<HTMLElement>('.tb')?.offsetHeight ?? 0;
-          const top = Math.min(t.getBoundingClientRect().top + scrollY - bar, document.documentElement.scrollHeight - innerHeight);
-          scrollTo({ top, behavior: reduce ? 'instant' : 'smooth' });
-          const focusable = t.querySelector<HTMLElement>('h1, h2') ?? t;
-          focusable.setAttribute('tabindex', '-1');
-          focusable.focus({ preventScroll: true });
-          paint(i);
-        };
-        const step = () => go((cur + 1) % steps.length);
-        const run = () => {
-          go(steps.length - 1);
-          document.getElementById('mail')?.focus({ preventScroll: true });
-        };
-
-        document.getElementById('step')?.addEventListener('click', step);
-        document.getElementById('run')?.addEventListener('click', run);
-        addEventListener('keydown', (e) => {
-          const tag = (e.target as HTMLElement).tagName;
-          if (e.altKey || e.ctrlKey || e.metaKey || tag === 'INPUT' || tag === 'TEXTAREA') return;
-          if (e.key === 'F8' || e.key === 'n') { e.preventDefault(); step(); }
-          else if (e.key === 'F9') { e.preventDefault(); run(); }
-        });
-
-        // Track the section in view so Step always continues from where the visitor is.
-        const visible = new Set<HTMLElement>();
-        const io = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((e) => (e.isIntersecting ? visible.add(e.target as HTMLElement) : visible.delete(e.target as HTMLElement)));
-            if (performance.now() < lockUntil || !visible.size) return;
-            const top = [...visible].sort((a, b) => steps.indexOf(a) - steps.indexOf(b))[0];
-            paint(steps.indexOf(top));
-          },
-          { rootMargin: '-64px 0px -60% 0px' },
-        );
-        steps.forEach((s) => io.observe(s));
-        paint(0);
-      }
+      import { backdrop } from '../scripts/backdrop';
+      const c = document.getElementById('backdrop') as HTMLCanvasElement;
+      try { if (backdrop(c)) c.classList.add('on'); } catch { /* the CSS gradient stays */ }
     </script>
 
     <style>
+      #backdrop { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: 0; transition: opacity 1200ms var(--ease); pointer-events: none; }
+      #backdrop:global(.on) { opacity: 1; }
+      @media (prefers-reduced-motion: reduce) { #backdrop { transition: none; } }
       .tb {
-        position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 18px;
-        padding: 10px var(--pad); background: color-mix(in srgb, var(--gutter) 92%, transparent);
-        backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); font-size: 13px;
+        position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: clamp(12px, 3vw, 36px);
+        height: var(--bar); padding: 0 var(--pad);
+        background: color-mix(in srgb, var(--gutter) 88%, transparent); backdrop-filter: blur(18px) saturate(1.3);
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
       }
-      .brand { flex: none; font: 800 17px/1 var(--disp); color: var(--fg-hi); text-decoration: none; letter-spacing: 0.02em; }
-      .brand span { font: 400 13px/1 var(--mono); color: var(--addr); margin-left: 1px; }
-      .tools { display: flex; gap: 6px; flex: none; }
-      .tools button, .tbtn {
-        all: unset; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 4px;
-        color: var(--fg); border: 1px solid var(--line); font: 500 12.5px/1 var(--mono);
-        transition: background-color 180ms var(--ease), border-color 180ms var(--ease), color 180ms var(--ease);
+      .brand {
+        display: inline-flex; align-items: center; gap: 0; flex: none; color: var(--fg-hi); text-decoration: none;
+        font: 700 1.05rem/1 var(--mono);
       }
-      .tools button:hover, .tbtn:hover { background: var(--panel-2); border-color: var(--addr); color: var(--fg-hi); }
-      .tools button:focus-visible, .tbtn:focus-visible { outline: 2px solid var(--kw); outline-offset: 2px; }
-      .tools button:active { transform: translateY(1px); }
-      kbd { font: 500 11px/1 var(--mono); padding: 3px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim); }
-      .state { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--dim); white-space: nowrap; min-width: 0; overflow: hidden; }
-      .state b { overflow: hidden; text-overflow: ellipsis; }
-      .state b { color: var(--kw); font-weight: 500; }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--kw); }
+      .brand .at { color: var(--acc); font-weight: 500; }
+      .sec { display: flex; gap: clamp(14px, 2.4vw, 30px); margin-left: auto; font-size: 0.86rem; font-weight: 500; text-transform: lowercase; }
+      .sec a { color: var(--dim); text-decoration: none; padding: 8px 0; transition: color 180ms var(--ease); }
+      .sec a::before { content: './'; color: var(--addr); }
+      .sec a:hover, .sec a[aria-current='page'] { color: var(--acc); }
 
-      .lang { display: flex; flex: none; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+      .lang { display: flex; flex: none; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
       .lang a {
-        display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 30px; padding: 0 8px;
-        font: 600 12px/1 var(--mono); letter-spacing: 0.04em; color: var(--dim); text-decoration: none;
+        display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 30px; padding: 0 10px;
+        font: 600 0.74rem/1 var(--disp); letter-spacing: 0.04em; color: var(--dim); text-decoration: none;
         transition: background-color 180ms var(--ease), color 180ms var(--ease);
       }
-      .lang a + a { border-left: 1px solid var(--line); }
       .lang a:hover { background: var(--panel-2); color: var(--fg-hi); }
-      .lang a[aria-current='true'] { background: var(--hl); color: var(--kw); }
-      .lang a:focus-visible { outline-offset: -2px; }
+      .lang a[aria-current='true'] { background: var(--acc); color: var(--gutter); }
+      .lang a:focus-visible { outline-offset: -3px; }
 
-      .status {
-        display: flex; flex-wrap: wrap; gap: 6px 24px; padding: 10px var(--pad); background: var(--gutter);
-        border-top: 1px solid var(--line); font-size: 12px; color: var(--addr);
+      .foot {
+        display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 32px; padding: 26px var(--pad) 34px;
+        border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--dim);
       }
-      .status .auth { margin-left: auto; }
+      .foot span { color: var(--addr); margin-left: 6px; }
 
-      @media (max-width: 760px) {
-        .tb { gap: 10px; }
-        .tools #run, .tools kbd, .state .lbl { display: none; }
-        .tb:not(:has(#step)) .state { display: none; }
-        .status .auth { margin-left: 0; }
+      @media (max-width: 720px) {
+        .sec .opt { display: none; }
       }
     </style>
   </body>

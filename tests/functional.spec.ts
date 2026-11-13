@@ -1,16 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { disclosures, stepSections } from '../src/data/profile';
+import { disclosures } from '../src/data/profile';
 import { pages } from './pages';
-
-/** Wait until smooth scrolling has settled (scrollY unchanged across two frames ~150ms apart). */
-const settled = (page: Page) =>
-  expect
-    .poll(async () => {
-      const a = await page.evaluate(() => scrollY);
-      await page.waitForTimeout(150);
-      return a === (await page.evaluate(() => scrollY));
-    })
-    .toBe(true);
 
 test.describe('home', () => {
   test('lists every disclosure with a link and a severity', async ({ page }) => {
@@ -29,34 +19,49 @@ test.describe('home', () => {
     await expect(page.locator('#mail')).toHaveAttribute('href', /^mailto:/);
   });
 
-  test('Step button walks every section in order and wraps', async ({ page }) => {
+  test('graph inspector opens on the CVSS 10.0 finding and links to its source', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#where')).toHaveText('whoami()');
-    for (const id of [...stepSections.slice(1), stepSections[0]]) {
-      await page.locator('#step').click();
-      await settled(page);
-      await expect(page.locator('#where')).toHaveText(`${id}()`);
-      await expect(page.locator(`#${id}`)).toBeInViewport();
+    await expect(page.locator('#insp-title')).toHaveText('CVE-2025-10230');
+    await expect(page.locator('#insp-src')).toHaveAttribute('href', disclosures[0].href);
+    // WebGL scene when available, static SVG otherwise: either way the hero settles into one of the two states.
+    await expect(page.locator('#whoami')).toHaveClass(/\b(gl|no-gl)\b/);
+  });
+
+  test('next / previous walk every node and wrap', async ({ page }) => {
+    test.slow(); // CI renders WebGL in software
+    await page.goto('/');
+    const count = page.locator('#insp-count');
+    const total = Number((await count.textContent())!.split('/')[1]);
+    const first = await page.locator('#insp-title').textContent();
+    const seen = new Set<string>();
+    for (let i = 0; i < total; i++) {
+      seen.add((await page.locator('#insp-title').textContent())!);
+      await page.locator('#next').click();
+    }
+    expect(seen.size).toBe(total);
+    await expect(page.locator('#insp-title')).toHaveText(first!);
+    await page.locator('#prev').click();
+    await expect(page.locator('#insp-title')).not.toHaveText(first!);
+  });
+
+  test('a linked node opens from the inspector and every node cites a source', async ({ page }) => {
+    test.slow();
+    await page.goto('/');
+    await page.locator('#insp-links button', { hasText: 'Samba' }).click();
+    await expect(page.locator('#insp-title')).toHaveText('Samba');
+    await expect(page.locator('#insp-links button', { hasText: 'CVE-2025-10230' })).toBeVisible();
+    const total = Number((await page.locator('#insp-count').textContent())!.split('/')[1]);
+    for (let i = 0; i < total; i++) {
+      await expect(page.locator('#insp-src')).toHaveAttribute('href', /^(https:\/\/|mailto:|\/|#)/);
+      await page.locator('#next').click();
     }
   });
 
-  test('keyboard: n / F8 step, F9 runs to connect() and focuses the email', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'hardware keyboard shortcuts are desktop-only');
-    await page.goto('/');
-    await page.keyboard.press('n');
-    await expect(page.locator('#where')).toHaveText('disclosures()');
-    await page.keyboard.press('F8');
-    await expect(page.locator('#where')).toHaveText('hall_of_fame()');
-    await page.keyboard.press('F9');
-    await expect(page.locator('#where')).toHaveText('connect()');
-    await expect(page.locator('#mail')).toBeFocused();
-  });
-
-  test('Step respects reduced motion', async ({ page }) => {
+  test('the graph works with reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    await page.locator('#step').click();
-    await expect(page.locator('#disclosures')).toBeInViewport();
+    await page.locator('#next').click();
+    await expect(page.locator('#insp-title')).not.toHaveText('CVE-2025-10230');
   });
 });
 
@@ -119,7 +124,7 @@ test.describe('language switch', () => {
   });
 
   test('every page publishes hreflang alternates', async ({ page }) => {
-    for (const p of pages.filter((x) => !x.path.includes('fixture'))) {
+    for (const p of pages.filter((x) => !x.path.includes('fixture') && !('single' in x))) {
       await page.goto(p.path);
       await expect(page.locator('link[rel="alternate"][hreflang="en-US"]')).toHaveCount(1);
       await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveCount(1);
@@ -155,6 +160,7 @@ test('legacy tool landing pages still resolve', async ({ page }) => {
 });
 
 test('every internal link resolves', async ({ page }) => {
+  test.slow(); // loads the WebGL home page several times; CI renders it in software
   const seen = new Set<string>();
   for (const p of pages) {
     await page.goto(p.path);

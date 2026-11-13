@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { disclosures, hallOfFame, imports, links, profile, tools } from '../data/profile';
+import { buildGraph, typeName, type NodeType } from '../data/graph';
+import { disclosures, hallOfFame, imports, links, platforms, profile, tools } from '../data/profile';
 import { localize, tr, type Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
@@ -11,145 +12,168 @@ const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
-const hex = (base: number, i: number, step: number) => (base + i * step).toString(16).toUpperCase().padStart(8, '0');
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const mail = `mailto:${profile.email}?subject=${encodeURIComponent(L('Engagement inquiry', 'Proposta de engajamento'))}`;
-const regs = [
-  { r: 'RIP', v: 'CVE-2025-10230 · CVSS 10.0', hot: true },
-  { r: 'RAX', v: '6', c: L('U.S. Gov Hall of Fame', 'Hall of Fame do Governo dos EUA') },
-  { r: 'RBX', v: '15', c: L('valid vulns', 'vulns válidas') },
-  { r: 'RCX', v: L('93.75%', '93,75%'), c: L('accuracy', 'precisão') },
-  { r: 'RDX', v: 'Bugcrowd · H1 · YWH · Intigriti' },
-  { r: 'RSI', v: 'OWASP', c: L('member since 2021', 'membro desde 2021') },
-];
+const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_gov: 'NCUA', be_gov: L('Belgian Government', 'Governo da Bélgica') };
+
+// --- the graph: same data as the sections below, laid out at build time
+const mine = writeups.filter((w) => w.data.lang === lang);
+const graph = buildGraph(lang, (mine.length ? mine : writeups).map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary })));
+const start = graph.nodes.findIndex((n) => n.id === 'vuln:CVE-2025-10230');
+const first = graph.nodes[start];
+const neighbours = (i: number) => graph.edges.filter(([a, b]) => a === i || b === i).map(([a, b]) => (a === i ? b : a));
+const types = Object.keys(typeName) as NodeType[];
+const strings = {
+  open: L('Open source', 'Abrir fonte'),
+  contact: L('Get in touch', 'Entrar em contato'),
+  types: Object.fromEntries(types.map((t) => [t, tr(typeName[t], lang)])),
+};
+// static projection for the no-WebGL fallback (same pitch the scene starts with)
+const proj = graph.nodes.map((n) => {
+  const [c, s] = [Math.cos(-0.5), Math.sin(-0.5)];
+  const x = n.p[0] * c + n.p[2] * s;
+  const z = -n.p[0] * s + n.p[2] * c;
+  return { x, y: -(n.p[1] * Math.cos(0.2) - z * Math.sin(0.2)) };
+});
+const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c');
 ---
 <Base
   lang={lang}
-  title={L('Marcos Tolosa (Tr0p): red team, exploit dev, reverse engineering', 'Marcos Tolosa (Tr0p): red team, exploit dev, engenharia reversa')}
+  title={L('Marcos Tolosa (Tr0p): red team, pentest, bug bounty', 'Marcos Tolosa (Tr0p): red team, pentest, bug bounty')}
   description={L(
-    'Red teamer, exploit developer and reverse engineer. CVE-2025-10230 (CVSS 10.0, Samba). 6× U.S. Government Hall of Fame. Available for pentest and red team engagements.',
-    'Red teamer, exploit developer e engenheiro reverso. CVE-2025-10230 (CVSS 10.0, Samba). 6× Hall of Fame do Governo dos EUA. Disponível para pentest e red team.',
+    'Red teamer, pentester and bug bounty hunter. CVE-2025-10230 (CVSS 10.0, Samba). 6× U.S. Government Hall of Fame. Available for pentest and red team engagements.',
+    'Red teamer, pentester e bug hunter. CVE-2025-10230 (CVSS 10.0, Samba). 6× Hall of Fame do Governo dos EUA. Disponível para pentest e red team.',
   )}
-  debugger
 >
-  <div class="cpu">
-    <section class="pane main" aria-label="CPU">
-      <div class="ph"><span>CPU · tr0p.bin</span><span class="a">00401000</span></div>
-
-      <header class="hero" id="whoami" data-step="whoami">
-        <p class="c">; breakpoint 1 · whoami() · {tr(profile.base, lang)}</p>
-        <h1>{profile.name} <span class="k">{profile.handle}</span></h1>
-        <p class="lede">{tr(profile.lede, lang)}</p>
-        <div class="actions">
-          <a class="btn" href={mail}>{L('Open an engagement', 'Abrir um engajamento')}</a>
-          <a class="ghost" href={localize('/writeups/', lang)}>{L('or read the writeups', 'ou leia os writeups')}</a>
-        </div>
-      </header>
-
-      <section id="disclosures" data-step="disclosures" aria-labelledby="h-disc">
-        <div class="fh">
-          <h2 id="h-disc">disclosures</h2>
-          <span class="c">; {disclosures.length} {L('public records, each one an xref', 'registros públicos, cada um é um xref')}</span>
-        </div>
-        <ol class="lst" translate="no">
-          {disclosures.map((d, i) => (
-            <li class={i === 0 ? 'ip' : i === 1 ? 'nx' : undefined}>
-              <span class="mk" aria-hidden="true">
-                {i === 0 && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="currentColor" /></svg>}
-                {i === 1 && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none" /></svg>}
-              </span>
-              <span class="a">{hex(0x401140, i, 0x28)}</span>
-              <span class="body">
-                <a href={d.href}>{d.id}</a>{' '}
-                <span class="k" data-sym={d.sym}>{d.sym}</span>{' '}
-                <span class="s">"{d.cls}"</span>
-                {d.note && <span class="c"> ; {tr(d.note, lang)}</span>}
-              </span>
-              <span class={d.crit ? 'sev crit' : 'sev'}><span class="visually-hidden">{L('severity', 'severidade')} </span>{d.sev}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-    </section>
-
-    <aside class="pane side" id="registers" aria-label={L('Registers and stack', 'Registradores e pilha')}>
-      <div class="ph"><span>{L('Registers', 'Registradores')}</span><span>x64</span></div>
-      <dl class="regs" translate="no">
-        {regs.map((x) => (
-          <div>
-            <dt>{x.r}</dt>
-            <dd class={x.hot ? 'hot' : undefined}>{x.v}{x.c && <span class="c"> ; {x.c}</span>}</dd>
-          </div>
-        ))}
-      </dl>
-      <p class="flags"><span>ZF <b>0</b></span><span>OF <b>1</b></span><span class="c">; {L('authorized', 'autorizado')} = 1</span></p>
-
-      <div class="ph"><span>{L('Stack · tools', 'Pilha · ferramentas')}</span><span>RSP</span></div>
-      <ol class="stack" id="tools" translate="no">
-        {tools.map((t, i) => (
-          <li>
-            <span class="a">{hex(0x19ff40, i, 8)}</span>
-            <span>
-              <a class="tn" href={t.href}>{t.name}</a>
-              <span class="td">{tr(t.desc, lang)}</span>
-              <span class="tt a">{t.tags}{t.repo && <> · <a href={t.repo}>{L('source', 'código')}</a></>}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-      <p class="imports" translate="no"><span class="c">; imports</span> {imports.join(' · ')}</p>
-    </aside>
-  </div>
-
-  <section class="band" id="hall_of_fame" data-step="hall_of_fame" aria-labelledby="h-hof">
-    <div class="fh">
-      <h2 id="h-hof">hall_of_fame</h2>
-      <span class="c">; {tr(hallOfFame.summary, lang)}</span>
+  <section class="hero" id="whoami" data-tint="writeup" aria-labelledby="h-me">
+    <div class="stage" id="stage" aria-hidden="true">
+      <svg class="fallback" viewBox="-1.15 -1.15 2.3 2.3">
+        {graph.edges.map(([a, b]) => <line x1={proj[a].x} y1={proj[a].y} x2={proj[b].x} y2={proj[b].y} />)}
+        {graph.nodes.map((n, i) => <circle cx={proj[i].x} cy={proj[i].y} r={n.size * 0.05 + 0.008} data-t={n.type} />)}
+      </svg>
+      <canvas></canvas>
+      <div class="labels"></div>
     </div>
-    <ol class="lst hof" translate="no">
-      {hallOfFame.agencies.map((a, i) => (
-        <li>
-          <span class="mk"></span>
-          <span class="a">{hex(0x401380, i, 5)}</span>
-          <span class="body"><span class="k">push</span> <span class="s" data-sym={a === 'NCUA' ? 'us_gov' : undefined}>"{a}"</span></span>
+
+    <div class="intro">
+      <p class="cmd boot" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i class="typed">whoami</i><span class="cur"></span></p>
+      <h1 id="h-me" data-text={profile.name}>{profile.name}</h1>
+      <p class="aka">{L('Known as Tr0p. Red teamer, pentester and bug bounty hunter.', 'Conhecido como Tr0p. Red teamer, pentester e bug hunter.')}</p>
+      <p class="lede">{L(
+        'You don’t have to take my word for it. This graph is my public record: pick a node and open its source.',
+        'Não precisa acreditar em mim. Este grafo é o meu registro público: escolha um nó e abra a fonte.',
+      )}</p>
+      <div class="actions">
+        <a class="btn" href={mail}>{L('Open an engagement', 'Abrir um engajamento')}</a>
+        <a class="ghost" href={localize('/writeups/', lang)}>{L('or read the writeups', 'ou leia os writeups')}</a>
+      </div>
+    </div>
+
+    <aside class="insp" aria-label={L('Selected node', 'Nó selecionado')}>
+      <p class="wbar" aria-hidden="true"><span></span><span></span><span></span>osint://tr0p/node</p>
+      <div class="card" id="insp" aria-live="polite" data-t={first.type}>
+        <p class="type"><span class="dot" aria-hidden="true"></span><span id="insp-type">{strings.types[first.type]}</span></p>
+        <p class="title" id="insp-title" translate="no">{first.label}</p>
+        <p class="desc" id="insp-desc">{first.desc}</p>
+        <p class="rel">
+          <span>{L('Linked to', 'Ligado a')}</span>
+          <span id="insp-links">
+            {neighbours(start).map((j) => <button type="button" data-i={j} data-t={graph.nodes[j].type}>{graph.nodes[j].label}</button>)}
+          </span>
+        </p>
+        <a class="src" id="insp-src" href={first.href}><span id="insp-open">{strings.open}</span><span class="id" id="insp-host">{first.src}</span></a>
+      </div>
+      <div class="walk">
+        <button type="button" id="prev" aria-label={L('Previous node', 'Nó anterior')}>
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <span class="id" id="insp-count">{start + 1} / {graph.nodes.length}</span>
+        <button type="button" id="next" aria-label={L('Next node', 'Próximo nó')}>
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <span class="hint">{L('Drag to rotate, click a node', 'Arraste para girar, clique em um nó')}</span>
+      </div>
+    </aside>
+
+    <ul class="legend" aria-label={L('Node types', 'Tipos de nó')}>
+      {types.map((t) => <li data-t={t}><span class="dot" aria-hidden="true"></span>{strings.types[t]}</li>)}
+    </ul>
+    <script type="application/json" id="graph-data" set:html={payload} />
+  </section>
+
+  <section class="sec" id="disclosures" data-focus="vuln" data-tint="vuln" aria-labelledby="h-disc">
+    <header class="sh">
+      <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>cat findings.log</i></p>
+      <h2 id="h-disc">{L('Disclosed vulnerabilities', 'Vulnerabilidades divulgadas')}</h2>
+      <p>{L('Six public records. Each one links to the advisory, the patch or the programme that confirmed it.', 'Seis registros públicos. Cada um leva ao advisory, ao patch ou ao programa que confirmou.')}</p>
+    </header>
+    <ol class="lst">
+      {disclosures.map((d, i) => (
+        <li class={i === 0 ? 'top' : undefined}>
+          <span class={d.crit ? 'sev crit' : 'sev'} translate="no"><span class="visually-hidden">{L('severity', 'severidade')} </span>{d.sev}</span>
+          <span class="what">
+            <a href={d.href} translate="no">{d.id}</a>
+            <span class="tgt" translate="no">{targetName[d.sym]}</span>
+          </span>
+          <span class="cls">{d.cls}{d.note && <span class="note">{tr(d.note, lang)}</span>}</span>
         </li>
       ))}
-      <li>
-        <span class="mk"></span>
-        <span class="a">{hex(0x401380, hallOfFame.agencies.length, 5)}</span>
-        <span class="body"><span class="k">call</span> <a href={hallOfFame.record}>bugcrowd.com/h/Tr0p</a> <span class="c">; {L('full record · plus', 'registro completo · mais')} {tr(hallOfFame.also, lang)}</span></span>
-      </li>
     </ol>
   </section>
 
-  <section class="band" id="writeups" data-step="writeups" aria-labelledby="h-wr">
-    <div class="fh">
-      <h2 id="h-wr">writeups</h2>
-      <span class="c">; {L('root cause, step by step', 'causa raiz, passo a passo')}</span>
-    </div>
+  <section class="sec" id="hall_of_fame" data-focus="target" data-tint="target" aria-labelledby="h-hof">
+    <header class="sh">
+      <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>cat hall_of_fame.txt</i></p>
+      <h2 id="h-hof">Hall of Fame</h2>
+      <p>{tr(hallOfFame.summary, lang)}. {L('The full record is on', 'O registro completo está em')} <a href={hallOfFame.record}>bugcrowd.com/h/Tr0p</a>.</p>
+    </header>
+    <ul class="hof" translate="no">
+      {hallOfFame.agencies.map((a) => <li>{a}</li>)}
+      <li>{tr(hallOfFame.also, lang)}</li>
+    </ul>
+    <p class="plat">{L('Active on', 'Ativo em')} {platforms.join(', ')}. {L('OWASP member since 2021.', 'Membro da OWASP desde 2021.')}</p>
+  </section>
+
+  <section class="sec" id="tools" data-focus="tool" data-tint="tool" aria-labelledby="h-tools">
+    <header class="sh">
+      <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>ls -la tools/</i></p>
+      <h2 id="h-tools">{L('Tools I built', 'Ferramentas que construí')}</h2>
+      <p>{L('What an engagement teaches me usually ends up as code.', 'O que um engajamento me ensina costuma virar código.')}</p>
+    </header>
+    <ul class="tools">
+      {tools.map((t) => (
+        <li>
+          <a class="tn" href={t.href} translate="no">{t.name}</a>
+          <span class="td">{tr(t.desc, lang)}</span>
+          <span class="tt"><span class="id" translate="no">{t.tags}</span>{t.repo && <a href={t.repo} aria-label={`${t.name}: ${L('source code', 'código-fonte')}`}>{L('source', 'código')}</a>}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="arsenal" translate="no"><span>{L('Day-to-day arsenal', 'Arsenal do dia a dia')}</span> {imports.join(', ')}</p>
+  </section>
+
+  <section class="sec" id="writeups" data-focus="writeup" data-tint="writeup" aria-labelledby="h-wr">
+    <header class="sh">
+      <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>ls writeups/</i></p>
+      <h2 id="h-wr">Writeups</h2>
+      <p>{L('Root cause first, then the exploit, step by step.', 'Primeiro a causa raiz, depois o exploit, passo a passo.')}</p>
+    </header>
     {writeups.length > 0 ? (
-      <ol class="lst" translate="no">
-        {writeups.slice(0, 5).map((w, i) => (
+      <ol class="wr">
+        {writeups.slice(0, 5).map((w) => (
           <li>
-            <span class="mk"></span>
-            <span class="a">{hex(0x401520, i, 0x10)}</span>
-            <span class="body"><a href={`/writeups/${w.id}/`} hreflang={w.data.lang}>{w.data.title}</a> <span class="c">; {fmt(w.data.date)}</span></span>
+            <span class="id" translate="no">{fmt(w.data.date)}</span>
+            <a href={`/writeups/${w.id}/`} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>{w.data.title}</a>
           </li>
         ))}
       </ol>
     ) : (
-      <p class="empty"><span class="c">; {L('nothing published here yet.', 'nada publicado aqui ainda.')}</span> {L('Until then, the advisories in', 'Até lá, os advisories em')} <a href="#disclosures">disclosures()</a> {L('are the primary sources.', 'são as fontes primárias.')}</p>
+      <p class="empty">{L('Nothing published yet. Until then, the advisories under', 'Nada publicado ainda. Até lá, os advisories em')} <a href="#disclosures">{L('disclosed vulnerabilities', 'vulnerabilidades divulgadas')}</a> {L('are the primary sources.', 'são as fontes primárias.')}</p>
     )}
   </section>
 
-  <section class="log" aria-label="Log">
-    <p><span class="a">[+]</span> {L('breakpoint hit at whoami(), visitor attached', 'breakpoint em whoami(), visitante anexado')}</p>
-    <p><span class="a">[*]</span> {L('next on', 'próximo no')} <span class="k">step</span> (F8 / n): <span class="k" id="next-hint" translate="no">disclosures()</span></p>
-    <p><span class="a">[*]</span> <span class="k">run</span> (F9) {L('continues to', 'segue até')} connect()</p>
-  </section>
-
-  <section class="connect" id="connect" data-step="connect" aria-labelledby="h-con">
-    <p class="c">; sub_401600 connect()</p>
+  <section class="connect" id="connect" data-focus="account" data-tint="vuln" aria-labelledby="h-con">
+    <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>./contact --scope yours</i></p>
     <h2 id="h-con">{L('Got something in scope?', 'Tem algo no escopo?')}</h2>
     <p class="lede">{L('Pentests, red team engagements and security research. Send the target and the rules of engagement.', 'Pentest, red team e pesquisa de segurança. Mande o alvo e as regras de engajamento.')}</p>
     <div class="actions">
@@ -159,86 +183,308 @@ const regs = [
       {links.map((l) => <li><a href={l.href} rel="me">{l.label}</a></li>)}
     </ul>
   </section>
-
 </Base>
 
-<style>
-  .cpu { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
-  .pane { background: var(--bg); min-width: 0; }
-  .ph { display: flex; justify-content: space-between; padding: 8px var(--pad); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--addr); background: var(--gutter); }
-  .side .ph { padding: 8px 22px; }
+<script>
+  import type { Graph } from '../data/graph';
 
-  .hero { padding: clamp(36px, 7vh, 72px) var(--pad) 36px; }
-  h1 { font: 900 clamp(2.9rem, 6.4vw, 5.6rem)/0.93 var(--disp); letter-spacing: -0.035em; color: var(--fg-hi); margin: 14px 0 18px; text-wrap: balance; }
-  h1 .k { display: block; }
-  .lede { font: 500 clamp(1.1rem, 1.5vw, 1.25rem)/1.5 var(--disp); color: var(--fg); max-width: 46ch; }
-  .actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 30px; }
-  .btn {
-    display: inline-block; background: var(--kw); color: var(--bg); text-decoration: none;
-    font: 700 15px/1 var(--disp); padding: 15px 20px; border-radius: 4px;
-    box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.8);
-    transition: transform 180ms var(--ease), background-color 180ms var(--ease);
+  const hero = document.getElementById('whoami')!;
+
+  // The name decrypts once on load: glyphs settle left to right into the real text.
+  const h1 = hero.querySelector('h1')!;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const real = h1.textContent!, pool = '01<>/\\[]{}#$%&*+=-_';
+    const t0 = performance.now() + 550;
+    const tick = (now: number) => {
+      const k = Math.max(0, (now - t0) / 900);
+      h1.textContent = [...real].map((ch, i) => (ch === ' ' || i < k * real.length ? ch : pool[(Math.random() * pool.length) | 0])).join('');
+      if (k < 1) requestAnimationFrame(tick); else h1.textContent = real;
+    };
+    requestAnimationFrame(tick);
   }
-  .btn:hover { background: #f1c77a; color: var(--bg); transform: translateY(-1px); }
-  .ghost { font: 500 15px/1 var(--disp); }
+  const data = JSON.parse(document.getElementById('graph-data')!.textContent!) as {
+    graph: Graph; start: number; strings: { open: string; contact: string; types: Record<string, string> };
+  };
+  const { nodes, edges } = data.graph;
+  const adj: number[][] = nodes.map(() => []);
+  edges.forEach(([a, b]) => { adj[a].push(b); adj[b].push(a); });
 
-  .fh { display: flex; gap: 6px 16px; align-items: baseline; flex-wrap: wrap; padding: 26px var(--pad) 12px; border-top: 1px solid var(--line); }
-  h2 { font: 800 1.55rem/1.2 var(--disp); color: var(--fg-hi); letter-spacing: -0.02em; }
-  h2:focus { outline: none; }
-  [data-ip] > .fh h2 { color: var(--kw); }
-  .fh .c { font-size: 13px; }
+  const $ = (id: string) => document.getElementById(id)!;
+  const card = $('insp'), linksEl = $('insp-links'), src = $('insp-src') as HTMLAnchorElement;
+  let current = data.start;
+  let scene: { select(i: number, turn?: boolean): void; focus(type: string | null): void } | undefined;
 
-  .lst { list-style: none; padding: 0 0 22px; }
+  function show(i: number) {
+    current = i;
+    const n = nodes[i];
+    card.dataset.t = n.type;
+    $('insp-type').textContent = data.strings.types[n.type];
+    $('insp-title').textContent = n.label;
+    $('insp-desc').textContent = n.desc;
+    linksEl.replaceChildren(
+      ...adj[i].map((j) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.i = String(j);
+        b.dataset.t = nodes[j].type;
+        b.textContent = nodes[j].label;
+        return b;
+      }),
+    );
+    src.hidden = !n.href;
+    if (n.href) {
+      src.href = n.href;
+      $('insp-open').textContent = n.href.startsWith('#') ? data.strings.contact : data.strings.open;
+      $('insp-host').textContent = n.src ?? '';
+    }
+    $('insp-count').textContent = `${i + 1} / ${nodes.length}`;
+    scene?.select(i);
+  }
+
+  linksEl.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('button[data-i]');
+    if (!b) return;
+    show(Number(b.dataset.i));
+    // the clicked button is replaced; keep keyboard users inside the card
+    linksEl.querySelector<HTMLElement>('button')?.focus();
+  });
+  $('prev').addEventListener('click', () => show((current - 1 + nodes.length) % nodes.length));
+  $('next').addEventListener('click', () => show((current + 1) % nodes.length));
+
+  // three.js is the heavy part: load it after the page is interactive, and keep the SVG if WebGL is unavailable.
+  const css = getComputedStyle(document.documentElement);
+  const colors = Object.fromEntries(Object.keys(data.strings.types).map((t) => [t, css.getPropertyValue(`--t-${t}`).trim()]));
+  import('../scripts/osint-graph')
+    .then(({ mount }) => {
+      scene = mount({
+        stage: $('stage'),
+        input: hero,
+        canvas: hero.querySelector('canvas')!,
+        labels: hero.querySelector<HTMLElement>('.labels')!,
+        graph: data.graph,
+        colors,
+        selected: current,
+        onPick: show,
+      });
+      hero.classList.add('gl');
+      // Scroll focus: each section names the kind of node it is about; the scene flies there and steps back.
+      const zones = [...document.querySelectorAll<HTMLElement>('[data-focus]')];
+      let queued = false;
+      const sync = () => {
+        queued = false;
+        const mid = innerHeight * 0.5;
+        const z = zones.find((el) => { const r = el.getBoundingClientRect(); return r.top <= mid && r.bottom > mid; });
+        scene!.focus(z ? z.dataset.focus! : null);
+      };
+      addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(sync); } }, { passive: true });
+      addEventListener('resize', sync);
+      sync();
+    })
+    .catch(() => hero.classList.add('no-gl'));
+</script>
+
+<style>
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative; display: flex; flex-direction: column; justify-content: center;
+    min-height: calc(100svh - var(--bar)); padding: 56px var(--pad) 150px;
+  }
+  /* Wide screens: the scene is fixed behind the whole page and follows the scroll. Its canvas composites additively. */
+  .stage {
+    position: fixed; inset: var(--bar) 0 0 0; z-index: -1; user-select: none;
+    transition: opacity 900ms var(--ease), filter 900ms var(--ease);
+  }
+  /* out of focus on purpose: behind the sections the scene is atmosphere, the text is the subject */
+  .stage:global([data-mode='ambient']) { opacity: 0.3; filter: blur(5px); }
+  .stage::after { transition: opacity 900ms var(--ease); }
+  .stage:global([data-mode='ambient'])::after { opacity: 0; }
+  .stage::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 900ms var(--ease); }
+  .gl canvas { opacity: 1; }
+  .fallback { position: absolute; right: 0; top: 46%; width: min(66%, 105vh); transform: translateY(-50%); overflow: visible; transition: opacity 500ms var(--ease); }
+  .gl .fallback { opacity: 0; }
+  .fallback line { stroke: var(--line); stroke-width: 0.004; }
+  .fallback circle { fill: var(--c); }
+
+  :global([data-t='person']) { --c: var(--t-person); }
+  :global([data-t='vuln']) { --c: var(--t-vuln); }
+  :global([data-t='target']) { --c: var(--t-target); }
+  :global([data-t='account']) { --c: var(--t-account); }
+  :global([data-t='tool']) { --c: var(--t-tool); }
+  :global([data-t='writeup']) { --c: var(--t-writeup); }
+
+  .labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .labels :global(span) {
+    position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; color: var(--c);
+    font: 600 0.72rem/1 var(--mono);
+    text-shadow: 0 0 4px var(--bg), 0 0 10px var(--bg), 0 0 18px var(--bg);
+    transition: opacity 260ms var(--ease); will-change: transform;
+  }
+  .labels :global(span.on) { font-weight: 700; font-size: 0.84rem; color: var(--fg-hi); }
+
+  .intro { max-width: 37rem; pointer-events: none; }
+  .intro a { pointer-events: auto; }
+  h1 {
+    position: relative; margin-top: 14px;
+    font: 700 clamp(2.7rem, 6vw, 5rem)/0.98 var(--mono); letter-spacing: -0.045em;
+    color: var(--fg-hi); text-shadow: 0 0 28px rgba(53, 242, 154, 0.45);
+  }
+  /* glitch: two offset copies of the name flash in slices every few seconds */
+  h1::before, h1::after { content: attr(data-text); position: absolute; inset: 0; opacity: 0; pointer-events: none; text-shadow: none; }
+  h1::before { color: var(--t-vuln); animation: glitch-a 6.5s steps(1) 2.4s infinite; }
+  h1::after { color: var(--t-account); animation: glitch-b 6.5s steps(1) 2.4s infinite; }
+  @keyframes glitch-a {
+    0%, 4%, 100% { opacity: 0; }
+    1% { opacity: 0.85; transform: translate(-5px, 1px); clip-path: inset(12% 0 58% 0); }
+    2% { opacity: 0.85; transform: translate(4px, -1px); clip-path: inset(64% 0 8% 0); }
+    3% { opacity: 0.85; transform: translate(-3px, 0); clip-path: inset(38% 0 36% 0); }
+  }
+  @keyframes glitch-b {
+    0%, 4%, 100% { opacity: 0; }
+    1% { opacity: 0.85; transform: translate(5px, -1px); clip-path: inset(52% 0 20% 0); }
+    2% { opacity: 0.85; transform: translate(-4px, 1px); clip-path: inset(6% 0 72% 0); }
+    3% { opacity: 0.85; transform: translate(3px, 0); clip-path: inset(74% 0 4% 0); }
+  }
+  .boot .typed { display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; width: 6ch; animation: typing 500ms steps(6) 100ms backwards; }
+  @keyframes typing { from { width: 0; } }
+  @media (prefers-reduced-motion: reduce) { h1::before, h1::after, .boot .typed { animation: none; } }
+  .aka { margin-top: 20px; font: 600 clamp(1rem, 1.35vw, 1.15rem)/1.4 var(--mono); color: var(--acc); max-width: 34ch; }
+  .lede { margin-top: 12px; font-size: 0.97rem; line-height: 1.6; color: var(--dim); max-width: 48ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; margin-top: 30px; }
+  .ghost { font-weight: 500; }
+
+  .insp { position: absolute; right: var(--pad); bottom: 34px; width: min(410px, 38vw); }
+  .wbar {
+    display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 0.72rem; color: var(--addr);
+    border: 1px solid var(--line); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--gutter);
+  }
+  .wbar span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .wbar span:first-child { background: var(--t-vuln); }
+  .wbar span:nth-child(2) { background: var(--t-target); }
+  .wbar span:nth-child(3) { background: var(--acc); margin-right: 8px; }
+  .card {
+    padding: 16px 18px 14px; border-radius: 0 0 4px 4px; border: 1px solid color-mix(in srgb, var(--c) 40%, var(--line));
+    background: color-mix(in srgb, var(--gutter) 86%, transparent); backdrop-filter: blur(10px);
+    box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.9), 0 0 40px -18px var(--c);
+    transition: border-color 300ms var(--ease);
+  }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .type { display: flex; align-items: center; gap: 8px; font-size: 0.76rem; font-weight: 600; color: var(--c); text-transform: lowercase; }
+  .type::before { content: 'type:'; color: var(--addr); font-weight: 400; }
+  .title { margin-top: 6px; font: 700 1.3rem/1.15 var(--mono); letter-spacing: -0.03em; color: var(--fg-hi); overflow-wrap: anywhere; }
+  .desc { margin-top: 8px; font-size: 0.85rem; line-height: 1.55; color: var(--fg); }
+  .rel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 12px; font-size: 0.8rem; color: var(--addr); }
+  #insp-links { display: contents; }
+  .rel :global(button) {
+    all: unset; cursor: pointer; display: inline-flex; align-items: center; min-height: 26px; padding: 0 8px; border-radius: 2px;
+    font: 600 0.76rem/1 var(--mono); color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+    transition: background-color 180ms var(--ease);
+  }
+  .rel :global(button:hover) { background: color-mix(in srgb, var(--c) 16%, transparent); }
+  .rel :global(button:focus-visible) { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .src {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--line); font-weight: 700; font-size: 0.94rem;
+  }
+  .src .id { color: var(--addr); font-weight: 400; overflow-wrap: anywhere; }
+  .src[hidden] { display: none; }
+  .walk { display: flex; align-items: center; gap: 10px; margin-top: 10px; color: var(--addr); }
+  .walk button {
+    all: unset; cursor: pointer; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 2px;
+    color: var(--fg-hi); border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 80%, transparent);
+    transition: background-color 180ms var(--ease), border-color 180ms var(--ease);
+  }
+  .walk button:hover { background: var(--panel-2); border-color: var(--addr); }
+  .walk button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .walk .id { min-width: 5.5ch; text-align: center; }
+  .hint { margin-left: auto; font-size: 0.78rem; text-align: right; }
+  .no-gl .hint { display: none; }
+
+  .legend { position: absolute; left: var(--pad); bottom: 40px; list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.8rem; color: var(--dim); max-width: 46%; }
+  .legend li { display: flex; align-items: center; gap: 7px; }
+  .legend .dot { width: 8px; height: 8px; box-shadow: none; }
+
+  /* ---------- sections ---------- */
+  .sec { padding: clamp(64px, 11vh, 120px) var(--pad) 0; max-width: 1440px; margin-inline: auto; }
+  .sh { display: grid; gap: 10px; margin-bottom: 30px; }
+  h2 { font: 700 clamp(1.7rem, 3.3vw, 2.5rem)/1.05 var(--mono); letter-spacing: -0.045em; color: var(--fg-hi); text-wrap: balance; }
+  h2::before { content: '# '; color: var(--acc); }
+  .sh p { color: var(--dim); max-width: 60ch; }
+
+  .lst { list-style: none; padding: 0; border-top: 1px solid var(--line); }
   .lst li {
-    display: grid; grid-template-columns: 18px 92px minmax(0, 1fr) auto; gap: 12px; align-items: baseline;
-    padding: 6px var(--pad) 6px calc(var(--pad) - 30px); transition: background-color 180ms var(--ease);
+    display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) minmax(0, 1.25fr); gap: 4px 28px; align-items: baseline;
+    padding: 18px 12px; border-bottom: 1px solid var(--line); transition: background-color 180ms var(--ease);
   }
   .lst li:hover { background: var(--hl); }
-  .lst li.ip { background: var(--hl); }
-  .lst .mk { color: var(--kw); display: flex; align-items: center; }
-  .lst li.nx { box-shadow: inset 2px 0 0 var(--kw); }
-  .lst li.nx .mk { color: var(--addr); }
-  .sev {
-    font: 700 12.5px/1 var(--mono); color: var(--bg); background: var(--num); padding: 4px 7px; border-radius: 3px;
-    min-width: 48px; text-align: center; font-variant-numeric: tabular-nums;
+  .sev { font: 700 1.5rem/1 var(--mono); letter-spacing: -0.04em; color: var(--t-target); font-variant-numeric: tabular-nums; }
+  .sev.crit { color: var(--t-vuln); }
+  /* the CVSS 10.0 is the strongest proof on the page, so it gets the scale */
+  .lst li.top { padding-block: 34px 30px; align-items: center; grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, 1.1fr); gap: 8px clamp(24px, 5vw, 72px); }
+  .lst li.top .sev { font-size: clamp(4.4rem, 11vw, 8.6rem); line-height: 0.8; letter-spacing: -0.08em; text-shadow: 0 0 60px rgba(255, 77, 94, 0.6); }
+  .lst li.top .what { flex-direction: column; gap: 6px; }
+  .lst li.top .what a { font-size: clamp(1.1rem, 2vw, 1.5rem); }
+  .lst li.top .tgt { font: 700 clamp(1.8rem, 3.8vw, 3rem)/0.95 var(--mono); letter-spacing: -0.05em; }
+  .lst li.top .cls { font-size: clamp(1.1rem, 1.7vw, 1.35rem); color: var(--fg-hi); }
+  .lst li.top .note { font-size: 1rem; color: var(--t-vuln); margin-top: 4px; }
+  .what { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; }
+  .what a { font: 500 1.02rem/1.4 var(--mono); }
+  .tgt { font-weight: 700; color: var(--fg-hi); }
+  .cls { color: var(--fg); }
+  .note { display: block; font-size: 0.9rem; color: var(--addr); }
+
+  .hof { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); column-gap: 40px; border-top: 1px solid var(--line); }
+  .hof li { padding: 16px 0; border-bottom: 1px solid var(--line); font: 600 clamp(1rem, 1.5vw, 1.2rem)/1.25 var(--mono); letter-spacing: -0.03em; color: var(--fg-hi); }
+  .hof li::before { content: '[+]'; color: var(--acc); margin-right: 12px; font-weight: 500; }
+  .plat { margin-top: 20px; color: var(--dim); }
+
+  .tools { list-style: none; padding: 0; border-top: 1px solid var(--line); }
+  .tools li { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.6fr) minmax(0, 0.9fr); gap: 6px 28px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .tn { font: 700 1.3rem/1.15 var(--mono); letter-spacing: -0.04em; color: var(--t-tool); text-decoration: none; }
+  .tn::before { content: './'; color: var(--addr); font-weight: 400; }
+  .tn:hover { color: var(--fg-hi); }
+  .td { color: var(--fg); max-width: 58ch; }
+  .tt { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: flex-end; color: var(--addr); font-size: 0.92rem; }
+  .arsenal { margin-top: 22px; color: var(--dim); font-size: 0.95rem; max-width: 90ch; }
+  .arsenal span { color: var(--fg-hi); font-weight: 700; margin-right: 6px; }
+
+  .wr { list-style: none; padding: 0; border-top: 1px solid var(--line); }
+  .wr li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 4px 20px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); color: var(--addr); }
+  .wr a { font: 600 1.08rem/1.35 var(--mono); letter-spacing: -0.03em; color: var(--fg-hi); text-decoration: none; text-wrap: balance; }
+  .wr a:hover { color: var(--t-writeup); }
+  .empty { color: var(--dim); max-width: 70ch; }
+
+  .connect { padding: clamp(88px, 16vh, 170px) var(--pad) clamp(72px, 12vh, 120px); max-width: 1440px; margin-inline: auto; }
+  .connect h2 { margin-top: 12px; font-size: clamp(2.2rem, 5.6vw, 4.4rem); line-height: 0.98; letter-spacing: -0.06em; text-shadow: 0 0 30px rgba(53, 242, 154, 0.4); }
+  .connect h2::before { content: none; }
+  .connect .lede { margin-top: 20px; font-size: 1rem; max-width: 52ch; }
+  .links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 34px; }
+
+  @media (max-width: 899px) {
+    .hero { justify-content: flex-start; min-height: 0; padding: 44px var(--pad) 28px; }
+    .intro { order: 1; }
+    .stage { order: 2; }
+    .insp { order: 3; }
+    .legend { order: 4; }
+    .stage { position: relative; inset: auto; z-index: -1; touch-action: pan-y; height: 52svh; min-height: 340px; max-height: 520px; margin: 18px calc(var(--pad) * -1) 0; }
+    /* in-flow on small screens: feather the top and bottom so the scene has no edge */
+    .stage canvas { mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 82%, transparent 100%); }
+    .fallback { position: absolute; inset: 0; width: 100%; height: 100%; top: 0; transform: none; }
+    .insp { position: static; width: auto; }
+    .legend { position: static; max-width: none; margin-top: 22px; }
+    .hint { display: none; }
+    .lst li { grid-template-columns: 4rem minmax(0, 1fr); padding: 16px 0; }
+    .lst li.top { grid-template-columns: 1fr; gap: 14px; }
+    .lst li.top .cls { grid-column: 1; }
+    .cls { grid-column: 2; }
+    .tools li { grid-template-columns: 1fr; }
+    .tt { justify-content: flex-start; }
+    .wr li { grid-template-columns: 1fr; }
   }
-  .sev.crit { background: var(--crit); }
-
-  .regs { padding: 12px 22px 4px; font-size: 13.5px; }
-  .regs div { display: grid; grid-template-columns: 50px 1fr; padding: 6px 0; border-bottom: 1px dashed var(--line); }
-  .regs dt { color: var(--addr); }
-  .regs dd { color: var(--fg-hi); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-  .regs dd.hot { color: var(--crit); }
-  .flags { display: flex; gap: 14px; padding: 10px 22px 18px; color: var(--dim); font-size: 12.5px; }
-  .flags b { color: var(--kw); font-weight: 500; }
-  .stack { list-style: none; padding: 10px 22px 6px; font-size: 13px; }
-  .stack li { display: grid; grid-template-columns: 84px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
-  .stack li:last-child { border-bottom: 0; }
-  .tn { font: 800 1.02rem/1.3 var(--disp); color: var(--fg-hi); text-decoration: none; }
-  .tn:hover { color: var(--kw); }
-  .td { display: block; color: var(--dim); line-height: 1.55; margin-top: 2px; }
-  .tt { display: block; font-size: 12px; margin-top: 2px; }
-  .imports { padding: 10px 22px 22px; font-size: 12.5px; color: var(--dim); line-height: 1.7; }
-
-  .band { border-bottom: 1px solid var(--line); }
-  .band .fh { border-top: 0; padding-top: 34px; }
-  .empty { padding: 0 var(--pad) 28px; color: var(--dim); }
-
-  .connect { padding: 64px var(--pad) 56px; border-bottom: 1px solid var(--line); }
-  .connect h2 { font: 900 clamp(2.2rem, 5vw, 3.8rem)/1 var(--disp); letter-spacing: -0.03em; margin: 12px 0 16px; }
-  .links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 28px; }
-  .log { padding: 18px var(--pad) 22px; font-size: 13px; color: var(--dim); background: var(--gutter); border-bottom: 1px solid var(--line); }
-  .log p { padding: 2px 0; }
-
-  @media (max-width: 960px) {
-    .cpu { grid-template-columns: 1fr; }
-    .side .ph, .regs, .flags, .stack, .imports { padding-left: var(--pad); padding-right: var(--pad); }
-  }
-  @media (max-width: 640px) {
-    .lst li { grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; padding: 9px var(--pad) 9px 6px; }
-    .lst .a { display: none; }
-    .lst li .body { overflow-wrap: anywhere; }
-    .stack li { grid-template-columns: 1fr; gap: 2px; }
-    .stack li > .a { font-size: 11.5px; }
+  @media (prefers-reduced-motion: reduce) {
+    canvas, .stage, .fallback, .labels :global(span), .card { transition: none; }
   }
 </style>

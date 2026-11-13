@@ -19,10 +19,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     'Technical writeups on vulnerability research, exploit development and reverse engineering by Marcos Tolosa (Tr0p).',
     'Writeups técnicos de pesquisa de vulnerabilidades, desenvolvimento de exploits e engenharia reversa por Marcos Tolosa (Tr0p).',
   )}
-  where="writeups"
 >
   <header class="head">
-    <p class="c">; sub_401520 writeups() · {writeups.length} {L('entries', 'entradas')}</p>
+    <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>ls -lt writeups/</i></p>
     <h1>Writeups</h1>
     <p class="lede">{L(
       'Root cause first, then the exploit, then how to find the next one. Step by step, nothing skipped.',
@@ -44,24 +43,26 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     </ol>
   ) : (
     <div class="empty">
-      <p><span class="c">; {L('nothing published here yet.', 'nada publicado aqui ainda.')}</span></p>
-      <p>{L('Until the first writeup lands, the coordinated advisories are the primary sources: start at', 'Até o primeiro writeup sair, os advisories coordenados são as fontes primárias: comece em')} <a href={localize('/#disclosures', lang)}>disclosures()</a>.</p>
+      <p>{L('Nothing published here yet. Until the first writeup lands, the coordinated advisories are the primary sources: start at the', 'Nada publicado aqui ainda. Até o primeiro writeup sair, os advisories coordenados são as fontes primárias: comece pelas')} <a href={localize('/#disclosures', lang)}>{L('disclosed vulnerabilities', 'vulnerabilidades divulgadas')}</a>.</p>
     </div>
   )}
 </Base>
 
 <style>
-  .head { padding: clamp(48px, 9vh, 96px) var(--pad) 40px; border-bottom: 1px solid var(--line); }
-  h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/1 var(--disp); color: var(--fg-hi); letter-spacing: -0.035em; margin: 16px 0 16px; }
-  .lede { font: 500 1.2rem/1.5 var(--disp); max-width: 46ch; }
-  .list { list-style: none; padding: 0; }
+  .head { padding: clamp(56px, 10vh, 110px) var(--pad) 44px; max-width: 1440px; margin-inline: auto; }
+  h1 { font: 700 clamp(2.6rem, 6vw, 4.6rem)/0.98 var(--mono); color: var(--fg-hi); letter-spacing: -0.06em; text-shadow: 0 0 28px rgba(53, 242, 154, 0.4); }
+  h1::before { content: '# '; color: var(--acc); }
+  .lede { margin-top: 20px; font-size: 1rem; line-height: 1.5; color: var(--dim); max-width: 46ch; }
+  .list { list-style: none; padding: 0 var(--pad) 80px; max-width: 1440px; margin-inline: auto; }
+  .list li { border-top: 1px solid var(--line); }
+  .list li:last-child { border-bottom: 1px solid var(--line); }
   .list a {
-    display: grid; gap: 6px; padding: 26px var(--pad); border-bottom: 1px solid var(--line);
+    display: grid; gap: 6px; padding: 28px 12px; margin-inline: -12px;
     text-decoration: none; color: var(--fg); transition: background-color 180ms var(--ease);
   }
   .list a:hover { background: var(--hl); }
-  .meta { font-size: 12.5px; }
-  .t { font: 800 1.5rem/1.2 var(--disp); color: var(--fg-hi); letter-spacing: -0.015em; text-wrap: balance; }
-  .sum { font: 400 1.05rem/1.55 var(--disp); color: var(--dim); max-width: 68ch; }
-  .empty { padding: 40px var(--pad); color: var(--dim); display: grid; gap: 8px; max-width: 80ch; }
+  .meta { font: 500 0.78rem/1.4 var(--mono); color: var(--t-writeup); }
+  .t { font: 700 clamp(1.2rem, 2vw, 1.5rem)/1.25 var(--mono); color: var(--fg-hi); letter-spacing: -0.04em; text-wrap: balance; }
+  .sum { color: var(--dim); max-width: 68ch; }
+  .empty { padding: 0 var(--pad) 80px; color: var(--dim); max-width: 80ch; }
 </style>

@@ -1,15 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="404 — Tr0p" description="Page not found. Página não encontrada." where="sub_404" alternates={{ en: '/', 'pt-br': '/pt-br/' }}>
+<Base title="404 — Tr0p" description="Page not found. Página não encontrada." alternates={{ en: '/', 'pt-br': '/pt-br/' }}>
   <section class="nf">
-    <p class="c">; sub_404 · unresolved xref</p>
-    <h1>Bad address.</h1>
-    <p>Nothing is mapped here. Jump back to <a href="/">whoami()</a> or the <a href="/writeups/">writeups</a>.</p>
-    <p lang="pt-BR">Nada mapeado aqui. Volte para <a href="/pt-br/">whoami()</a> ou para os <a href="/pt-br/writeups/">writeups</a>.</p>
+    <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>curl -I this-page</i> &nbsp;HTTP/1.1 404</p>
+    <h1>Out of scope.</h1>
+    <p>This address is not part of the engagement. Go back to the <a href="/">graph</a> or read the <a href="/writeups/">writeups</a>.</p>
+    <p lang="pt-BR">Este endereço está fora do escopo. Volte para o <a href="/pt-br/">grafo</a> ou leia os <a href="/pt-br/writeups/">writeups</a>.</p>
   </section>
 </Base>
 <style>
-  .nf { padding: clamp(56px, 12vh, 120px) var(--pad); display: grid; gap: 16px; }
-  h1 { font: 900 clamp(2.6rem, 7vw, 5rem)/1 var(--disp); color: var(--fg-hi); letter-spacing: -0.035em; }
+  .nf { padding: clamp(72px, 16vh, 160px) var(--pad); display: grid; gap: 16px; max-width: 1440px; margin-inline: auto; color: var(--dim); }
+  h1 { font: 700 clamp(2.6rem, 7vw, 5rem)/0.98 var(--mono); color: var(--t-vuln); letter-spacing: -0.06em; margin-bottom: 8px; text-shadow: 0 0 30px rgba(255, 77, 94, 0.5); }
+  p { max-width: 52ch; }
 </style>

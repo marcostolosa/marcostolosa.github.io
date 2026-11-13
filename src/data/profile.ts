@@ -7,8 +7,8 @@ export const profile = {
   handle: 'Tr0p',
   base: { en: 'Rio de Janeiro, BR', 'pt-br': 'Rio de Janeiro, BR' } as T,
   lede: {
-    en: 'Red teamer, exploit developer and reverse engineer. I take every finding apart to its root cause, turn it into tooling, and write it up so you can follow.',
-    'pt-br': 'Red teamer, exploit developer e engenheiro reverso. Desmonto cada achado até a causa raiz, transformo em ferramenta e documento pra você conseguir seguir.',
+    en: 'Red teamer, pentester and bug bounty hunter. I take every finding down to its root cause, turn it into tooling, and write it up so you can follow.',
+    'pt-br': 'Red teamer, pentester e bug hunter. Levo cada achado até a causa raiz, transformo em ferramenta e documento pra você conseguir seguir.',
   } as T,
   email: 'marcos.tolosa@owasp.org',
 };
@@ -16,7 +16,7 @@ export const profile = {
 export type Disclosure = {
   id: string;
   href: string;
-  sym: string; // target symbol, used for xref highlighting
+  sym: string; // target key: links the finding to its target node in the graph
   cls: string;
   note?: T;
   sev: string;
@@ -95,7 +95,7 @@ export const hallOfFame = {
 export const tools: { name: string; href: string; repo?: string; desc: T; tags: string }[] = [
   {
     name: 'MANW-NG',
-    href: '/manw-ng.html',
+    href: '/manw-ng/',
     repo: 'https://github.com/marcostolosa/manw-ng',
     desc: {
       en: 'Win32/NTAPI docs scraper plus a live ctypes execution engine, built for reversers who never leave the terminal.',
@@ -105,7 +105,7 @@ export const tools: { name: string; href: string; repo?: string; desc: T; tags: 
   },
   {
     name: 'OCRack',
-    href: '/ocrack.html',
+    href: '/ocrack/',
     repo: 'https://github.com/marcostolosa/OCRack',
     desc: {
       en: 'Translate and OCR any PDF while keeping its layout. PaddleOCR, PyMuPDF and an LLM.',
@@ -145,5 +145,8 @@ export const links = [
   { label: 'discord', href: 'https://discord.gg/T9RVG3re2J' },
 ];
 
-/** Home page sections in Step order; ids are the anchors. Tests import this list. */
-export const stepSections = ['whoami', 'disclosures', 'hall_of_fame', 'writeups', 'connect'] as const;
+/** Bug bounty platforms where the record above was earned. */
+export const platforms = ['Bugcrowd', 'HackerOne', 'YesWeHack', 'Intigriti'];
+
+/** Home page sections in reading order; ids are the anchors. Tests import this list. */
+export const homeSections = ['whoami', 'disclosures', 'hall_of_fame', 'tools', 'writeups', 'connect'] as const;

@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { stepSections } from '../src/data/profile';
+import { homeSections } from '../src/data/profile';
 import { pages, WCAG } from './pages';
 
 const scan = async (page: Page, include?: string) => {
@@ -37,28 +37,28 @@ for (const p of pages) {
 test('404 page is accessible', async ({ page }) => {
   const res = await page.goto('/this-address-is-not-mapped/');
   expect(res?.status()).toBe(404);
-  await expect(page.locator('h1')).toHaveText('Bad address.');
+  await expect(page.locator('h1')).toHaveText('Out of scope.');
   await scan(page);
 });
 
 for (const home of ['/', '/pt-br/']) {
   test.describe(`sections on ${home}`, () => {
-    for (const id of [...stepSections, 'registers']) {
+    for (const id of homeSections) {
       test(`#${id} renders, is labelled and passes axe`, async ({ page }) => {
         await page.goto(home);
         const s = page.locator(`#${id}`);
         await s.scrollIntoViewIfNeeded();
         await expect(s).toBeVisible();
         if (id === 'whoami') await expect(s.locator('h1')).toBeVisible();
-        else if (id === 'registers') await expect(s).toHaveAttribute('aria-label', /.+/);
         else await expect(s.locator('h2')).toBeVisible();
         await scan(page, `#${id}`);
       });
     }
 
-    test('stays accessible after stepping through every section', async ({ page }) => {
+    test('stays accessible after walking the graph', async ({ page }) => {
       await page.goto(home);
-      for (let i = 0; i < stepSections.length; i++) await page.locator('#step').click();
+      for (let i = 0; i < 6; i++) await page.locator('#next').click();
+      await page.locator('#insp-links button').first().click();
       await scan(page);
     });
   });

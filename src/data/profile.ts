@@ -92,7 +92,8 @@ export const hallOfFame = {
   record: 'https://bugcrowd.com/h/Tr0p',
 };
 
-export const tools: { name: string; href: string; repo?: string; desc: T; tags: string }[] = [
+/** `i18n`: the landing page at `href` also exists under /pt-br/. */
+export const tools: { name: string; href: string; i18n?: boolean; repo?: string; desc: T; tags: string }[] = [
   {
     name: 'MANW-NG',
     href: '/manw-ng/',
@@ -116,6 +117,7 @@ export const tools: { name: string; href: string; repo?: string; desc: T; tags: 
   {
     name: 'Atticus',
     href: '/atticus/',
+    i18n: true,
     repo: 'https://github.com/marcostolosa/atticus-linux',
     desc: {
       en: 'Voice assistant overlay for Omarchy (Hyprland/Wayland). Hotkey or wake word, local Whisper and Piper speech in Portuguese and English, model shell commands sandboxed with bubblewrap.',

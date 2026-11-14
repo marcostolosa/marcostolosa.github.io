@@ -290,3 +290,83 @@ export const atticus: ToolPage = {
     { label: 'Piper', href: 'https://github.com/OHF-Voice/piper1-gpl' },
   ],
 };
+
+/** /pt-br/atticus/: same page, same commands, Portuguese prose. */
+export const atticusPt: ToolPage = {
+  ...atticus,
+  title: 'Atticus: assistente de voz em overlay para Omarchy e Hyprland',
+  description:
+    'Atticus é um assistente de voz em overlay para o Omarchy (Hyprland/Wayland): hotkey ou wake word, reconhecimento de fala local em português do Brasil e inglês, voz neural e comandos de shell em sandbox.',
+  tagline: 'Aperte uma tecla, fale, ouça a resposta. No seu próprio desktop Linux.',
+  lede: 'O Atticus coloca um painel pequeno, sempre visível, no canto da tela. Ele transcreve português do Brasil ou inglês com `faster-whisper`, responde com uma voz neural do `Piper` e passa todo comando que o modelo executa por uma sandbox `bubblewrap`.',
+  badges: [['plataforma', 'Omarchy · Hyprland'], ['licença', 'MIT'], ['stack', 'GTK4 · faster-whisper · Piper'], ['fala', 'local']],
+  demo: {
+    title: atticus.demo.title,
+    lines: [
+      { note: 'atalho Ctrl+Alt+Space: aperte, fale, aperte de novo' },
+      { cmd: 'atticus-ctl toggle' },
+      { out: '<span class="k">ouvido</span>   <span class="s">"coloca um timer de 10 minutos para o macarrão"</span>' },
+      { out: '<span class="k">direto</span>   timer · <span class="n">10:00</span> · macarrão <span class="c">(sem passar pela IA)</span>' },
+      { gap: true },
+      { note: 'todo o resto vai para o modelo, atrás da barreira' },
+      { out: '<span class="k">ouvido</span>   <span class="s">"o que tem na minha tela?"</span>' },
+      { out: '<span class="k">sandbox</span>  bwrap · arquivos só leitura · sem rede' },
+      { out: '<span class="s">[+]</span> resposta exibida no painel e lida em voz alta' },
+    ],
+  },
+  features: {
+    intro: 'Um assistente de voz de desktop que não atrapalha, mantém a sua fala na sua máquina e nunca deixa o modelo rodar um comando sem verificação.',
+    items: [
+      { name: 'Overlay que não rouba o foco', desc: 'Um painel de canto feito sobre `wlr-layer-shell` com GTK4 e WebKitGTK. Flutua acima das janelas e deixa o teclado onde estava.' },
+      { name: 'Hotkey ou wake word', desc: 'Aperte para falar com um atalho, ou ligue a wake word sempre ativa. O modo conversa reabre o microfone quando o Atticus termina com uma pergunta.' },
+      { name: 'Fala local, nos dois sentidos', desc: 'Reconhecimento ajustado para português do Brasil com `faster-whisper`, com suporte a inglês. A voz do `Piper` fica carregada, então a resposta começa a ser falada na hora.' },
+      { name: 'Comandos instantâneos', desc: 'Timers, alarmes, lembretes, volume, brilho, mídia, listas, Wi-Fi, Bluetooth e bloqueio de tela rodam localmente em português e inglês, sem passar pela IA.' },
+      { name: 'Sandbox por padrão', desc: 'Os comandos do modelo rodam dentro do `bubblewrap`: arquivos só leitura, chaves e perfis de navegador ocultos, sem rede. Mudanças reais pedem um cartão de permissão. `rm`, `sudo` e `git push` nunca rodam.' },
+      { name: 'Vê e opera o desktop', desc: 'Leitura de tela com `grim` e `tesseract`, busca na web, busca de arquivos locais, clique e digitação nativos, e casa inteligente por um servidor Home Assistant.' },
+    ],
+  },
+  usage: {
+    intro: 'Configure uma tecla e fale. O Atticus roda como serviço de usuário do systemd, então você o gerencia como qualquer outro.',
+    modes: [
+      {
+        name: 'Fale com ele', tag: 'hotkey · wake word',
+        desc: 'Aperte Ctrl+Alt+Space, fale e aperte de novo para enviar. A resposta aparece no painel e é lida em voz alta. Feche com Esc ou deixe sumir sozinho.',
+        cmds: atticus.usage.modes[0].cmds,
+      },
+      {
+        name: 'Rode como serviço', tag: 'systemd user',
+        desc: 'As configurações ficam em ~/.config/atticus/settings.json. Reinicie o serviço depois de editar e acompanhe os logs ao vivo.',
+        cmds: atticus.usage.modes[1].cmds,
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Pipeline de voz',
+    intro: 'Todo pedido faz o mesmo caminho, da sua voz até a resposta falada.',
+    steps: [
+      { name: 'Gatilho', desc: 'Um atalho ou a wake word abre o microfone.' },
+      { name: 'Transcrição', desc: 'O faster-whisper transforma fala em texto, localmente.' },
+      { name: 'Roteamento', desc: 'Comandos do dia a dia rodam na hora. O resto vai para o modelo.' },
+      { name: 'Barreira', desc: 'Comandos do modelo passam pela sandbox ou esperam a sua permissão.' },
+      { name: 'Resposta', desc: 'O texto aparece em tempo real no painel.' },
+      { name: 'Fala', desc: 'O Piper lê em voz alta com uma voz neural.' },
+    ],
+  },
+  numbers: [
+    ['Idiomas de fala', 'PT-BR / EN'],
+    ['Níveis de segurança de comando', '4'],
+    ['Modelo Whisper padrão', 'small'],
+    ['Telemetria', 'nenhuma'],
+  ],
+  install: {
+    intro: 'Clone e compile. O `build.sh` cria o ambiente virtual, baixa a voz em português e inicia o serviço de usuário.',
+    cmd: atticus.install.cmd,
+    notes: [
+      'Requer Omarchy ou outra sessão Hyprland / Wayland, e Python 3.11+.',
+      'O `build.sh` confere os pacotes do sistema e mostra a linha exata do `pacman` para o que faltar.',
+      'O cérebro usa a CLI `claude` por padrão. Um endpoint no estilo OpenAI ou Claude (Ollama, LM Studio) também funciona.',
+      'Saia da sessão e entre de novo uma vez após a primeira instalação, para o `ydotool` poder clicar e digitar.',
+    ],
+  },
+  closing: 'Uma voz para o seu desktop Linux que você pode ler, auditar e mudar. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
+};

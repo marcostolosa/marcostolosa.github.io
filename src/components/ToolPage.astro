@@ -2,9 +2,16 @@
 // A tool's landing page, written as its README: pitch and live demo on top, the file below.
 import Base from '../layouts/Base.astro';
 import type { ToolPage } from '../data/toolpages';
+import { localize, type Lang } from '../i18n/ui';
 
-interface Props { tool: ToolPage }
-const { tool: t } = Astro.props;
+interface Props {
+  tool: ToolPage;
+  lang?: Lang;
+  /** The page exists in both locales at the same path. Otherwise PT-BR readers are sent back to the tools list. */
+  bilingual?: boolean;
+}
+const { tool: t, lang = 'en', bilingual = false } = Astro.props;
+const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /** Prose with `inline code`. */
@@ -26,15 +33,15 @@ const demo = t.demo.lines
   .join('\n');
 
 const toc = [
-  ['features', 'Features'],
-  ['usage', 'Usage'],
+  ['features', L('Features', 'Recursos')],
+  ['usage', L('Usage', 'Uso')],
   ['pipeline', t.pipeline.title],
-  ['numbers', 'Numbers'],
-  ['install', 'Install'],
+  ['numbers', L('Numbers', 'Números')],
+  ['install', L('Install', 'Instalação')],
   ['links', 'Links'],
 ];
 ---
-<Base title={t.title} description={t.description} alternates={{ en: `/${t.slug}/`, 'pt-br': '/pt-br/#tools' }}>
+<Base title={t.title} description={t.description} lang={lang} alternates={bilingual ? undefined : { en: `/${t.slug}/`, 'pt-br': '/pt-br/#tools' }}>
   <div class="tp" data-tint={t.tint} style={`--c: var(--t-${t.tint})`}>
     <header class="hero">
       <div class="pitch">
@@ -42,12 +49,12 @@ const toc = [
         <h1 translate="no"><span class="hash" aria-hidden="true"># </span>{t.name}</h1>
         <p class="tag">{t.tagline}</p>
         <p class="lede" set:html={md(t.lede)} />
-        <ul class="badges" aria-label="Project facts">
+        <ul class="badges" aria-label={L('Project facts', 'Dados do projeto')}>
           {t.badges.map(([k, v]) => <li><span>{k}</span><b>{v}</b></li>)}
         </ul>
         <p class="cta">
-          <a class="btn" href="#install">Install</a>
-          <a href={t.repo} rel="noopener">Source on GitHub</a>
+          <a class="btn" href="#install">{L('Install', 'Instalar')}</a>
+          <a href={t.repo} rel="noopener">{L('Source on GitHub', 'Código no GitHub')}</a>
         </p>
       </div>
       <figure class="term">
@@ -57,7 +64,7 @@ const toc = [
     </header>
 
     <div class="doc">
-      <nav class="toc" aria-label="On this page">
+      <nav class="toc" aria-label={L('On this page', 'Nesta página')}>
         <p aria-hidden="true">README.md</p>
         <ul>
           {toc.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
@@ -66,7 +73,7 @@ const toc = [
 
       <article class="file">
         <section id="features" aria-labelledby="h-features">
-          <h2 id="h-features"><span class="hash" aria-hidden="true">## </span>Features</h2>
+          <h2 id="h-features"><span class="hash" aria-hidden="true">## </span>{L('Features', 'Recursos')}</h2>
           <p class="intro">{t.features.intro}</p>
           <dl class="feat">
             {t.features.items.map((f) => (
@@ -79,7 +86,7 @@ const toc = [
         </section>
 
         <section id="usage" aria-labelledby="h-usage">
-          <h2 id="h-usage"><span class="hash" aria-hidden="true">## </span>Usage</h2>
+          <h2 id="h-usage"><span class="hash" aria-hidden="true">## </span>{L('Usage', 'Uso')}</h2>
           <p class="intro">{t.usage.intro}</p>
           <div class="modes">
             {t.usage.modes.map((m) => (
@@ -106,9 +113,9 @@ const toc = [
         </section>
 
         <section id="numbers" aria-labelledby="h-numbers">
-          <h2 id="h-numbers"><span class="hash" aria-hidden="true">## </span>Numbers</h2>
+          <h2 id="h-numbers"><span class="hash" aria-hidden="true">## </span>{L('Numbers', 'Números')}</h2>
           <table>
-            <thead><tr><th scope="col">Metric</th><th scope="col">Value</th></tr></thead>
+            <thead><tr><th scope="col">{L('Metric', 'Métrica')}</th><th scope="col">{L('Value', 'Valor')}</th></tr></thead>
             <tbody>
               {t.numbers.map(([k, v]) => <tr><th scope="row">{k}</th><td>{v}</td></tr>)}
             </tbody>
@@ -116,11 +123,11 @@ const toc = [
         </section>
 
         <section id="install" aria-labelledby="h-install">
-          <h2 id="h-install"><span class="hash" aria-hidden="true">## </span>Install</h2>
+          <h2 id="h-install"><span class="hash" aria-hidden="true">## </span>{L('Install', 'Instalação')}</h2>
           <p class="intro" set:html={md(t.install.intro)} />
           <div class="copy">
             <pre tabindex="0" translate="no"><code set:html={sh(t.install.cmd)} /></pre>
-            <button type="button" id="copy" data-cmd={t.install.cmd} aria-live="polite">Copy</button>
+            <button type="button" id="copy" data-cmd={t.install.cmd} data-done={L('Copied', 'Copiado')} data-fail={L('Select and copy', 'Selecione e copie')} aria-live="polite">{L('Copy', 'Copiar')}</button>
           </div>
           <ul class="req">
             {t.install.notes.map((n) => <li set:html={md(n)} />)}
@@ -133,7 +140,7 @@ const toc = [
           <ul class="links">
             {t.links.map((l) => <li><a href={l.href} rel="noopener">{l.label}</a></li>)}
             <li><a href={t.docs} rel="noopener">Docs</a></li>
-            <li><a href="/#tools">More tools by Tr0p</a></li>
+            <li><a href={localize('/#tools', lang)}>{L('More tools by Tr0p', 'Mais ferramentas do Tr0p')}</a></li>
           </ul>
         </section>
       </article>
@@ -144,9 +151,10 @@ const toc = [
 <script>
   const b = document.getElementById('copy');
   b?.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(b.dataset.cmd!); b.textContent = 'Copied'; }
-    catch { b.textContent = 'Select and copy'; }
-    setTimeout(() => { b.textContent = 'Copy'; }, 1800);
+    const label = b.dataset.label ?? (b.dataset.label = b.textContent!);
+    try { await navigator.clipboard.writeText(b.dataset.cmd!); b.textContent = b.dataset.done!; }
+    catch { b.textContent = b.dataset.fail!; }
+    setTimeout(() => { b.textContent = label; }, 1800);
   });
 </script>
 

@@ -143,7 +143,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
     <ul class="tools">
       {tools.map((t) => (
         <li>
-          <a class="tn" href={t.href} translate="no">{t.name}</a>
+          <a class="tn" href={t.i18n ? localize(t.href, lang) : t.href} translate="no">{t.name}</a>
           <span class="td">{tr(t.desc, lang)}</span>
           <span class="tt"><span class="id" translate="no">{t.tags}</span>{t.repo && <a href={t.repo} aria-label={`${t.name}: ${L('source code', 'código-fonte')}`}>{L('source', 'código')}</a>}</span>
         </li>

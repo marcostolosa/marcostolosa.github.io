@@ -173,6 +173,7 @@ test('every internal link resolves', async ({ page }) => {
 });
 
 test('every image on the site opens full screen and zooms', async ({ page }) => {
+  test.slow(); // walks every route, at a 2560px viewport on desktop
   // big enough that the screenshots have to be scaled up to fill it
   if (!page.viewportSize() || page.viewportSize()!.width > 1000) await page.setViewportSize({ width: 2560, height: 1440 });
   const vp = page.viewportSize()!;

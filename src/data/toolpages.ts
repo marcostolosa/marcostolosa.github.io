@@ -1,4 +1,4 @@
-// Landing pages for the two tools that have one. Rendered by components/ToolPage.astro as a README.
+// Landing pages for the tools that have one. Rendered by components/ToolPage.astro as a README.
 // Inline `code` in strings is written with backticks. Demo output lines are trusted HTML using the
 // global token classes from global.css (.k keyword, .s string, .n number, .c comment).
 import type { NodeType } from './graph';
@@ -198,5 +198,95 @@ export const ocrack: ToolPage = {
     { label: 'GitHub', href: 'https://github.com/marcostolosa/OCRack' },
     { label: 'Issues', href: 'https://github.com/marcostolosa/OCRack/issues' },
     { label: 'PaddleOCR', href: 'https://github.com/PaddlePaddle/PaddleOCR' },
+  ],
+};
+
+export const atticus: ToolPage = {
+  slug: 'atticus',
+  name: 'Atticus',
+  tint: 'account',
+  title: 'Atticus: a voice assistant overlay for Omarchy and Hyprland',
+  description:
+    'Atticus is a voice assistant overlay for Omarchy (Hyprland/Wayland): hotkey or wake word, local speech recognition in Brazilian Portuguese and English, a neural voice, and sandboxed shell commands.',
+  tagline: 'Press a hotkey, speak, get a spoken answer. On your own Linux desktop.',
+  lede: 'Atticus puts a small always-on-top panel in the corner of your screen. It transcribes Brazilian Portuguese or English with `faster-whisper`, answers in a `Piper` neural voice, and gates every command the model runs behind a `bubblewrap` sandbox.',
+  badges: [['platform', 'Omarchy · Hyprland'], ['license', 'MIT'], ['stack', 'GTK4 · faster-whisper · Piper'], ['speech', 'local']],
+  repo: 'https://github.com/marcostolosa/atticus-linux',
+  demo: {
+    title: 'tr0p@omarchy: ~/apps/atticus-linux',
+    lines: [
+      { note: 'bound to Ctrl+Alt+Space: press, speak, press again' },
+      { cmd: 'atticus-ctl toggle' },
+      { out: '<span class="k">heard</span>    <span class="s">"coloca um timer de 10 minutos para o macarrão"</span>' },
+      { out: '<span class="k">instant</span>  timer · <span class="n">10:00</span> · macarrão <span class="c">(no AI round trip)</span>' },
+      { gap: true },
+      { note: 'anything else goes to the model, behind the gate' },
+      { out: '<span class="k">heard</span>    <span class="s">"what is on my screen?"</span>' },
+      { out: '<span class="k">sandbox</span>  bwrap · files read-only · no network' },
+      { out: '<span class="s">[+]</span> answer streamed to the panel and read aloud' },
+    ],
+  },
+  features: {
+    intro: 'A desktop voice assistant that stays out of the way, keeps your speech on your machine and never lets the model run a command unchecked.',
+    items: [
+      { name: 'Overlay that never steals focus', desc: 'A corner panel built on `wlr-layer-shell` with GTK4 and WebKitGTK. It floats above your windows and leaves the keyboard where it was.' },
+      { name: 'Hotkey or wake word', desc: 'Push to talk with a keybinding, or turn on the always-on wake word. Conversation mode reopens the microphone when Atticus ends on a question.' },
+      { name: 'Local speech, both ways', desc: 'Recognition tuned for Brazilian Portuguese with `faster-whisper`, English supported. The `Piper` voice stays loaded so answers start speaking at once.' },
+      { name: 'Instant commands', desc: 'Timers, alarms, reminders, volume, brightness, media, lists, Wi-Fi, Bluetooth and lock screen run locally in Portuguese and English, with no AI round trip.' },
+      { name: 'Sandboxed by default', desc: 'Model commands run inside `bubblewrap`: files read-only, keys and browser profiles hidden, no network. Real changes need an Allow card. `rm`, `sudo` and `git push` never run.' },
+      { name: 'Sees and drives the desktop', desc: 'Screen reading with `grim` and `tesseract`, web search, local file search, native click and typing, plus smart home through a Home Assistant server.' },
+    ],
+  },
+  usage: {
+    intro: 'Bind one key and talk. Atticus runs as a systemd user service, so you manage it like any other.',
+    modes: [
+      {
+        name: 'Talk to it', tag: 'hotkey · wake word',
+        desc: 'Press Ctrl+Alt+Space, speak, press again to send. The answer streams into the panel and is read aloud. Close with Esc or let it fade.',
+        cmds: ['atticus-ctl toggle', 'hyprctl reload'],
+      },
+      {
+        name: 'Run it as a service', tag: 'systemd user',
+        desc: 'Settings live in ~/.config/atticus/settings.json. Restart the service after editing them and follow the logs live.',
+        cmds: ['systemctl --user status atticus', 'systemctl --user restart atticus', 'journalctl --user -u atticus -f'],
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Voice pipeline',
+    intro: 'Every request takes the same path from your voice to a spoken answer.',
+    steps: [
+      { name: 'Trigger', desc: 'A hotkey or the wake word opens the microphone.' },
+      { name: 'Transcribe', desc: 'faster-whisper turns speech into text, locally.' },
+      { name: 'Route', desc: 'Everyday commands run at once. The rest goes to the model.' },
+      { name: 'Gate', desc: 'Model commands pass the sandbox or wait for your Allow.' },
+      { name: 'Answer', desc: 'The reply streams into the overlay panel.' },
+      { name: 'Speak', desc: 'Piper reads it aloud in a neural voice.' },
+    ],
+  },
+  numbers: [
+    ['Speech languages', 'PT-BR / EN'],
+    ['Command safety tiers', '4'],
+    ['Default Whisper model', 'small'],
+    ['Telemetry', 'none'],
+  ],
+  install: {
+    intro: 'Clone and build. `build.sh` sets up the virtual environment, downloads the Portuguese voice and starts the user service.',
+    cmd: 'git clone https://github.com/marcostolosa/atticus-linux.git && cd atticus-linux && ./build.sh',
+    notes: [
+      'Requires Omarchy or another Hyprland / Wayland session, and Python 3.11+.',
+      '`build.sh` checks the system packages and prints the exact `pacman` line for anything missing.',
+      'The brain defaults to the `claude` CLI. An OpenAI or Claude-style endpoint (Ollama, LM Studio) works too.',
+      'Log out and back in once after the first install so `ydotool` can click and type.',
+    ],
+  },
+  closing: 'A voice for your Linux desktop that you can read, audit and change. Star it on GitHub, file an issue, or send a pull request.',
+  docs: 'https://github.com/marcostolosa/atticus-linux#readme',
+  links: [
+    { label: 'GitHub', href: 'https://github.com/marcostolosa/atticus-linux' },
+    { label: 'Issues', href: 'https://github.com/marcostolosa/atticus-linux/issues' },
+    { label: 'atticus-mac', href: 'https://github.com/SaarthurR/atticus-mac' },
+    { label: 'faster-whisper', href: 'https://github.com/SYSTRAN/faster-whisper' },
+    { label: 'Piper', href: 'https://github.com/OHF-Voice/piper1-gpl' },
   ],
 };

@@ -68,7 +68,7 @@ export function mount(o: Opts) {
   const { nodes, edges } = graph;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  const renderer = new WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
   // Drawn on black, then the last pass zeroes alpha: with premultiplied alpha the browser composites the canvas
   // additively, so the site backdrop shows through the scene without any CSS blend mode.
   const scene = new Scene();
@@ -215,8 +215,10 @@ export function mount(o: Opts) {
   let tier = 0, slowFrames = 0, sampled = 0, slowSum = 0;
   let skip = 4, bad = 0; // the first frames compile shaders and are not representative
   const down = () => { tier++; slowFrames = 0; bad = 0; sampled = 0; slowSum = 0; bloom.enabled = false; pulses.visible = pulses.visible && tier < 3; resize(); };
-  const measure = (raw: number) => {
+  const measure = (raw: number, capped: boolean) => {
     if (tier >= 3 || skip-- > 0) return;
+    // a frame that was held back on purpose says nothing about the GPU unless it is grossly late
+    if (capped && raw <= 200) return;
     // two very slow frames are enough evidence; otherwise judge the average of a short window
     if (raw > 200 && ++bad >= 2) return down();
     slowSum += Math.min(raw, 200);
@@ -228,11 +230,14 @@ export function mount(o: Opts) {
     if (slowFrames >= 2 || avg > 110) down();
   };
 
+  let lowRes = false, lowTimer = 0, labelsOff = false;
   function resize() {
     w = stage.clientWidth;
     h = stage.clientHeight;
     wide = w >= 900;
-    const dpr = tier === 0 ? Math.min(devicePixelRatio || 1, wide ? 2 : 1.75) : tier === 1 ? 1 : 0.6;
+    // Bloom hides the difference above 1.5x, and behind the page (blurred, dimmed) a third of the pixels is enough.
+    const full = tier === 0 ? Math.min(devicePixelRatio || 1, 1.5) : tier === 1 ? 1 : 0.6;
+    const dpr = lowRes ? Math.min(full, 0.6) : full;
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     composer.setPixelRatio(dpr);
@@ -249,10 +254,15 @@ export function mount(o: Opts) {
     const raw = now - last;
     if (!onScreen || document.hidden) { last = now; return; }
     if (tier === 3 && raw < 240) return;
-    const dt = tier === 3 ? 1 : Math.min(0.05, raw / 1000);
-    last = now;
-    measure(raw);
+    // Full rate only while something is being driven: the intro, a drag, a hover, a camera move.
+    // Idle rotation runs at ~30 fps, and ~20 fps when the scene is only a blurred backdrop for the page.
     const t = (now - born) / 1000;
+    const busy = t < 4.5 || dragging || hover >= 0 || yawTarget !== null || Math.abs(zoomT - zoom) > 0.001 || Math.abs(offT - offK) > 0.001;
+    const capped = !busy && !reduce;
+    if (raw < (busy ? 14 : mode ? 48 : 31)) return;
+    const dt = tier === 3 ? 1 : Math.min(0.06, raw / 1000);
+    last = now;
+    measure(raw, capped);
 
     // orientation
     if (!dragging) {
@@ -311,7 +321,8 @@ export function mount(o: Opts) {
     world.updateMatrixWorld();
     const pxPerUnit = h / (2 * Math.tan((camera.fov * Math.PI) / 360));
     placed.length = 0;
-    for (const i of labelOrder()) {
+    // behind the page every label is hidden: after one pass that hides them, stop touching the DOM
+    for (const i of mode && labelsOff ? [] : labelOrder()) {
       v.copy(pos[i]).applyMatrix4(world.matrixWorld);
       const dist = camera.position.z - v.z;
       v.project(camera);
@@ -343,6 +354,7 @@ export function mount(o: Opts) {
       el.classList.toggle('on', i === selected);
     }
 
+    labelsOff = mode !== null;
     composer.render();
   }
 
@@ -417,8 +429,13 @@ export function mount(o: Opts) {
         nodes.forEach((n, i) => { if (n.type === mode) { c.add(pos[i]); k++; } });
         if (k) facePoint(c.multiplyScalar(1 / k));
         stage.dataset.mode = 'ambient';
+        // once the CSS blur has faded in, drop the resolution: it cannot be seen through the blur
+        clearTimeout(lowTimer);
+        lowTimer = window.setTimeout(() => { lowRes = true; resize(); }, 900);
       } else {
         delete stage.dataset.mode;
+        clearTimeout(lowTimer);
+        if (lowRes) { lowRes = false; resize(); }
         faceNode(selected);
       }
       idleUntil = performance.now() + 4000;

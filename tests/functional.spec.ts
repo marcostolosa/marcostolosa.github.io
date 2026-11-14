@@ -171,3 +171,51 @@ test('every internal link resolves', async ({ page }) => {
     expect((await page.goto(href))?.status(), href).toBe(200);
   }
 });
+
+test('every image on the site opens full screen and zooms', async ({ page }) => {
+  // big enough that the screenshots have to be scaled up to fill it
+  if (!page.viewportSize() || page.viewportSize()!.width > 1000) await page.setViewportSize({ width: 2560, height: 1440 });
+  const vp = page.viewportSize()!;
+  const routes = new Set<string>(pages.map((p) => p.path));
+  for (const index of ['/writeups/', '/pt-br/writeups/']) {
+    await page.goto(index);
+    for (const href of await page.locator('main a[href^="/"]').evaluateAll((as) => as.map((a) => a.getAttribute('href')!))) routes.add(href);
+  }
+  let seen = 0;
+  for (const route of routes) {
+    await page.goto(route);
+    const imgs = page.locator('img:not(dialog.lb img)');
+    const n = await imgs.count();
+    if (!n) continue;
+    const dlg = page.locator('dialog.lb');
+    await expect(dlg, route).toBeAttached();
+    const big = dlg.locator('.lb-view img');
+    for (let i = 0; i < n; i++) {
+      const img = imgs.nth(i);
+      const where = `${route} img #${i}`;
+      await expect(img, where).toHaveAttribute('role', 'button');
+      await img.scrollIntoViewIfNeeded();
+      await img.click();
+      await expect(dlg, where).toBeVisible();
+      const d = (await dlg.boundingBox())!;
+      expect(d.width, where).toBeGreaterThanOrEqual(vp.width - 1);
+      expect(d.height, where).toBeGreaterThanOrEqual(vp.height - 1);
+      // fitted: touches the screen edge in one direction and overflows in neither
+      const b = (await big.boundingBox())!;
+      expect(b.width, where).toBeLessThanOrEqual(vp.width + 1);
+      expect(b.height, where).toBeLessThanOrEqual(vp.height + 1);
+      expect(Math.max(b.width / vp.width, b.height / vp.height), where).toBeGreaterThan(0.99);
+      await expect(dlg.locator('output')).toHaveText('100%');
+      await page.keyboard.press('+');
+      await expect(dlg.locator('output')).toHaveText('150%');
+      await expect.poll(async () => (await big.boundingBox())!.width, { message: where }).toBeGreaterThan(b.width * 1.45);
+      await dlg.locator('[data-a="fit"]').click();
+      await expect(dlg.locator('output')).toHaveText('100%');
+      await page.keyboard.press('Escape');
+      await expect(dlg).toBeHidden();
+      await expect(img).toBeFocused();
+      seen++;
+    }
+  }
+  expect(seen).toBeGreaterThan(0);
+});

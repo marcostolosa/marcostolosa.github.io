@@ -1,0 +1,11 @@
+---
+import ToolPage from '../../components/ToolPage.astro';
+import { toolPages } from '../../data/toolpages';
+import { locales, urlPrefix } from '../../i18n/ui';
+
+export const getStaticPaths = () =>
+  Object.entries(toolPages).flatMap(([tool, page]) =>
+    locales.map((lang) => ({ params: { loc: urlPrefix[lang], tool }, props: { page: page[lang], lang } })),
+  );
+---
+<ToolPage tool={Astro.props.page} lang={Astro.props.lang} />

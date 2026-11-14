@@ -37,14 +37,6 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     {!alternates && <link rel="alternate" hreflang="x-default" href={new URL(alt.en, Astro.site)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script is:inline>
-      // First visit to the English home from a Portuguese browser: offer PT-BR once. An explicit choice always wins.
-      try {
-        var pref = localStorage.getItem('lang');
-        if (!pref && location.pathname === '/' && /^pt\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '')) {
-          localStorage.setItem('lang', 'pt-br');
-          location.replace('/pt-br/' + location.hash);
-        }
-      } catch (e) {}
       // Remember an explicit language choice. Delegated from <head> so it works before any module script loads.
       document.addEventListener('click', function (e) {
         var a = e.target && e.target.closest && e.target.closest('.lang a[data-lang]');

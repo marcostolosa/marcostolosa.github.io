@@ -4,13 +4,8 @@ import Base from '../layouts/Base.astro';
 import type { ToolPage } from '../data/toolpages';
 import { localize, type Lang } from '../i18n/ui';
 
-interface Props {
-  tool: ToolPage;
-  lang?: Lang;
-  /** The page exists in both locales at the same path. Otherwise PT-BR readers are sent back to the tools list. */
-  bilingual?: boolean;
-}
-const { tool: t, lang = 'en', bilingual = false } = Astro.props;
+interface Props { tool: ToolPage; lang?: Lang }
+const { tool: t, lang = 'en' } = Astro.props;
 const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -41,7 +36,7 @@ const toc = [
   ['links', 'Links'],
 ];
 ---
-<Base title={t.title} description={t.description} lang={lang} alternates={bilingual ? undefined : { en: `/${t.slug}/`, 'pt-br': '/pt-br/#tools' }}>
+<Base title={t.title} description={t.description} lang={lang}>
   <div class="tp" data-tint={t.tint} style={`--c: var(--t-${t.tint})`}>
     <header class="hero">
       <div class="pitch">

@@ -1,0 +1,7 @@
+---
+import WriteupList from '../../../components/WriteupList.astro';
+import { localePaths } from '../../../i18n/ui';
+
+export const getStaticPaths = localePaths;
+---
+<WriteupList lang={Astro.props.lang} />

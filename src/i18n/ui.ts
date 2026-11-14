@@ -11,13 +11,17 @@ export const langName: Record<Lang, string> = { en: 'English', 'pt-br': 'Portugu
 export type T = { en: string; 'pt-br': string };
 export const tr = (v: T | string, lang: Lang) => (typeof v === 'string' ? v : v[lang]);
 
+/** First URL segment of every page: /en-us/... and /pt-br/... The site root only redirects to one of them. */
+export const urlPrefix: Record<Lang, string> = { en: 'en-us', 'pt-br': 'pt-br' };
+
 /** Prefix a site-root path for a locale: ('/writeups/', 'pt-br') -> '/pt-br/writeups/'. */
-export const localize = (path: string, lang: Lang) => (lang === defaultLang ? path : `/${lang}${path}`);
+export const localize = (path: string, lang: Lang) => `/${urlPrefix[lang]}${path}`;
+
+/** getStaticPaths entries for a page that exists in every locale under src/pages/[loc]/. */
+export const localePaths = () => locales.map((lang) => ({ params: { loc: urlPrefix[lang] }, props: { lang } }));
 
 /** Strip the locale prefix from a pathname: '/pt-br/writeups/' -> '/writeups/'. */
-export const unlocalize = (path: string) => path.replace(/^\/pt-br(?=\/|$)/, '') || '/';
-
-export const langFromPath = (path: string): Lang => (/^\/pt-br(\/|$)/.test(path) ? 'pt-br' : 'en');
+export const unlocalize = (path: string) => path.replace(/^\/(en-us|pt-br)(?=\/|$)/, '') || '/';
 
 export const ui = {
   skip: { en: 'Skip to content', 'pt-br': 'Pular para o conteúdo' },

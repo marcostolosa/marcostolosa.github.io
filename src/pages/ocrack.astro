@@ -1,5 +1,5 @@
 ---
-import ToolPage from '../components/ToolPage.astro';
-import { ocrack } from '../data/toolpages';
+// Old address, from before pages moved under /en-us/ and /pt-br/.
+import Redirect from '../components/Redirect.astro';
 ---
-<ToolPage tool={ocrack} />
+<Redirect to="/en-us/ocrack/" />

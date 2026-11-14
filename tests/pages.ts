@@ -3,15 +3,17 @@ export const LIVE = !!process.env.BASE_URL;
 
 // Every route the site ships, with the <html lang> it must declare.
 const all = [
-  { path: '/', lang: 'en-US', home: true },
+  { path: '/en-us/', lang: 'en-US', home: true },
   { path: '/pt-br/', lang: 'pt-BR', home: true },
-  { path: '/writeups/', lang: 'en-US' },
+  { path: '/en-us/writeups/', lang: 'en-US' },
   { path: '/pt-br/writeups/', lang: 'pt-BR' },
-  { path: '/manw-ng/', lang: 'en-US', single: true },
-  { path: '/ocrack/', lang: 'en-US', single: true },
-  { path: '/atticus/', lang: 'en-US' },
+  { path: '/en-us/manw-ng/', lang: 'en-US' },
+  { path: '/pt-br/manw-ng/', lang: 'pt-BR' },
+  { path: '/en-us/ocrack/', lang: 'en-US' },
+  { path: '/pt-br/ocrack/', lang: 'pt-BR' },
+  { path: '/en-us/atticus/', lang: 'en-US' },
   { path: '/pt-br/atticus/', lang: 'pt-BR' },
-  { path: '/writeups/fixture-article/', lang: 'en-US', fixture: true },
+  { path: '/en-us/writeups/fixture-article/', lang: 'en-US', fixture: true },
 ] as const;
 export const pages = all.filter((p) => !(LIVE && 'fixture' in p));
 

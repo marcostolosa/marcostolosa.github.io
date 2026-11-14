@@ -1,6 +1,7 @@
 // Landing pages for the tools that have one. Rendered by components/ToolPage.astro as a README.
 // Inline `code` in strings is written with backticks. Demo output lines are trusted HTML using the
 // global token classes from global.css (.k keyword, .s string, .n number, .c comment).
+import type { Lang } from '../i18n/ui';
 import type { NodeType } from './graph';
 
 export type DemoLine = { cmd: string } | { out: string } | { note: string } | { gap: true };
@@ -369,4 +370,159 @@ export const atticusPt: ToolPage = {
     ],
   },
   closing: 'Uma voz para o seu desktop Linux que você pode ler, auditar e mudar. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
+};
+
+/** /pt-br/manw-ng/ */
+export const manwPt: ToolPage = {
+  ...manw,
+  title: 'MANW-NG: documentação e execução da API do Windows, direto do terminal',
+  description:
+    'MANW-NG é uma CLI em Python para reversers e pesquisadores de segurança: extrai documentação estruturada de Win32/NTAPI do Microsoft Learn e executa APIs do Windows diretamente via ctypes.',
+  tagline: 'Documentação e execução da API do Windows, direto do seu terminal.',
+  lede: 'O MANW-NG extrai a documentação estruturada do Microsoft Learn e chama APIs reais do Windows via `ctypes`. Uma única CLI feita para reversers e pesquisadores de segurança.',
+  badges: [['python', '3.11+'], ['licença', 'MIT'], ['apis', 'Win32 · NTAPI · driver'], ['mapeamentos', '61.000+']],
+  demo: {
+    title: manw.demo.title,
+    lines: manw.demo.lines.map((l) => ('note' in l ? { note: 'chama uma API real do Windows via ctypes' } : l)),
+  },
+  features: {
+    intro: 'De consultas offline à execução ao vivo: uma única ferramenta que tira as idas e voltas ao navegador do seu fluxo de reversing.',
+    items: [
+      { name: 'Documentação estruturada', desc: 'Assinatura, parâmetros, valores de retorno e observações extraídos do Microsoft Learn em uma saída limpa e fácil de processar.' },
+      { name: 'Execução de WinAPI ao vivo', desc: 'Chame qualquer função exportada via `ctypes`, com retornos tipados, alocação de buffers, hexdumps e o resultado de `GetLastError`.' },
+      { name: 'Base com 61 mil+ mapeamentos', desc: 'Um índice enorme de função→header com classificação heurística resolve APIs mesmo quando a busca não encontra nada.' },
+      { name: 'Vários formatos de saída', desc: 'Saída em terminal rico, `JSON` e Markdown, todas localizadas, para o resultado cair direto em scripts e anotações.' },
+      { name: 'Inglês e português', desc: 'Documentação bilíngue completa com `-l br`: assinaturas, tabelas de parâmetros e observações são traduzidas juntas.' },
+      { name: 'Rápido e com cache', desc: 'HTTP assíncrono com cache condicional por ETag e um cache de URLs que aprende sozinho deixam consultas repetidas quase instantâneas.' },
+    ],
+  },
+  usage: {
+    intro: 'Consulte e depois execute. O modo documentação é multiplataforma. O modo execução roda a API de verdade no Windows.',
+    modes: [
+      {
+        name: 'Modo documentação', tag: 'multiplataforma',
+        desc: 'Resolva qualquer função Win32, NTAPI ou de driver até a assinatura e a referência completas. Sem navegador.',
+        cmds: manw.usage.modes[0].cmds,
+      },
+      {
+        name: 'Modo execução', tag: 'só windows',
+        desc: 'Invoque APIs reais com atalhos de módulo, retornos tipados, buffers graváveis e inspeção de erros.',
+        cmds: manw.usage.modes[1].cmds,
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Pipeline de busca',
+    intro: 'Cada consulta passa por cinco fallbacks em cascata até encontrar uma correspondência confiável.',
+    steps: [
+      { name: 'Learn Search', desc: 'Consulta primeiro a API oficial de busca do Microsoft Learn.' },
+      { name: 'URLs inteligentes', desc: 'Gera e valida URLs candidatas de documentação a partir de padrões.' },
+      { name: 'Classificador', desc: 'A classificação heurística de headers mapeia o nome da função.' },
+      { name: 'Catálogo', desc: 'Recorre ao catálogo interno de APIs que acompanha a ferramenta.' },
+      { name: 'Mapa offline', desc: 'Resolve pelo mapeamento JSON offline de 61 mil+ entradas, em último caso.' },
+    ],
+  },
+  numbers: [
+    ['Mapeamentos função→header', '61 mil+'],
+    ['Etapas de fallback na busca', '5'],
+    ['Idiomas', 'EN / PT-BR'],
+    ['Formatos de saída', '3'],
+  ],
+  install: {
+    intro: 'Clone, instale e você ganha o comando `manw-ng` no terminal.',
+    cmd: manw.install.cmd,
+    notes: [
+      'Requer Python 3.11+ e pip.',
+      'O modo documentação roda em qualquer lugar: Linux, macOS, Windows.',
+      'O modo execução precisa de um interpretador Python nativo do Windows.',
+    ],
+  },
+  closing: 'Faça engenharia reversa da API do Windows mais rápido. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
+  links: manw.links.map((l) => (l.label === 'Original MANW' ? { ...l, label: 'MANW original' } : l)),
+};
+
+/** /pt-br/ocrack/ */
+export const ocrackPt: ToolPage = {
+  ...ocrack,
+  title: 'OCRack: traduza e faça OCR de qualquer PDF com IA, direto do terminal',
+  description:
+    'OCRack é uma CLI em Python que extrai imagens, faz OCR do texto e traduz PDFs com IA preservando o layout, usando PaddleOCR, PyMuPDF e os modelos GPT da OpenAI.',
+  tagline: 'Traduza qualquer PDF com IA. Com layout, imagens e tudo.',
+  lede: 'O OCRack extrai as imagens, faz OCR do texto e traduz PDFs inteiros com IA, preservando formatação e posicionamento. Um único pipeline de terminal construído sobre `PaddleOCR` e OpenAI GPT.',
+  badges: [['python', '3.8+'], ['licença', 'MIT'], ['stack', 'PaddleOCR · PyMuPDF · GPT'], ['saída', 'preserva o layout']],
+  demo: {
+    title: ocrack.demo.title,
+    lines: [
+      { cmd: 'ocrack book.pdf -p "234-235"' },
+      { out: '<span class="s">[+]</span> analisando documento · 2 páginas selecionadas' },
+      { out: `<span class="k">extract</span>   ${bar} 4 imagens @ coords` },
+      { out: `<span class="k">ocr</span>       ${bar} fallback PaddleOCR ok` },
+      { out: `<span class="k">chunk</span>     ${bar} 18 segmentos` },
+      { out: `<span class="k">translate</span> ${bar} gpt-4o-mini` },
+      { out: `<span class="k">render</span>    ${bar} HTML → PDF` },
+      { gap: true },
+      { out: '<span class="s">[✓]</span> out/book_translated_20260706.pdf <span class="c">($0.011)</span>' },
+    ],
+  },
+  features: {
+    intro: 'Extração, OCR, segmentação inteligente e renderização, encadeados de ponta a ponta para o PDF traduzido sair com a cara do original.',
+    items: [
+      { name: 'Extração e reinserção de imagens', desc: 'As figuras são extraídas com suas coordenadas e devolvidas ao documento traduzido exatamente na mesma posição.' },
+      { name: 'OCR com fallback', desc: 'O PaddleOCR é o motor principal, com o `Tesseract` como fallback offline, então páginas escaneadas ou só de imagem também são lidas.' },
+      { name: 'Chunking inteligente', desc: 'A segmentação inteligente do texto mantém o contexto da tradução enxuto e melhora a precisão em documentos longos e estruturados.' },
+      { name: 'Otimização de custo', desc: 'Acompanhamento de tokens e custo em tempo real com o prompt caching da OpenAI: até `50%` mais barato em conteúdo repetido.' },
+      { name: 'Robusto e retomável', desc: 'Tratamento de erros, novas tentativas automáticas e recuperação por checkpoint fazem um job longo sobreviver a APIs instáveis e continuar de onde parou.' },
+      { name: 'Interface de terminal rica', desc: 'Uma interface profissional feita com `Rich` mostra o progresso ao vivo, a detecção de capítulos e o custo por página enquanto trabalha.' },
+    ],
+  },
+  usage: {
+    intro: 'Gere um PDF traduzido fiel ao original, ou pule a renderização e leia a tradução direto no terminal.',
+    modes: [
+      {
+        name: 'Modo PDF', tag: 'padrão',
+        desc: 'Extrai as imagens, traduz e renderiza de novo em um PDF que preserva o layout, ao lado de um gêmeo em HTML.',
+        cmds: ocrack.usage.modes[0].cmds,
+      },
+      {
+        name: 'Modo rápido / CLI', tag: 'sem render',
+        desc: 'Pule a extração de imagens ou a renderização do PDF quando você só quer o texto traduzido, rápido e barato.',
+        cmds: ocrack.usage.modes[1].cmds,
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Pipeline de tradução',
+    intro: 'Todo PDF passa pelas mesmas seis etapas determinísticas, da análise ao documento renderizado.',
+    steps: [
+      { name: 'Análise', desc: 'Lê a estrutura e seleciona páginas ou capítulos.' },
+      { name: 'Extração', desc: 'Retira as imagens com as coordenadas exatas da página.' },
+      { name: 'OCR', desc: 'Lê o texto com PaddleOCR, com fallback para Tesseract.' },
+      { name: 'Chunking', desc: 'Divide o texto em partes que respeitam o contexto.' },
+      { name: 'Tradução', desc: 'Envia os segmentos ao GPT acompanhando o custo.' },
+      { name: 'Renderização', desc: 'Monta o HTML e imprime de volta em PDF.' },
+    ],
+  },
+  numbers: [
+    ['Páginas traduzidas por minuto', '1–5'],
+    ['Custo por página (gpt-4o-mini)', '$0.001+'],
+    ['Redução de custo com cache', '50%'],
+    ['Etapas do pipeline', '6'],
+  ],
+  install: {
+    intro: 'Clone, instale e você ganha o comando `ocrack` no terminal.',
+    cmd: ocrack.install.cmd,
+    notes: [
+      'Requer Python 3.8+ e uma chave de API da OpenAI.',
+      'Rode `playwright install chromium` para a renderização HTML→PDF.',
+      'Defina `OPENAI_API_KEY`. `OPENAI_MODEL` usa gpt-4o-mini por padrão.',
+    ],
+  },
+  closing: 'Traduza os livros que as outras ferramentas ignoram. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
+};
+
+/** Every landing page, by URL slug then locale: /en-us/<slug>/ and /pt-br/<slug>/. */
+export const toolPages: Record<string, Record<Lang, ToolPage>> = {
+  'manw-ng': { en: manw, 'pt-br': manwPt },
+  ocrack: { en: ocrack, 'pt-br': ocrackPt },
+  atticus: { en: atticus, 'pt-br': atticusPt },
 };

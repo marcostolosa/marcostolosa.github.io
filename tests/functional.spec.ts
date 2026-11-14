@@ -4,7 +4,7 @@ import { pages } from './pages';
 
 test.describe('home', () => {
   test('lists every disclosure with a link and a severity', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en-us/');
     const rows = page.locator('#disclosures li');
     await expect(rows).toHaveCount(disclosures.length);
     for (const [i, d] of disclosures.entries()) {
@@ -14,13 +14,13 @@ test.describe('home', () => {
   });
 
   test('primary action is a mailto link', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en-us/');
     await expect(page.locator('#whoami a.btn')).toHaveAttribute('href', /^mailto:marcos\.tolosa@owasp\.org/);
     await expect(page.locator('#mail')).toHaveAttribute('href', /^mailto:/);
   });
 
   test('graph inspector opens on the CVSS 10.0 finding and links to its source', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en-us/');
     await expect(page.locator('#insp-title')).toHaveText('CVE-2025-10230');
     await expect(page.locator('#insp-src')).toHaveAttribute('href', disclosures[0].href);
     // WebGL scene when available, static SVG otherwise: either way the hero settles into one of the two states.
@@ -29,7 +29,7 @@ test.describe('home', () => {
 
   test('next / previous walk every node and wrap', async ({ page }) => {
     test.slow(); // CI renders WebGL in software
-    await page.goto('/');
+    await page.goto('/en-us/');
     const count = page.locator('#insp-count');
     const total = Number((await count.textContent())!.split('/')[1]);
     const first = await page.locator('#insp-title').textContent();
@@ -46,7 +46,7 @@ test.describe('home', () => {
 
   test('a linked node opens from the inspector and every node cites a source', async ({ page }) => {
     test.slow();
-    await page.goto('/');
+    await page.goto('/en-us/');
     await page.locator('#insp-links button', { hasText: 'Samba' }).click();
     await expect(page.locator('#insp-title')).toHaveText('Samba');
     await expect(page.locator('#insp-links button', { hasText: 'CVE-2025-10230' })).toBeVisible();
@@ -59,7 +59,7 @@ test.describe('home', () => {
 
   test('the graph works with reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/en-us/');
     await page.locator('#next').click();
     await expect(page.locator('#insp-title')).not.toHaveText('CVE-2025-10230');
   });
@@ -68,7 +68,7 @@ test.describe('home', () => {
 test.describe('keyboard and focus', () => {
   test('skip link is the first tab stop and moves to main', async ({ page, isMobile }) => {
     test.skip(isMobile, 'tab order is a desktop concern');
-    await page.goto('/');
+    await page.goto('/en-us/');
     await page.keyboard.press('Tab');
     const skip = page.locator('a.skip');
     await expect(skip).toBeFocused();
@@ -79,7 +79,7 @@ test.describe('keyboard and focus', () => {
 
   test('every tab stop shows a visible focus indicator', async ({ page, isMobile }) => {
     test.skip(isMobile, 'tab order is a desktop concern');
-    await page.goto('/');
+    await page.goto('/en-us/');
     for (let i = 0; i < 30; i++) {
       await page.keyboard.press('Tab');
       const visible = await page.evaluate(() => {
@@ -103,7 +103,7 @@ test.describe('language switch', () => {
       const body = (await res.text()).replace(/<script type="module"[\s\S]*?<\/script>/g, '');
       await route.fulfill({ response: res, body });
     });
-    await page.goto('/writeups/');
+    await page.goto('/en-us/writeups/');
     await page.locator('.lang a[data-lang="pt-br"]').click();
     await expect(page).toHaveURL((url) => url.pathname === '/pt-br/writeups/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
@@ -112,7 +112,7 @@ test.describe('language switch', () => {
 
     await page.locator('.lang a[data-lang="en"]').click();
     // Exact path: a /\/writeups\/$/ regex would also match /pt-br/writeups/ and pass before navigating.
-    await expect(page).toHaveURL((url) => url.pathname === '/writeups/');
+    await expect(page).toHaveURL((url) => url.pathname === '/en-us/writeups/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
     expect(await page.evaluate(() => localStorage.getItem('lang'))).toBe('en');
   });
@@ -124,32 +124,50 @@ test.describe('language switch', () => {
   });
 
   test('every page publishes hreflang alternates', async ({ page }) => {
-    for (const p of pages.filter((x) => !x.path.includes('fixture') && !('single' in x))) {
+    for (const p of pages.filter((x) => !x.path.includes('fixture'))) {
       await page.goto(p.path);
       await expect(page.locator('link[rel="alternate"][hreflang="en-US"]')).toHaveCount(1);
       await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveCount(1);
     }
   });
 
-  test('Portuguese browser lands on /pt-br/ on first visit only', async ({ browser }) => {
+  test('the root sends a Portuguese browser to /pt-br/ until English is chosen', async ({ browser }) => {
     const ctx = await browser.newContext({ locale: 'pt-BR' });
     const page = await ctx.newPage();
     await page.goto('/');
-    await expect(page).toHaveURL(/\/pt-br\/$/);
+    await expect(page).toHaveURL((url) => url.pathname === '/pt-br/');
     await page.locator('.lang a[data-lang="en"]').click();
-    await expect(page).toHaveURL((url) => url.pathname === "/");
+    await expect(page).toHaveURL((url) => url.pathname === '/en-us/');
     await page.goto('/');
-    await expect(page).toHaveURL(new URL('/', test.info().project.use.baseURL).href);
+    await expect(page).toHaveURL((url) => url.pathname === '/en-us/');
     await ctx.close();
   });
 
-  test('English browser stays on /', async ({ browser }) => {
+  test('the root sends an English browser to /en-us/ and keeps the hash', async ({ browser }) => {
     const ctx = await browser.newContext({ locale: 'en-US' });
     const page = await ctx.newPage();
-    await page.goto('/');
-    await expect(page).toHaveURL(new URL('/', test.info().project.use.baseURL).href);
+    await page.goto('/#tools');
+    await expect(page).toHaveURL((url) => url.pathname === '/en-us/' && url.hash === '#tools');
     await ctx.close();
   });
+});
+
+test('addresses from before the /en-us/ and /pt-br/ layout still land on the page', async ({ page }) => {
+  const moved: [string, string][] = [
+    ['/writeups/', '/en-us/writeups/'],
+    ['/writeups/htb-unclaimed-en/', '/en-us/writeups/htb-unclaimed-en/'],
+    ['/writeups/htb-unclaimed/', '/pt-br/writeups/htb-unclaimed/'],
+    ['/manw-ng/', '/en-us/manw-ng/'],
+    ['/ocrack/', '/en-us/ocrack/'],
+    ['/atticus/', '/en-us/atticus/'],
+    ['/ocrack.html', '/en-us/ocrack/'],
+    ['/manw-ng.html', '/en-us/manw-ng/'],
+  ];
+  for (const [from, to] of moved) {
+    await page.goto(from);
+    await expect(page, from).toHaveURL((url) => url.pathname === to);
+    await expect(page.locator('h1'), from).toHaveCount(1);
+  }
 });
 
 // Status checks go through the browser (page.goto) so they follow the same network path as a visitor.
@@ -178,7 +196,7 @@ test('every image on the site opens full screen and zooms', async ({ page }) => 
   if (!page.viewportSize() || page.viewportSize()!.width > 1000) await page.setViewportSize({ width: 2560, height: 1440 });
   const vp = page.viewportSize()!;
   const routes = new Set<string>(pages.map((p) => p.path));
-  for (const index of ['/writeups/', '/pt-br/writeups/']) {
+  for (const index of ['/en-us/writeups/', '/pt-br/writeups/']) {
     await page.goto(index);
     for (const href of await page.locator('main a[href^="/"]').evaluateAll((as) => as.map((a) => a.getAttribute('href')!))) routes.add(href);
   }

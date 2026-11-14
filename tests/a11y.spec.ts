@@ -41,7 +41,7 @@ test('404 page is accessible', async ({ page }) => {
   await scan(page);
 });
 
-for (const home of ['/', '/pt-br/']) {
+for (const home of ['/en-us/', '/pt-br/']) {
   test.describe(`sections on ${home}`, () => {
     for (const id of homeSections) {
       test(`#${id} renders, is labelled and passes axe`, async ({ page }) => {

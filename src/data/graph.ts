@@ -77,7 +77,7 @@ const accountDesc: Record<string, { en: string; 'pt-br': string }> = {
   discord: { en: 'Community server.', 'pt-br': 'Servidor da comunidade.' },
 };
 
-type Writeup = { id: string; title: string; summary: string };
+type Writeup = { id: string; title: string; summary: string; href: string };
 
 export function buildGraph(lang: Lang, writeups: Writeup[]): Graph {
   const nodes: Omit<GNode, 'depth' | 'p'>[] = [];
@@ -139,7 +139,7 @@ export function buildGraph(lang: Lang, writeups: Writeup[]): Graph {
 
   // writeups
   for (const w of writeups.slice(0, 4)) {
-    add({ id: `wr:${w.id}`, type: 'writeup', label: w.title.length > 34 ? `${w.title.slice(0, 33)}…` : w.title, size: 0.36, desc: w.summary, href: `/writeups/${w.id}/` });
+    add({ id: `wr:${w.id}`, type: 'writeup', label: w.title.length > 34 ? `${w.title.slice(0, 33)}…` : w.title, size: 0.36, desc: w.summary, href: w.href });
     link('tr0p', `wr:${w.id}`);
   }
 

@@ -18,7 +18,7 @@ const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_
 
 // --- the graph: same data as the sections below, laid out at build time
 const mine = writeups.filter((w) => w.data.lang === lang);
-const graph = buildGraph(lang, (mine.length ? mine : writeups).map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary })));
+const graph = buildGraph(lang, (mine.length ? mine : writeups).map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${w.id}/`, w.data.lang) })));
 const start = graph.nodes.findIndex((n) => n.id === 'vuln:CVE-2025-10230');
 const first = graph.nodes[start];
 const neighbours = (i: number) => graph.edges.filter(([a, b]) => a === i || b === i).map(([a, b]) => (a === i ? b : a));
@@ -143,7 +143,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
     <ul class="tools">
       {tools.map((t) => (
         <li>
-          <a class="tn" href={t.i18n ? localize(t.href, lang) : t.href} translate="no">{t.name}</a>
+          <a class="tn" href={t.href.startsWith('/') ? localize(t.href, lang) : t.href} translate="no">{t.name}</a>
           <span class="td">{tr(t.desc, lang)}</span>
           <span class="tt"><span class="id" translate="no">{t.tags}</span>{t.repo && <a href={t.repo} aria-label={`${t.name}: ${L('source code', 'código-fonte')}`}>{L('source', 'código')}</a>}</span>
         </li>
@@ -163,7 +163,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
         {writeups.slice(0, 5).map((w) => (
           <li>
             <span class="id" translate="no">{fmt(w.data.date)}</span>
-            <a href={`/writeups/${w.id}/`} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>{w.data.title}</a>
+            <a href={localize(`/writeups/${w.id}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>{w.data.title}</a>
           </li>
         ))}
       </ol>

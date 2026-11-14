@@ -33,7 +33,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     <ol class="list">
       {writeups.map((w) => (
         <li>
-          <a href={`/writeups/${w.id}/`} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>
+          <a href={localize(`/writeups/${w.id}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>
             <span class="meta a" translate="no">{fmt(w.data.date)} · {langLabel[w.data.lang]}{w.data.cve && <> · {w.data.cve}</>}{w.data.severity && <> · {w.data.severity}</>}</span>
             <span class="t">{w.data.title}</span>
             <span class="sum">{w.data.summary}</span>

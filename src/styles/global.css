@@ -125,3 +125,35 @@ a:hover { color: var(--fg-hi); text-decoration-color: currentColor; }
   --astro-code-token-punctuation: var(--dim);
   --astro-code-token-link: var(--sym);
 }
+
+/* Image viewer (scripts/lightbox.ts): any image in <main> opens full screen and can be zoomed */
+main img[role='button'] { cursor: zoom-in; transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease); }
+main img[role='button']:hover { border-color: var(--acc); box-shadow: 0 0 28px -8px rgba(53, 242, 154, 0.6); }
+dialog.lb {
+  position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: rgba(3, 6, 4, 0.96); color: var(--fg); overflow: hidden;
+}
+dialog.lb::backdrop { background: var(--gutter); }
+.lb-view { position: absolute; inset: 0; display: grid; place-items: center; touch-action: none; cursor: zoom-out; user-select: none; }
+.lb-view img { max-width: 100vw; max-height: 100dvh; object-fit: contain; cursor: zoom-in; transform-origin: center; will-change: transform; }
+.lb-view.zoomed img { cursor: grab; }
+.lb-view img.anim { transition: transform 200ms var(--ease); }
+.lb-cap {
+  position: absolute; top: 0; left: 0; right: 0; padding: 12px var(--pad); pointer-events: none;
+  background: linear-gradient(rgba(3, 6, 4, 0.85), transparent); color: var(--dim); font-size: 0.82rem;
+}
+.lb-cap:empty { display: none; }
+.lb-cap::before { content: '# '; color: var(--acc); }
+.lb-bar {
+  position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: flex; align-items: stretch; border: 1px solid var(--line); background: var(--gutter);
+}
+.lb-bar button {
+  min-width: 46px; min-height: 44px; padding: 0 14px; border: 0; background: none; color: var(--acc);
+  font: 600 0.95rem/1 var(--mono); cursor: pointer;
+}
+.lb-bar button + button, .lb-bar output + button { border-left: 1px solid var(--line); }
+.lb-bar button:hover { background: var(--acc); color: var(--gutter); }
+.lb-bar button:focus-visible { outline-offset: -3px; }
+.lb-bar output { display: grid; place-items: center; min-width: 6ch; padding: 0 8px; border-left: 1px solid var(--line); color: var(--fg-hi); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .lb-view img.anim, main img[role='button'] { transition: none; } }

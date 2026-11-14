@@ -14,20 +14,22 @@ float noise(vec2 p){
   vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
 }
-float fbm(vec2 p){ float a = .5, s = 0.; for (int i = 0; i < 5; i++){ s += a * noise(p); p = p * 2.03 + 11.7; a *= .5; } return s; }
+float fbm(vec2 p){ float a = .5, s = 0.; for (int i = 0; i < 4; i++){ s += a * noise(p); p = p * 2.03 + 11.7; a *= .5; } return s; }
+// the warp field and the second light are low-frequency: fewer octaves, rescaled to the same range
+float fbmLo(vec2 p){ return (.5 * noise(p) + .25 * noise(p * 2.03 + 11.7)) * 1.29; }
 
 void main(){
   vec2 uv = gl_FragCoord.xy / uRes;
   vec2 p = (gl_FragCoord.xy - .5 * uRes) / uRes.y;
   p.y -= uScroll * 1.6;                      // the map slides under the page as you scroll
   float t = uTime * .028;
-  vec2 q = vec2(fbm(p * 1.15 + t), fbm(p * 1.15 + vec2(5.2, 1.3) - t * .8));
+  vec2 q = vec2(fbmLo(p * 1.15 + t), fbmLo(p * 1.15 + vec2(5.2, 1.3) - t * .8));
   float h = fbm(p * 1.5 + q * 1.5);          // terrain height
 
   vec3 deep = vec3(.006, .016, .011), navy = vec3(.016, .055, .038), violet = vec3(.08, .46, .36);
   vec3 col = mix(deep, navy, smoothstep(.2, .75, h));
   col += uTint * smoothstep(.38, .9, h) * .2 * uAmt;                       // lit ridges
-  col += violet * smoothstep(.45, 1., fbm(p * .8 - q + 3.1)) * .17 * uAmt;   // a second, cooler light
+  col += violet * smoothstep(.45, 1., fbmLo(p * .8 - q + 3.1)) * .17 * uAmt;   // a second, cooler light
 
   // contour lines every 1/11 of height; every fourth one is an index line
   float k = h * 11.;
@@ -103,9 +105,13 @@ export function backdrop(canvas: HTMLCanvasElement) {
   let last = 0, sampled = 0, sum = 0, bad = 0, skip = 4;
   const born = performance.now();
 
+  // The picture is soft by design, so it is drawn at CSS resolution (never device pixels) and capped at about
+  // a megapixel: a 4K monitor costs the same as a laptop.
+  const BUDGET = 1.0e6;
   const resize = () => {
-    canvas.width = Math.max(1, Math.round(innerWidth * scale));
-    canvas.height = Math.max(1, Math.round(innerHeight * scale));
+    const k = scale * Math.min(1, Math.sqrt(BUDGET / Math.max(1, innerWidth * innerHeight)));
+    canvas.width = Math.max(1, Math.round(innerWidth * k));
+    canvas.height = Math.max(1, Math.round(innerHeight * k));
     gl.viewport(0, 0, canvas.width, canvas.height);
     dirty = true;
   };
@@ -117,13 +123,15 @@ export function backdrop(canvas: HTMLCanvasElement) {
     dirty = true;
   };
   addEventListener('resize', resize);
-  addEventListener('scroll', read, { passive: true });
+  let fastUntil = 0;
+  addEventListener('scroll', () => { read(); fastUntil = performance.now() + 300; }, { passive: true });
   addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth; my = 1 - e.clientY / innerHeight; dirty = true; }, { passive: true });
 
   function frame(now: number) {
     requestAnimationFrame(frame);
     const raw = now - last;
-    if (document.hidden || raw < (still ? 160 : 30) || (still && !dirty)) return;
+    // ~22 fps is plenty for a slow drift; while the page scrolls the parallax gets the full rate
+    if (document.hidden || raw < (still ? 160 : now < fastUntil ? 30 : 44) || (still && !dirty)) return;
     last = now;
     // slow GPU or software rendering: drop resolution, then stop animating and redraw only on input
     if (!still && skip-- <= 0) {
@@ -131,7 +139,7 @@ export function backdrop(canvas: HTMLCanvasElement) {
       if (raw > 200 && ++bad >= 2) degrade();
       else {
         sum += Math.min(raw, 200);
-        if (++sampled >= 6) { if (sum / sampled > 70) degrade(); sampled = 0; sum = 0; bad = 0; }
+        if (++sampled >= 6) { if (sum / sampled > 85) degrade(); sampled = 0; sum = 0; bad = 0; }
       }
     }
     const k = still ? 1 : 0.08;

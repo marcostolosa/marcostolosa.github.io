@@ -114,6 +114,15 @@ export const tools: { name: string; href: string; repo?: string; desc: T; tags: 
     tags: 'python · ocr · ai',
   },
   {
+    name: 'Atticus',
+    href: 'https://github.com/marcostolosa/atticus-linux',
+    desc: {
+      en: 'Voice assistant overlay for Omarchy (Hyprland/Wayland). Hotkey or wake word, local Whisper and Piper speech in Portuguese and English, model shell commands sandboxed with bubblewrap.',
+      'pt-br': 'Assistente de voz em overlay pro Omarchy (Hyprland/Wayland). Hotkey ou wake word, fala local com Whisper e Piper em português e inglês, comandos do modelo isolados em sandbox bubblewrap.',
+    },
+    tags: 'python · wayland · voice ai',
+  },
+  {
     name: 'ARCTAX',
     href: 'https://github.com/marcostolosa/arctax',
     desc: {

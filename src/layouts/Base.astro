@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Analytics from '../components/Analytics.astro';
+import { analytics } from '../data/analytics';
 import { profile } from '../data/profile';
 import { abs, ogImage } from '../data/seo';
 import { defaultLang, htmlLang, langLabel, langName, localize, locales, tr, ui, unlocalize, type Lang } from '../i18n/ui';
@@ -108,7 +110,10 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     <footer class="foot">
       <p>{t('authorized')} <span>{t('method')}</span></p>
       <p translate="no">{profile.name} ({profile.handle}), {tr(profile.base, lang)}</p>
+      {(analytics.ga4 || analytics.clarity) && <p><button type="button" class="ck" data-consent-open>{t('cookies')}</button></p>}
     </footer>
+
+    <Analytics lang={lang} />
 
     <script>
       import { backdrop } from '../scripts/backdrop';
@@ -152,6 +157,8 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
         border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--dim);
       }
       .foot span { color: var(--addr); margin-left: 6px; }
+      .ck { font: inherit; color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+      .ck:hover { color: var(--acc); }
 
       @media (max-width: 720px) {
         .sec .opt { display: none; }

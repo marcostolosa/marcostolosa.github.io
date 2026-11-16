@@ -34,4 +34,5 @@ export const ui = {
   authorized: { en: 'Authorized targets only.', 'pt-br': 'Somente alvos autorizados.' },
   language: { en: 'Language', 'pt-br': 'Idioma' },
   home: { en: 'Home', 'pt-br': 'Início' },
+  cookies: { en: 'Analytics preferences', 'pt-br': 'Preferências de analytics' },
 } satisfies Record<string, T>;

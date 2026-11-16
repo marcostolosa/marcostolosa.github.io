@@ -9,7 +9,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 
-const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort(
+const writeups = (await getCollection('writeups', (w) => !w.data.draft && w.data.lang === lang)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
@@ -17,8 +17,7 @@ const mail = `mailto:${profile.email}?subject=${encodeURIComponent(L('Engagement
 const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_gov: 'NCUA', be_gov: L('Belgian Government', 'Governo da Bélgica') };
 
 // --- the graph: same data as the sections below, laid out at build time
-const mine = writeups.filter((w) => w.data.lang === lang);
-const graph = buildGraph(lang, (mine.length ? mine : writeups).map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${w.id}/`, w.data.lang) })));
+const graph = buildGraph(lang, writeups.map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${w.id}/`, w.data.lang) })));
 const start = graph.nodes.findIndex((n) => n.id === 'vuln:CVE-2025-10230');
 const first = graph.nodes[start];
 const neighbours = (i: number) => graph.edges.filter(([a, b]) => a === i || b === i).map(([a, b]) => (a === i ? b : a));

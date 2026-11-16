@@ -117,6 +117,26 @@ test.describe('language switch', () => {
     expect(await page.evaluate(() => localStorage.getItem('lang'))).toBe('en');
   });
 
+  test('writeup lists only show the selected language', async ({ page }) => {
+    for (const [path, lang] of [['/en-us/writeups/', 'en'], ['/pt-br/writeups/', 'pt-br']] as const) {
+      await page.goto(path);
+      const items = page.locator('.list > li > a');
+      await expect(items.first()).toBeVisible();
+      for (const hreflang of await items.evaluateAll((as) => as.map((a) => a.getAttribute('hreflang')))) {
+        expect(hreflang).toBe(lang);
+      }
+    }
+
+    for (const [path, lang] of [['/en-us/', 'en'], ['/pt-br/', 'pt-br']] as const) {
+      await page.goto(path);
+      const items = page.locator('#writeups .wr a');
+      await expect(items.first()).toBeVisible();
+      for (const hreflang of await items.evaluateAll((as) => as.map((a) => a.getAttribute('hreflang')))) {
+        expect(hreflang).toBe(lang);
+      }
+    }
+  });
+
   test('home content is translated', async ({ page }) => {
     await page.goto('/pt-br/');
     await expect(page.locator('#whoami a.btn')).toHaveText('Abrir um engajamento');

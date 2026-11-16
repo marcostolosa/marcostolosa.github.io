@@ -7,7 +7,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 
-const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort(
+const writeups = (await getCollection('writeups', (w) => !w.data.draft && w.data.lang === lang)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 const fmt = (d: Date) => d.toISOString().slice(0, 10);

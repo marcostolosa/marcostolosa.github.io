@@ -1,6 +1,8 @@
 ---
 title: "HTB RedEye: de um RCE no GeoNetwork ao Domain Admin pelo ADCS"
 summary: "Uma caixa multi-máquina: o front leva ao GN01, o serviço de ingest leva ao domínio, e uma política de certificado gravável no DC01 entrega o Administrator. O caminho completo, com o porquê de cada passo."
+seoTitle: "HTB RedEye: de RCE no GeoNetwork a Domain Admin via ADCS"
+description: "Writeup do HTB RedEye: um RCE no GeoNetwork leva ao GN01, o serviço de ingest leva ao domínio e uma política de certificado ADCS gravável dá o Domain Admin."
 date: 2026-11-16
 lang: pt-br
 target: "HTB RedEye (10.129.28.102 → 10.129.28.183)"

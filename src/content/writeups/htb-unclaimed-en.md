@@ -1,6 +1,8 @@
 ---
 title: "HTB Unclaimed: prompt injection, MSSQL sysadmin and Backup Operators"
 summary: "A Windows box whose only entry point is a baggage chatbot. Prompt injection hands over an override code, SQL hands over sysadmin, and a SQL Agent proxy hands over the account that reads root.txt."
+seoTitle: "HTB Unclaimed: prompt injection, MSSQL, Backup Operators"
+description: "HTB Unclaimed writeup: prompt injection on a baggage chatbot leaks an override code, SQL gives MSSQL sysadmin, and a SQL Agent proxy reads root.txt."
 date: 2026-11-10
 lang: en
 target: "HTB Unclaimed (10.129.26.50)"

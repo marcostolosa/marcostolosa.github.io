@@ -1,5 +1,5 @@
 // @ts-check
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { defineConfig } from 'astro/config';
 
@@ -33,7 +33,12 @@ const imageAttributes = {
         const out = html.replace(/<img src="(\/img\/[^"]+\.webp)"(?![^>]*\bwidth=)/g, (_, src) => {
           const size = webpSize(new URL(`.${src}`, dir));
           const dims = size ? ` width="${size.width}" height="${size.height}"` : '';
-          return `<img src="${src}"${dims} decoding="async"${seen++ > 0 ? ' loading="lazy"' : ''}`;
+          // Big screenshots ship a 1600px sibling for the article column; the lightbox opens the full file.
+          const small = src.replace(/\.webp$/, '-1600.webp');
+          const srcset = size && existsSync(new URL(`.${small}`, dir))
+            ? ` srcset="${small} 1600w, ${src} ${size.width}w" sizes="(max-width: 800px) 100vw, 800px"`
+            : '';
+          return `<img src="${src}"${srcset}${dims} decoding="async"${seen++ > 0 ? ' loading="lazy"' : ''}`;
         });
         if (out !== html) await writeFile(file, out);
       }

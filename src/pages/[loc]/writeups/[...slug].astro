@@ -32,7 +32,7 @@ const schema = ld(
     mainEntityOfPage: abs(self),
     url: abs(self),
     headline: w.data.title,
-    description: w.data.summary,
+    description: w.data.description ?? w.data.summary,
     datePublished: w.data.date.toISOString(),
     dateModified: w.data.date.toISOString(),
     inLanguage: htmlLang[lang],
@@ -45,8 +45,8 @@ const schema = ld(
 );
 ---
 <Base
-  title={w.data.title}
-  description={w.data.summary}
+  title={w.data.seoTitle ?? w.data.title}
+  description={w.data.description ?? w.data.summary}
   lang={lang}
   alternates={alternates}
   translations={paired ? locales : []}

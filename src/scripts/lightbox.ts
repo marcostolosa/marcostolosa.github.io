@@ -69,11 +69,13 @@ export function lightbox(root: ParentNode = document) {
   };
 
   const open = (src: HTMLImageElement) => {
-    big.src = src.currentSrc || src.src;
+    // always the full file: the article column may have picked the 1600px sibling from srcset
+    big.src = src.src;
     big.alt = src.alt;
     cap.textContent = src.alt;
-    nw = src.naturalWidth || src.width || 1;
-    nh = src.naturalHeight || src.height || 1;
+    // the width/height attributes are the full file's pixels; naturalWidth follows whichever srcset candidate loaded
+    nw = Number(src.getAttribute('width')) || src.naturalWidth || src.width || 1;
+    nh = Number(src.getAttribute('height')) || src.naturalHeight || src.height || 1;
     s = 1; tx = ty = 0;
     dlg.showModal();
     size();

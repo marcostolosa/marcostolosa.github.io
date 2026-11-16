@@ -16,6 +16,9 @@ const writeups = defineCollection({
   schema: z.object({
     title: z.string(),
     summary: z.string(),
+    // Search results: a <title> under 60 characters and a description under 160. Default to title and summary.
+    seoTitle: z.string().max(60).optional(),
+    description: z.string().max(160).optional(),
     date: z.coerce.date(),
     lang: z.enum(['en', 'pt-br']).default('en'),
     target: z.string().optional(),

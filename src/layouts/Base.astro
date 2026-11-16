@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { profile } from '../data/profile';
+import { abs, ogImage } from '../data/seo';
 import { defaultLang, htmlLang, langLabel, langName, localize, locales, tr, ui, unlocalize, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -9,10 +10,19 @@ interface Props {
   lang?: Lang;
   /** Per-locale URL of this page. Defaults to the same path in each locale; pass when a translation does not exist. */
   alternates?: Partial<Record<Lang, string>>;
+  /** Locales this page really exists in, for hreflang. Defaults to all of them, or none when `alternates` is passed. */
+  translations?: readonly Lang[];
   /** Long-form reading pages keep the animated background at roughly half strength. */
   quiet?: boolean;
+  /** Keep the page out of search results (404). */
+  noindex?: boolean;
+  /** Open Graph: an article carries its publication date and tags. */
+  article?: { published: Date; tags?: string[] };
+  /** JSON-LD for this page. */
+  schema?: object;
 }
-const { title, description, lang = defaultLang, alternates, quiet = false } = Astro.props;
+const { title, description, lang = defaultLang, alternates, quiet = false, noindex = false, article, schema } = Astro.props;
+const translations = Astro.props.translations ?? (alternates ? [] : locales);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const base = unlocalize(Astro.url.pathname);
 const alt = Object.fromEntries(locales.map((l) => [l, alternates?.[l] ?? localize(base, l)])) as Record<Lang, string>;
@@ -25,16 +35,34 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex
+      ? <meta name="robots" content="noindex" />
+      : <>
+          <link rel="canonical" href={canonical} />
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+        </>}
+    <meta name="author" content={`${profile.name} (${profile.handle})`} />
     <meta name="theme-color" content="#050a08" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:site_name" content={`${profile.name} (${profile.handle})`} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={abs(ogImage.src)} />
+    <meta property="og:image:width" content={String(ogImage.width)} />
+    <meta property="og:image:height" content={String(ogImage.height)} />
+    <meta property="og:image:alt" content={`${profile.name} (${profile.handle}): red team, pentest, bug bounty`} />
     <meta property="og:locale" content={htmlLang[lang].replace('-', '_')} />
-    {!alternates && locales.map((l) => <link rel="alternate" hreflang={htmlLang[l]} href={new URL(alt[l], Astro.site)} />)}
-    {!alternates && <link rel="alternate" hreflang="x-default" href={new URL(alt.en, Astro.site)} />}
+    {translations.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={htmlLang[l].replace('-', '_')} />)}
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article && <meta property="article:author" content={abs(localize('/', lang))} />}
+    {article?.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@MarcosTolosa_" />
+    {translations.length > 1 && translations.map((l) => <link rel="alternate" hreflang={htmlLang[l]} href={new URL(alt[l], Astro.site)} />)}
+    {translations.length > 1 && <link rel="alternate" hreflang="x-default" href={new URL(alt[translations.includes('en') ? 'en' : lang], Astro.site)} />}
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g, '\\u003c')} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script is:inline>
       // Remember an explicit language choice. Delegated from <head> so it works before any module script loads.

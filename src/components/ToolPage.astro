@@ -2,7 +2,8 @@
 // A tool's landing page, written as its README: pitch and live demo on top, the file below.
 import Base from '../layouts/Base.astro';
 import type { ToolPage } from '../data/toolpages';
-import { localize, type Lang } from '../i18n/ui';
+import { abs, authorRef, breadcrumbSchema, graph as ld } from '../data/seo';
+import { htmlLang, localize, type Lang } from '../i18n/ui';
 
 interface Props { tool: ToolPage; lang?: Lang }
 const { tool: t, lang = 'en' } = Astro.props;
@@ -27,6 +28,22 @@ const demo = t.demo.lines
   .concat('<span class="s">$</span> <span class="cur"></span>')
   .join('\n');
 
+const self = localize(`/${t.slug}/`, lang);
+const schema = ld(
+  {
+    '@type': 'SoftwareSourceCode',
+    '@id': `${abs(self)}#software`,
+    name: t.name,
+    description: t.description,
+    url: abs(self),
+    codeRepository: t.repo,
+    programmingLanguage: 'Python',
+    inLanguage: htmlLang[lang],
+    author: authorRef,
+  },
+  breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)], [t.name, self]]),
+);
+
 const toc = [
   ['features', L('Features', 'Recursos')],
   ['usage', L('Usage', 'Uso')],
@@ -36,7 +53,7 @@ const toc = [
   ['links', 'Links'],
 ];
 ---
-<Base title={t.title} description={t.description} lang={lang}>
+<Base title={t.title} description={t.description} lang={lang} schema={schema}>
   <div class="tp" data-tint={t.tint} style={`--c: var(--t-${t.tint})`}>
     <header class="hero">
       <div class="pitch">

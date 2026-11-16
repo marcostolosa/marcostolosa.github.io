@@ -26,7 +26,7 @@ The box was redeployed mid-session. The front moved from `10.129.28.102` to `10.
 
 The front exposes no 445, 636 or 135. Port 443 terminates on DC01's ADFS, but without a credential that is just a login page. The path that gave execution was GN01, and that is where the first RCE lands.
 
-![Attack-path map: access starts at the GeoNetwork formatter and ends at a certificate issued by DC01's CA](/img/redeye-01-path-en.png)
+![Attack-path map: access starts at the GeoNetwork formatter and ends at a certificate issued by DC01's CA](/img/redeye-01-path-en.webp)
 
 The winning chain has six steps:
 
@@ -95,7 +95,7 @@ uid=999(geonetwork) gid=989(geonetwork) groups=989(geonetwork)
 GN01
 ```
 
-![Anonymous formatter request and the id output: the process runs as geonetwork, uid 999](/img/redeye-02-geonetwork-en.png)
+![Anonymous formatter request and the id output: the process runs as geonetwork, uid 999](/img/redeye-02-geonetwork-en.webp)
 
 Why does it work? Three decisions add up. The upload does not require authentication; the XSLT engine accepts Java extensions; and there is no sandbox between the template and the operating system. None of them is an RCE on its own, but together they give execution as `geonetwork`.
 
@@ -127,7 +127,7 @@ system/server/log=log4j2-stage.xml
 
 `LogUtils.refreshLogConfiguration` loads the resource from the classpath and applies it to the `LoggerContext`. The appender reads the command from `cmd.txt` (planted alongside) and runs it as uid 999. This is not Log4Shell: there is no JNDI lookup here. The vector is a logging configuration loaded from a directory we can write to.
 
-![The path from the ZIP to the classpath and the trigger that reloads the logging XML](/img/redeye-03-zipslip-en.png)
+![The path from the ZIP to the classpath and the trigger that reloads the logging XML](/img/redeye-03-zipslip-en.webp)
 
 What was a render-dependent RCE became a repeatable channel, with the same user and without touching the service. The difference matters: the first path breaks when the formatter changes; the second stays up.
 
@@ -158,7 +158,7 @@ RC_PASS=<redacted>
 
 The Rocket.Chat password was `gabby.t`'s domain password. The LDAPS bind on 636 returned `rc=0`, and the domain had `lockoutThreshold=0` — no lockout for anyone testing.
 
-![The ingest script, the name that injects SQL and execution as gisops; the chat password is redacted](/img/redeye-04-gisops-en.png)
+![The ingest script, the name that injects SQL and execution as gisops; the chat password is redacted](/img/redeye-04-gisops-en.webp)
 
 Three trusts add up here: the file name is treated as a SQL identifier; `psql` accepts meta-commands; and the service account can read a secret it should never have reached. None of them is required for the ingest to work.
 
@@ -182,7 +182,7 @@ After that, `POST /api/v1/users.register` creates an account through the public 
 {"success":true,"user":{"roles":["admin"]}}
 ```
 
-![Injection into the Rocket.Chat bus and the registration of an account born with the admin role](/img/redeye-05-rocketchat-en.png)
+![Injection into the Rocket.Chat bus and the registration of an account born with the admin role](/img/redeye-05-rocketchat-en.webp)
 
 The same channel also accepts `watch.integrations` with `clientAction: inserted`, which lets you insert an outgoing webhook without going through the API. I did not need to go further for the domain chain, but the primitive is there. The lesson is that authorization on the bus is not optional: whoever publishes an event controls the state that event updates.
 
@@ -209,7 +209,7 @@ GABBY C$: ERR 0xc0000022 STATUS_ACCESS_DENIED
 
 On DC01, `isabel.o` also had RDP, the `GP Management` group and access to the CA policy directory. The RDP session was not administrative — the console itself warns — but it was a valid domain session on the Domain Controller:
 
-![RDP session on DC01 as isabel.o: sconfig shows the domain and the DC name, and the console warns the session is not administrative](/img/redeye-06-rdp.png)
+![RDP session on DC01 as isabel.o: sconfig shows the domain and the DC name, and the console warns the session is not administrative](/img/redeye-06-rdp.webp)
 
 The route to writing on DC01 was that session with a looping `cmd`: it fetched jobs from the GN01 listener, ran them and posted the output back. That beacon created `C:\PolicyFiles\User.xml`. The certificate request left GN01 over DCOM/TCP 135 (the ADCS enrollment RPC), with the same account.
 
@@ -275,7 +275,7 @@ Got hash for 'administrator@airways.htb': <redacted>
 
 The rest is pass-the-hash: using the NT hash instead of the password. SMB to DC01 as `airways.htb/Administrator`, `C$`, and `root.txt` on the desktop. Domain Users to Domain Admin, with no CA restart and no interaction.
 
-![The TameMyCerts policy, the certificate with SID -500 and the PKINIT chain to Domain Admin](/img/redeye-07-adcs-en.png)
+![The TameMyCerts policy, the certificate with SID -500 and the PKINIT chain to Domain Admin](/img/redeye-07-adcs-en.webp)
 
 The KDC did not compare the SID with the account that made the request; it used the SID in the certificate. The certificate is isabel's, but the identity it carries is the Administrator's. That difference is what the policy module should have prevented.
 

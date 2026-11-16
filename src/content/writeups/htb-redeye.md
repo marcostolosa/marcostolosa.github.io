@@ -26,7 +26,7 @@ A caixa foi redeployada no meio da sessão. O front mudou de `10.129.28.102` par
 
 O front não expõe 445, 636 nem 135. O 443 termina no ADFS do DC01, mas sem credencial é só uma tela de login. O caminho que dava execução era o GN01, e é lá que o primeiro RCE cai.
 
-![Mapa da cadeia: o acesso começa no formatter do GeoNetwork e termina no certificado emitido pelo CA do DC01](/img/redeye-01-path.png)
+![Mapa da cadeia: o acesso começa no formatter do GeoNetwork e termina no certificado emitido pelo CA do DC01](/img/redeye-01-path.webp)
 
 A cadeia vencedora tem seis passos:
 
@@ -95,7 +95,7 @@ uid=999(geonetwork) gid=989(geonetwork) groups=989(geonetwork)
 GN01
 ```
 
-![Requisição anônima ao formatter e a saída de id: o processo roda como geonetwork, uid 999](/img/redeye-02-geonetwork.png)
+![Requisição anônima ao formatter e a saída de id: o processo roda como geonetwork, uid 999](/img/redeye-02-geonetwork.webp)
 
 Por que isso funciona? Três decisões se somam. O upload não exige autenticação; o motor XSLT aceita extensões Java; e não existe sandbox entre o template e o sistema operacional. Nenhuma delas é um RCE sozinha, mas juntas dão execução como `geonetwork`.
 
@@ -127,7 +127,7 @@ system/server/log=log4j2-stage.xml
 
 O `LogUtils.refreshLogConfiguration` carrega o recurso do classpath e aplica ao `LoggerContext`. O appender lê o comando de `cmd.txt` (plantado junto) e o executa como uid 999. Não é Log4Shell: não há JNDI lookup aqui. O vetor é a configuração de log carregada de um diretório em que conseguimos escrever.
 
-![O caminho do ZIP até o classpath e o gatilho que recarrega o XML de log](/img/redeye-03-zipslip.png)
+![O caminho do ZIP até o classpath e o gatilho que recarrega o XML de log](/img/redeye-03-zipslip.webp)
 
 O que era um RCE dependente de um render virou um canal repetível, com o mesmo usuário e sem tocar no serviço. A diferença importa: o primeiro caminho quebra quando o formatter muda; o segundo continua de pé.
 
@@ -158,7 +158,7 @@ RC_PASS=<redacted>
 
 A senha do Rocket.Chat era a senha de domínio de `gabby.t`. O bind LDAPS em 636 voltou `rc=0`, e o domínio tinha `lockoutThreshold=0` — sem bloqueio para quem quisesse testar.
 
-![O script do ingest, o nome que injeta SQL e a execução como gisops; a senha do chat aparece redigida](/img/redeye-04-gisops.png)
+![O script do ingest, o nome que injeta SQL e a execução como gisops; a senha do chat aparece redigida](/img/redeye-04-gisops.webp)
 
 Três confianças se somam aqui: o nome do arquivo é tratado como identificador SQL; o `psql` aceita meta-comandos; e a conta de serviço lê um segredo que não deveria estar no seu alcance. Nenhuma delas precisaria existir para o ingest funcionar.
 
@@ -182,7 +182,7 @@ Depois disso, `POST /api/v1/users.register` cria uma conta pelo fluxo público. 
 {"success":true,"user":{"roles":["admin"]}}
 ```
 
-![Injeção no barramento do Rocket.Chat e o registro de uma conta que nasce com role admin](/img/redeye-05-rocketchat.png)
+![Injeção no barramento do Rocket.Chat e o registro de uma conta que nasce com role admin](/img/redeye-05-rocketchat.webp)
 
 O mesmo canal ainda aceita `watch.integrations` com `clientAction: inserted`, o que permite inserir um webhook de saída sem passar pela API. Não precisei ir além para a cadeia do domínio, mas o primitivo está lá. A lição é que autorização no barramento não é opcional: quem publica um evento controla o estado que o evento atualiza.
 
@@ -209,7 +209,7 @@ GABBY C$: ERR 0xc0000022 STATUS_ACCESS_DENIED
 
 No DC01, `isabel.o` também tinha RDP, o grupo `GP Management` e acesso ao diretório de política do CA. A sessão RDP não era administrativa — a própria console avisa —, mas era uma sessão de domínio válida em cima do Domain Controller:
 
-![Sessão RDP em DC01 com isabel.o: o sconfig mostra o domínio e o nome do DC, e a console avisa que a sessão não é administrativa](/img/redeye-06-rdp.png)
+![Sessão RDP em DC01 com isabel.o: o sconfig mostra o domínio e o nome do DC, e a console avisa que a sessão não é administrativa](/img/redeye-06-rdp.webp)
 
 O caminho para escrever no DC01 foi essa sessão com um `cmd` em laço: ele buscava jobs no listener do GN01, executava e devolvia a saída. Foi esse beacon que criou o `C:\PolicyFiles\User.xml`. O pedido do certificado saiu do GN01 por DCOM/TCP 135 (o RPC de enrollment do ADCS), com a mesma conta.
 
@@ -275,7 +275,7 @@ Got hash for 'administrator@airways.htb': <redacted>
 
 O resto é pass-the-hash: usar o hash NT no lugar da senha. SMB no DC01 como `airways.htb/Administrator`, `C$`, e o `root.txt` no desktop. Domain Users → Domain Admin, sem reiniciar o CA e sem interação.
 
-![A política do TameMyCerts, o certificado com SID -500 e a cadeia PKINIT até o Domain Admin](/img/redeye-07-adcs.png)
+![A política do TameMyCerts, o certificado com SID -500 e a cadeia PKINIT até o Domain Admin](/img/redeye-07-adcs.webp)
 
 O KDC não comparou o SID com a conta que fez o pedido; usou o SID do certificado. O certificado é da isabel, mas a identidade que ele carrega é a do Administrator. É essa diferença que o módulo de política deveria ter impedido.
 

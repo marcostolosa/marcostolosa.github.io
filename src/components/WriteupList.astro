@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { langLabel, localize, type Lang } from '../i18n/ui';
+import { abs, authorRef, breadcrumbSchema, graph as ld } from '../data/seo';
+import { htmlLang, langLabel, localize, type Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -11,14 +12,37 @@ const writeups = (await getCollection('writeups', (w) => !w.data.draft && w.data
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const title = L('Pentest and red team writeups: HTB, Active Directory | Tr0p', 'Writeups de pentest e red team: HTB, Active Directory | Tr0p');
+const description = L(
+  'Step-by-step pentest and red team writeups by Marcos Tolosa (Tr0p): Hack The Box, Active Directory, ADCS, web exploitation and prompt injection.',
+  'Writeups de pentest e red team passo a passo por Marcos Tolosa (Tr0p): Hack The Box, Active Directory, ADCS, exploração web e prompt injection.',
+);
+const self = localize('/writeups/', lang);
+const schema = ld(
+  {
+    '@type': 'Blog',
+    '@id': `${abs(self)}#blog`,
+    url: abs(self),
+    name: title,
+    description,
+    inLanguage: htmlLang[lang],
+    author: authorRef,
+    blogPost: writeups.map((w) => ({
+      '@type': 'BlogPosting',
+      headline: w.data.title,
+      url: abs(localize(`/writeups/${w.id}/`, lang)),
+      datePublished: w.data.date.toISOString(),
+      author: authorRef,
+    })),
+  },
+  breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)], ['Writeups', self]]),
+);
 ---
 <Base
   lang={lang}
-  title={L('Writeups — Marcos Tolosa (Tr0p)', 'Writeups — Marcos Tolosa (Tr0p)')}
-  description={L(
-    'Technical writeups on vulnerability research, exploit development and reverse engineering by Marcos Tolosa (Tr0p).',
-    'Writeups técnicos de pesquisa de vulnerabilidades, desenvolvimento de exploits e engenharia reversa por Marcos Tolosa (Tr0p).',
-  )}
+  title={title}
+  description={description}
+  schema={schema}
 >
   <header class="head">
     <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>ls -lt writeups/</i></p>

@@ -33,7 +33,7 @@ export const manw: ToolPage = {
   tint: 'writeup',
   title: 'MANW-NG: Windows API docs and execution, from your terminal',
   description:
-    'MANW-NG is a Python CLI for reverse engineers and security researchers: scrape structured Win32/NTAPI documentation from Microsoft Learn and execute Windows APIs directly via ctypes.',
+    'MANW-NG is a Python CLI for reverse engineers: scrape structured Win32/NTAPI docs from Microsoft Learn and execute Windows APIs directly via ctypes.',
   tagline: 'Windows API docs and execution, straight from your terminal.',
   lede: 'MANW-NG scrapes structured Microsoft Learn documentation and calls live Windows APIs via `ctypes`. One CLI built for reverse engineers and security researchers.',
   badges: [['python', '3.11+'], ['license', 'MIT'], ['apis', 'Win32 · NTAPI · driver'], ['mappings', '61,000+']],
@@ -208,7 +208,7 @@ export const atticus: ToolPage = {
   tint: 'account',
   title: 'Atticus: a voice assistant overlay for Omarchy and Hyprland',
   description:
-    'Atticus is a voice assistant overlay for Omarchy (Hyprland/Wayland): hotkey or wake word, local speech recognition in Brazilian Portuguese and English, a neural voice, and sandboxed shell commands.',
+    'Atticus is a voice assistant overlay for Omarchy (Hyprland/Wayland): hotkey or wake word, local speech in Portuguese and English, sandboxed shell commands.',
   tagline: 'Press a hotkey, speak, get a spoken answer. On your own Linux desktop.',
   lede: 'Atticus puts a small always-on-top panel in the corner of your screen. It transcribes Brazilian Portuguese or English with `faster-whisper`, answers in a `Piper` neural voice, and gates every command the model runs behind a `bubblewrap` sandbox.',
   badges: [['platform', 'Omarchy · Hyprland'], ['license', 'MIT'], ['stack', 'GTK4 · faster-whisper · Piper'], ['speech', 'local']],
@@ -297,7 +297,7 @@ export const atticusPt: ToolPage = {
   ...atticus,
   title: 'Atticus: assistente de voz em overlay para Omarchy e Hyprland',
   description:
-    'Atticus é um assistente de voz em overlay para o Omarchy (Hyprland/Wayland): hotkey ou wake word, reconhecimento de fala local em português do Brasil e inglês, voz neural e comandos de shell em sandbox.',
+    'Atticus é um assistente de voz em overlay para o Omarchy (Hyprland/Wayland): hotkey ou wake word, fala local em português e inglês, comandos de shell em sandbox.',
   tagline: 'Aperte uma tecla, fale, ouça a resposta. No seu próprio desktop Linux.',
   lede: 'O Atticus coloca um painel pequeno, sempre visível, no canto da tela. Ele transcreve português do Brasil ou inglês com `faster-whisper`, responde com uma voz neural do `Piper` e passa todo comando que o modelo executa por uma sandbox `bubblewrap`.',
   badges: [['plataforma', 'Omarchy · Hyprland'], ['licença', 'MIT'], ['stack', 'GTK4 · faster-whisper · Piper'], ['fala', 'local']],
@@ -377,7 +377,7 @@ export const manwPt: ToolPage = {
   ...manw,
   title: 'MANW-NG: documentação e execução da API do Windows, direto do terminal',
   description:
-    'MANW-NG é uma CLI em Python para reversers e pesquisadores de segurança: extrai documentação estruturada de Win32/NTAPI do Microsoft Learn e executa APIs do Windows diretamente via ctypes.',
+    'MANW-NG é uma CLI em Python para reversers: extrai documentação estruturada de Win32/NTAPI do Microsoft Learn e executa APIs do Windows direto via ctypes.',
   tagline: 'Documentação e execução da API do Windows, direto do seu terminal.',
   lede: 'O MANW-NG extrai a documentação estruturada do Microsoft Learn e chama APIs reais do Windows via `ctypes`. Uma única CLI feita para reversers e pesquisadores de segurança.',
   badges: [['python', '3.11+'], ['licença', 'MIT'], ['apis', 'Win32 · NTAPI · driver'], ['mapeamentos', '61.000+']],

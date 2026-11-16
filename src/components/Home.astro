@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { buildGraph, typeName, type NodeType } from '../data/graph';
 import { disclosures, hallOfFame, imports, links, platforms, profile, tools } from '../data/profile';
+import { graph as ld, personSchema, websiteSchema } from '../data/seo';
 import { localize, tr, type Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
@@ -38,6 +39,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
 ---
 <Base
   lang={lang}
+  schema={ld(websiteSchema(lang), { '@type': 'ProfilePage', '@id': `${Astro.site}${localize('/', lang).slice(1)}#profile`, url: new URL(localize('/', lang), Astro.site).href, inLanguage: lang === 'en' ? 'en-US' : 'pt-BR', mainEntity: personSchema(lang) })}
   title={L('Marcos Tolosa (Tr0p): red team, pentest, bug bounty', 'Marcos Tolosa (Tr0p): red team, pentest, bug bounty')}
   description={L(
     'Red teamer, pentester and bug bounty hunter. CVE-2025-10230 (CVSS 10.0, Samba). 6× U.S. Government Hall of Fame. Available for pentest and red team engagements.',

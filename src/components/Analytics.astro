@@ -1,103 +1,47 @@
 ---
-// Google Analytics 4 and Microsoft Clarity, loaded only after the visitor accepts. The choice is kept in
-// localStorage; a browser that sends Global Privacy Control is treated as a refusal and never asked.
+// Google Analytics 4 and Microsoft Clarity, loaded on every page. Browsers that send Global Privacy Control
+// and automated browsers (crawlers, tests, Lighthouse) are not measured.
 import { analytics } from '../data/analytics';
-import type { Lang } from '../i18n/ui';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
-const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
 const { ga4, clarity } = analytics;
-const on = !!(ga4 || clarity);
-const names = [ga4 && 'Google Analytics', clarity && 'Microsoft Clarity'].filter(Boolean).join(L(' and ', ' e '));
 ---
-{on && (
-  <section id="consent" class="consent" aria-label={L('Analytics consent', 'Consentimento de analytics')} hidden>
-    <p>
-      {L(`Allow ${names} to measure visits and clicks?`, `Permitir ${names} para medir visitas e cliques?`)}
-    </p>
-    <div class="consent-b">
-      <button type="button" data-consent="granted">{L('Accept', 'Aceitar')}</button>
-      <button type="button" data-consent="denied">{L('Decline', 'Recusar')}</button>
-    </div>
-  </section>
-)}
-{on && (
+{(ga4 || clarity) && (
   <script is:inline define:vars={{ ga4, clarity }}>
     (function () {
-      var KEY = 'consent', d = document, box = d.getElementById('consent'), loaded = false;
-      var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
-      var set = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
-
-      function load() {
-        if (loaded) return;
-        loaded = true;
-        if (ga4) {
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', ga4);
-          var g = d.createElement('script');
-          g.async = true;
-          g.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4);
-          d.head.appendChild(g);
-          // Which link, and in which part of the page. Page views, scroll depth and outbound clicks come from
-          // GA4's enhanced measurement.
-          d.addEventListener('click', function (e) {
-            var a = e.target && e.target.closest && e.target.closest('a[href]');
-            if (!a) return;
-            var sec = a.closest('section[id], header, nav, footer, article');
-            var href = a.getAttribute('href') || '';
-            window.gtag('event', href.indexOf('mailto:') === 0 ? 'contact_click' : 'link_click', {
-              link_url: href.indexOf('mailto:') === 0 ? 'mailto' : a.href,
-              link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
-              link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',
-              outbound: a.host !== location.host,
-            });
-          }, true);
-        }
-        if (clarity) {
-          window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
-          var c = d.createElement('script');
-          c.async = true;
-          c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);
-          d.head.appendChild(c);
-        }
+      if (navigator.globalPrivacyControl || navigator.webdriver) return;
+      var d = document;
+      if (ga4) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', ga4);
+        var g = d.createElement('script');
+        g.async = true;
+        g.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4);
+        d.head.appendChild(g);
+        // Which link, and in which part of the page. Page views, scroll depth and outbound clicks come from
+        // GA4's enhanced measurement.
+        d.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var sec = a.closest('section[id], header, nav, footer, article');
+          var href = a.getAttribute('href') || '';
+          var mail = href.indexOf('mailto:') === 0;
+          window.gtag('event', mail ? 'contact_click' : 'link_click', {
+            link_url: mail ? 'mailto' : a.href,
+            link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+            link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',
+            outbound: a.host !== location.host,
+          });
+        }, true);
       }
-
-      var choice = get();
-      if (choice === 'granted') load();
-      // Automated browsers (crawlers, tests, Lighthouse) are neither asked nor measured.
-      else if (!choice && !navigator.globalPrivacyControl && !navigator.webdriver) box.hidden = false;
-
-      d.addEventListener('click', function (e) {
-        var t = e.target && e.target.closest && e.target.closest('[data-consent], [data-consent-open]');
-        if (!t) return;
-        if (t.hasAttribute('data-consent-open')) { box.hidden = false; box.querySelector('button').focus(); return; }
-        var v = t.getAttribute('data-consent');
-        set(v);
-        box.hidden = true;
-        if (v === 'granted') load();
-        // a refusal after an earlier acceptance takes effect on the next page
-      });
+      if (clarity) {
+        window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+        var c = d.createElement('script');
+        c.async = true;
+        c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);
+        d.head.appendChild(c);
+      }
     })();
   </script>
 )}
-
-<style>
-  .consent {
-    position: fixed; z-index: 30; left: 16px; right: 16px; bottom: 16px; max-width: 560px; margin-left: auto;
-    display: grid; gap: 14px; padding: 18px 20px;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
-    font: 400 0.86rem/1.6 var(--mono); color: var(--fg);
-    box-shadow: 0 18px 60px -12px rgba(0, 0, 0, 0.8);
-  }
-  .consent[hidden] { display: none; }
-  .consent-b { display: flex; flex-wrap: wrap; gap: 10px; }
-  .consent button {
-    min-height: 40px; padding: 0 18px; border-radius: 2px; cursor: pointer;
-    font: 600 0.86rem/1 var(--mono); border: 1px solid var(--line); background: var(--panel-2); color: var(--fg-hi);
-  }
-  .consent button[data-consent='granted'] { background: var(--acc); border-color: var(--acc); color: var(--gutter); }
-  .consent button:hover { border-color: var(--fg-hi); }
-</style>

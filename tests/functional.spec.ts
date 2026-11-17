@@ -19,6 +19,13 @@ test.describe('home', () => {
     await expect(page.locator('#mail')).toHaveAttribute('href', /^mailto:/);
   });
 
+  test('WhatsApp sits next to email in the hero and in contact', async ({ page }) => {
+    await page.goto('/en-us/');
+    await expect(page.locator('#whoami a[data-wa]')).toHaveAttribute('href', /^https:\/\/wa\.me\//);
+    await expect(page.locator('#wa')).toHaveAttribute('href', /^https:\/\/wa\.me\//);
+    await expect(page.locator('#wa')).toHaveAccessibleName('WhatsApp');
+  });
+
   test('graph inspector opens on the CVSS 10.0 finding and links to its source', async ({ page }) => {
     await page.goto('/en-us/');
     await expect(page.locator('#insp-title')).toHaveText('CVE-2025-10230');

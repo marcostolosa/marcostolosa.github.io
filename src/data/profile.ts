@@ -11,6 +11,7 @@ export const profile = {
     'pt-br': 'Red teamer, pentester e bug hunter. Levo cada achado até a causa raiz, transformo em ferramenta e documento pra você conseguir seguir.',
   } as T,
   email: 'marcos.tolosa@owasp.org',
+  whatsapp: 'https://wa.me/message/L54CDCA4HJ2UF1',
 };
 
 export type Disclosure = {

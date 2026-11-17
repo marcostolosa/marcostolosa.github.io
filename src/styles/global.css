@@ -101,6 +101,18 @@ a:hover { color: var(--fg-hi); text-decoration-color: currentColor; }
 .btn:active { transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
 
+/* secondary action next to .btn: same height, outlined, so the primary still reads first */
+.btn-alt {
+  display: inline-flex; align-items: center; gap: 9px; color: var(--fg-hi); text-decoration: none;
+  font: 700 0.98rem/1 var(--mono); padding: 14px 19px; border-radius: 2px;
+  border: 1px solid var(--line); background: rgba(8, 19, 14, 0.6);
+  transition: transform 180ms var(--ease), border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.btn-alt .wa-ic { width: 1.15em; height: 1.15em; color: #25d366; flex: none; }
+.btn-alt:hover { border-color: #25d366; transform: translateY(-1px); box-shadow: 0 0 26px -6px rgba(37, 211, 102, 0.7); }
+.btn-alt:active { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .btn-alt { transition: none; } .btn-alt:hover { transform: none; } }
+
 /* shell prompt above a block: decoration that names the command the block answers */
 .cmd { font: 500 0.86rem/1.4 var(--mono); color: var(--addr); white-space: nowrap; overflow: hidden; }
 .cmd b { color: var(--acc); font-weight: 500; }

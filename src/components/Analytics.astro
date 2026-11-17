@@ -27,7 +27,8 @@ const { ga4, clarity } = analytics;
           var sec = a.closest('section[id], header, nav, footer, article');
           var href = a.getAttribute('href') || '';
           var mail = href.indexOf('mailto:') === 0;
-          window.gtag('event', mail ? 'contact_click' : 'link_click', {
+          var wa = a.hostname === 'wa.me';
+          window.gtag('event', wa ? 'whatsapp_click' : mail ? 'contact_click' : 'link_click', {
             link_url: mail ? 'mailto' : a.href,
             link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
             link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',

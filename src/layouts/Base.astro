@@ -115,10 +115,9 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
 
     <script>
       import { backdrop } from '../scripts/backdrop';
-      import { softwareGL, whenIdle } from '../scripts/gpu';
+      import { startGL } from '../scripts/gpu';
       const c = document.getElementById('backdrop') as HTMLCanvasElement;
-      whenIdle(() => {
-        if (softwareGL()) return; // the CSS gradient stays
+      startGL(() => {
         try { if (backdrop(c)) c.classList.add('on'); } catch { /* the CSS gradient stays */ }
       });
       if (document.querySelector('main img')) import('../scripts/lightbox').then((m) => m.lightbox());

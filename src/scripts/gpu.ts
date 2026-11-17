@@ -17,6 +17,21 @@ export function softwareGL(): boolean {
   return cached;
 }
 
+/**
+ * Start a WebGL scene: once the page is idle, and on a software renderer only after the visitor first
+ * moves, touches, scrolls or types, so a slow CPU-drawn scene never blocks the load. `waiting` runs when
+ * the start is deferred, so the caller can show its static fallback meanwhile.
+ */
+export function startGL(fn: () => void, waiting?: () => void) {
+  whenIdle(() => {
+    if (!softwareGL()) return fn();
+    waiting?.();
+    const evs = ['pointermove', 'pointerdown', 'keydown', 'scroll', 'touchstart', 'wheel'];
+    const go = () => { evs.forEach((e) => removeEventListener(e, go)); fn(); };
+    evs.forEach((e) => addEventListener(e, go, { once: true, passive: true }));
+  });
+}
+
 /** Run after the page has loaded and the main thread is idle, so WebGL never competes with first paint. */
 export function whenIdle(fn: () => void) {
   const go = () => ('requestIdleCallback' in window ? requestIdleCallback(() => fn(), { timeout: 1500 }) : setTimeout(fn, 200));

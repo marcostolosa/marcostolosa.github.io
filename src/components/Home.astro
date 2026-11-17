@@ -255,7 +255,8 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
   // three.js is the heavy part: load it after the page is interactive, and keep the SVG if WebGL is unavailable.
   const css = getComputedStyle(document.documentElement);
   const colors = Object.fromEntries(Object.keys(data.strings.types).map((t) => [t, css.getPropertyValue(`--t-${t}`).trim()]));
-  import('../scripts/osint-graph')
+  import { softwareGL, whenIdle } from '../scripts/gpu';
+  whenIdle(() => (softwareGL() ? Promise.reject() : import('../scripts/osint-graph'))
     .then(({ mount }) => {
       scene = mount({
         stage: $('stage'),
@@ -281,7 +282,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
       addEventListener('resize', sync);
       sync();
     })
-    .catch(() => hero.classList.add('no-gl'));
+    .catch(() => hero.classList.add('no-gl')));
 </script>
 
 <style>

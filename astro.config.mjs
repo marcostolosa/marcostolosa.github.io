@@ -50,6 +50,8 @@ export default defineConfig({
   site: 'https://mindsecurity.org',
   trailingSlash: 'ignore',
   integrations: [imageAttributes],
+  // About 9 KB of CSS: inlined, it no longer blocks the first paint.
+  build: { inlineStylesheets: 'always' },
   markdown: {
     // Code blocks pick up the palette from CSS variables in src/styles/global.css.
     shikiConfig: { theme: 'css-variables', wrap: false },

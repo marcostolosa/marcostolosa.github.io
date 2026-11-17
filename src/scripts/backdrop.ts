@@ -137,21 +137,25 @@ export function backdrop(canvas: HTMLCanvasElement) {
     const raw = now - last;
     // ~22 fps is plenty for a slow drift; while the page scrolls the parallax gets the full rate
     const step = LEVELS[level].ms;
+    // a full-screen image (the lightbox) covers the page: nothing to draw behind it
+    if (document.querySelector('dialog[open]')) return;
     if (document.hidden || raw < (still ? 160 : now < fastUntil && level < 2 ? 30 : step) || (still && !dirty)) return;
     last = now;
     canvas.dataset.state = still ? 'still' : `level${level}`; // visible in devtools: why the rain is or is not moving
     // a frame that arrives much later than asked for means the machine cannot keep up: step down one level
     // the first seconds are page load (fonts, the graph, analytics): their stalls say nothing about the GPU
     if (!still && now - born > 3000 && skip-- <= 0) {
+      const floor = level === LEVELS.length - 1;
       const degrade = () => {
-        if (level < LEVELS.length - 1) { level++; scale = LEVELS[level].scale; resize(); }
+        if (!floor) { level++; scale = LEVELS[level].scale; resize(); }
+        else still = true; // not even a few frames a second: the page matters more than the rain
         sampled = 0; sum = 0; bad = 0; skip = 4;
       };
       const late = raw - step;
-      if (late > 200 && ++bad >= 2) degrade();
+      if (late > (floor ? 400 : 200) && ++bad >= 2) degrade();
       else {
         sum += Math.min(late, 200);
-        if (++sampled >= 8) { if (sum / sampled > 45) degrade(); sampled = 0; sum = 0; bad = 0; }
+        if (++sampled >= 8) { if (sum / sampled > (floor ? 150 : 45)) degrade(); sampled = 0; sum = 0; bad = 0; }
       }
     }
     const k = still ? 1 : 0.08;

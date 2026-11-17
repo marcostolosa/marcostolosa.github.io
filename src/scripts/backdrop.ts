@@ -101,7 +101,8 @@ export function backdrop(canvas: HTMLCanvasElement) {
 
   // Slow GPU or software rendering steps down resolution and frame rate, but never stops: the rain keeps falling.
   // Only prefers-reduced-motion freezes it (drawn once, redrawn on input).
-  const LEVELS = [{ scale: 1, ms: 44 }, { scale: 0.6, ms: 60 }, { scale: 0.42, ms: 85 }, { scale: 0.3, ms: 120 }];
+  // The last level is a crawl for CPU renderers: a few frames a second leaves the main thread free for the page.
+  const LEVELS = [{ scale: 1, ms: 44 }, { scale: 0.6, ms: 60 }, { scale: 0.42, ms: 85 }, { scale: 0.3, ms: 140 }, { scale: 0.22, ms: 400 }];
   let level = 0;
   let scale = 1, still = reduce, dirty = true;
   let want = fallbackTint, tint = [...fallbackTint] as [number, number, number];
@@ -136,7 +137,7 @@ export function backdrop(canvas: HTMLCanvasElement) {
     const raw = now - last;
     // ~22 fps is plenty for a slow drift; while the page scrolls the parallax gets the full rate
     const step = LEVELS[level].ms;
-    if (document.hidden || raw < (still ? 160 : now < fastUntil ? Math.min(30, step) : step) || (still && !dirty)) return;
+    if (document.hidden || raw < (still ? 160 : now < fastUntil && level < 2 ? 30 : step) || (still && !dirty)) return;
     last = now;
     canvas.dataset.state = still ? 'still' : `level${level}`; // visible in devtools: why the rain is or is not moving
     // a frame that arrives much later than asked for means the machine cannot keep up: step down one level

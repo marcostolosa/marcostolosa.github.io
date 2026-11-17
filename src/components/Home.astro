@@ -15,7 +15,7 @@ const writeups = (await getCollection('writeups', (w) => !w.data.draft && w.data
 );
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const mail = `mailto:${profile.email}?subject=${encodeURIComponent(L('Engagement inquiry', 'Proposta de engajamento'))}`;
-const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_gov: 'NCUA', be_gov: L('Belgian Government', 'Governo da Bélgica') };
+const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_gov: 'NCUA', be_gov: L('Belgian Government', 'Governo da Bélgica'), ba: 'British Airways' };
 
 // --- the graph: same data as the sections below, laid out at build time
 const graph = buildGraph(lang, writeups.map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${w.id}/`, w.data.lang) })));
@@ -107,7 +107,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
     <header class="sh">
       <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>cat findings.log</i></p>
       <h2 id="h-disc">{L('Disclosed vulnerabilities', 'Vulnerabilidades divulgadas')}</h2>
-      <p>{L('Six public records. Each one links to the advisory, the patch or the programme that confirmed it.', 'Seis registros públicos. Cada um leva ao advisory, ao patch ou ao programa que confirmou.')}</p>
+      <p>{L('Seven records. Each one links to the advisory, the patch or the report on the programme that confirmed it.', 'Sete registros. Cada um leva ao advisory, ao patch ou ao report no programa que confirmou.')}</p>
     </header>
     <ol class="lst">
       {disclosures.map((d, i) => (
@@ -131,7 +131,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
     </header>
     <ul class="hof" translate="no">
       {hallOfFame.agencies.map((a) => <li>{a}</li>)}
-      <li>{tr(hallOfFame.also, lang)}</li>
+      {hallOfFame.also.map((a) => <li>{tr(a, lang)}</li>)}
     </ul>
     <p class="plat">{L('Active on', 'Ativo em')} {platforms.join(', ')}. {L('OWASP member since 2021.', 'Membro da OWASP desde 2021.')}</p>
   </section>

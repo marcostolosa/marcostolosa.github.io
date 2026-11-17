@@ -35,6 +35,15 @@ export const disclosures: Disclosure[] = [
     crit: true,
   },
   {
+    id: 'British Airways VDP',
+    href: 'https://hackerone.com/reports/3489589',
+    sym: 'ba',
+    cls: 'exposed Solr admin (default credentials) → RCE',
+    note: { en: 'production flight pricing data', 'pt-br': 'dados de preço de voos em produção' },
+    sev: '10.0',
+    crit: true,
+  },
+  {
     id: 'CVE-2026-23722',
     href: 'https://github.com/LabRedesCefetRJ/WeGIA/security/advisories/GHSA-g7hh-6qj7-mcqf',
     sym: 'wegia',
@@ -51,7 +60,7 @@ export const disclosures: Disclosure[] = [
   },
   {
     id: 'NCUA VDP',
-    href: 'https://bugcrowd.com/engagements/ncua-vdp/crowdstream',
+    href: 'https://bugcrowd.com/submissions/b71548c0-fca2-4483-8b40-5264ca87ec7d',
     sym: 'us_gov',
     cls: 'unauthenticated OS command injection',
     note: { en: 'federal infrastructure', 'pt-br': 'infraestrutura federal' },
@@ -60,7 +69,7 @@ export const disclosures: Disclosure[] = [
   },
   {
     id: 'Digital Flanders',
-    href: 'https://yeswehack.com/programs/digital-flanders-vulnerability-disclosure-program#program-activity',
+    href: 'https://yeswehack.com/reports/683327',
     sym: 'be_gov',
     cls: 'blind XXE → internal SSRF',
     note: { en: 'reached Tomcat Manager', 'pt-br': 'chegou ao Tomcat Manager' },
@@ -89,7 +98,10 @@ export const hallOfFame = {
     en: '6× U.S. Government · 15 valid · 93.75% accuracy',
     'pt-br': '6× Governo dos EUA · 15 válidas · 93,75% de precisão',
   } as T,
-  also: { en: 'Digital Flanders (Belgian Government)', 'pt-br': 'Digital Flanders (Governo da Bélgica)' } as T,
+  also: [
+    { en: 'Digital Flanders (Belgian Government)', 'pt-br': 'Digital Flanders (Governo da Bélgica)' },
+    { en: 'British Airways', 'pt-br': 'British Airways' },
+  ] as T[],
   record: 'https://bugcrowd.com/h/Tr0p',
 };
 
@@ -151,6 +163,7 @@ export const imports = [
 export const links = [
   { label: 'github', href: 'https://github.com/marcostolosa' },
   { label: 'bugcrowd', href: 'https://bugcrowd.com/h/Tr0p' },
+  { label: 'hackerone', href: 'https://hackerone.com/tr0p' },
   { label: 'linkedin', href: 'https://www.linkedin.com/in/marcos-tolosa/' },
   { label: 'youtube', href: 'https://youtube.com/@Marcos.Tolosa' },
   { label: 'x', href: 'https://twitter.com/MarcosTolosa_' },

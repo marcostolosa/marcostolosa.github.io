@@ -66,11 +66,20 @@ const targets: Record<string, { label: string; desc: { en: string; 'pt-br': stri
     },
     href: 'https://yeswehack.com/programs/digital-flanders-vulnerability-disclosure-program',
   },
+  ba: {
+    label: 'British Airways',
+    desc: {
+      en: 'British Airways vulnerability disclosure programme, run on HackerOne. One critical finding, resolved.',
+      'pt-br': 'Programa de divulgação de vulnerabilidades da British Airways, hospedado no HackerOne. Um achado crítico, resolvido.',
+    },
+    href: 'https://hackerone.com/british_airways_vdp',
+  },
 };
 
 const accountDesc: Record<string, { en: string; 'pt-br': string }> = {
   github: { en: 'Source code for every tool on this page.', 'pt-br': 'Código-fonte de todas as ferramentas desta página.' },
   bugcrowd: { en: 'Public bug bounty record: Hall of Fame entries, valid findings, accuracy.', 'pt-br': 'Registro público de bug bounty: Hall of Fame, achados válidos, precisão.' },
+  hackerone: { en: 'HackerOne profile: reports to programmes such as British Airways.', 'pt-br': 'Perfil no HackerOne: reports para programas como a British Airways.' },
   linkedin: { en: 'Professional history.', 'pt-br': 'Histórico profissional.' },
   youtube: { en: 'Talks and walkthroughs.', 'pt-br': 'Palestras e demonstrações.' },
   x: { en: 'Research notes and disclosures as they land.', 'pt-br': 'Notas de pesquisa e divulgações em tempo real.' },
@@ -98,7 +107,7 @@ export function buildGraph(lang: Lang, writeups: Writeup[]): Graph {
 
   // accounts first: other nodes cite them
   for (const l of links) {
-    add({ id: `acc:${l.label}`, type: 'account', label: l.label === 'x' ? 'X' : l.label[0].toUpperCase() + l.label.slice(1), size: l.label === 'bugcrowd' || l.label === 'github' ? 0.44 : 0.3, desc: tr(accountDesc[l.label], lang), href: l.href });
+    add({ id: `acc:${l.label}`, type: 'account', label: l.label === 'x' ? 'X' : l.label === 'hackerone' ? 'HackerOne' : l.label[0].toUpperCase() + l.label.slice(1), size: l.label === 'bugcrowd' || l.label === 'github' ? 0.44 : 0.3, desc: tr(accountDesc[l.label], lang), href: l.href });
     link('tr0p', `acc:${l.label}`);
   }
   add({
@@ -129,6 +138,7 @@ export function buildGraph(lang: Lang, writeups: Writeup[]): Graph {
     link(`vuln:${d.id}`, d.sym === 'us_gov' ? 'agency:NCUA' : `tgt:${d.sym}`);
   }
   link('vuln:NCUA VDP', 'acc:bugcrowd');
+  link('vuln:British Airways VDP', 'acc:hackerone');
 
   // tools
   for (const t of tools) {

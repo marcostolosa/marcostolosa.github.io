@@ -115,7 +115,8 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
 
     <script>
       import { backdrop } from '../scripts/backdrop';
-      import { startGL } from '../scripts/gpu';
+      import { recoverFromStaleChunks, startGL } from '../scripts/gpu';
+      recoverFromStaleChunks();
       const c = document.getElementById('backdrop') as HTMLCanvasElement;
       startGL(() => {
         try { if (backdrop(c)) c.classList.add('on'); } catch { /* the CSS gradient stays */ }

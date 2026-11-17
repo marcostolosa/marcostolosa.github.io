@@ -31,7 +31,7 @@ test.describe('home', () => {
     await expect(page.locator('#insp-title')).toHaveText('CVE-2025-10230');
     await expect(page.locator('#insp-src')).toHaveAttribute('href', disclosures[0].href);
     // WebGL scene when available, static SVG otherwise: either way the hero settles into one of the two states.
-    await expect(page.locator('#whoami')).toHaveClass(/\b(gl|no-gl)\b/);
+    await expect(page.locator('#whoami')).toHaveClass(/(^|\s)(gl|no-gl)(\s|$)/);
   });
 
   test('next / previous walk every node and wrap', async ({ page }) => {
@@ -197,10 +197,11 @@ test('addresses from before the /en-us/ and /pt-br/ layout still land on the pag
   }
 });
 
-// Status checks go through the browser (page.goto) so they follow the same network path as a visitor.
+// Status checks use the page's own request context (same proxy and cookies as the browser) but bypass the
+// browser cache, so a revalidated page counts as the 200 it is and a client-side redirect cannot abort it.
 test('legacy tool landing pages still resolve', async ({ page }) => {
   for (const path of ['/ocrack.html', '/manw-ng.html', '/favicon.svg']) {
-    expect((await page.goto(path))?.status(), path).toBe(200);
+    expect((await page.request.get(path)).status(), path).toBe(200);
   }
 });
 
@@ -213,7 +214,7 @@ test('every internal link resolves', async ({ page }) => {
     hrefs.forEach((h) => seen.add(h.split('#')[0] || '/'));
   }
   for (const href of seen) {
-    expect((await page.goto(href))?.status(), href).toBe(200);
+    expect((await page.request.get(href)).status(), href).toBe(200);
   }
 });
 

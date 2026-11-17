@@ -16,7 +16,7 @@ jobs:
   test:
     name: Accessibility & functional tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       # Test build includes tests/fixtures/writeups so the article template is covered.
       - run: npm run build:test
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       # WCAG 2.2 AA (axe-core) on every page and every home section, EN and PT-BR,
       # desktop and mobile; plus Step/Run, keyboard focus, language switch, links, overflow.
       - run: npx playwright test

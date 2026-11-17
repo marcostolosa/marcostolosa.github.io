@@ -99,6 +99,10 @@ export function backdrop(canvas: HTMLCanvasElement) {
   const amt = document.body.dataset.bg === 'quiet' ? 0.55 : 1;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Slow GPU or software rendering steps down resolution and frame rate, but never stops: the rain keeps falling.
+  // Only prefers-reduced-motion freezes it (drawn once, redrawn on input).
+  const LEVELS = [{ scale: 1, ms: 44 }, { scale: 0.6, ms: 60 }, { scale: 0.42, ms: 85 }, { scale: 0.3, ms: 120 }];
+  let level = 0;
   let scale = 1, still = reduce, dirty = true;
   let want = fallbackTint, tint = [...fallbackTint] as [number, number, number];
   let mx = 0.5, my = 0.5, sx = 0.5, sy = 0.5, scroll = 0, sScroll = 0;
@@ -131,15 +135,22 @@ export function backdrop(canvas: HTMLCanvasElement) {
     requestAnimationFrame(frame);
     const raw = now - last;
     // ~22 fps is plenty for a slow drift; while the page scrolls the parallax gets the full rate
-    if (document.hidden || raw < (still ? 160 : now < fastUntil ? 30 : 44) || (still && !dirty)) return;
+    const step = LEVELS[level].ms;
+    if (document.hidden || raw < (still ? 160 : now < fastUntil ? Math.min(30, step) : step) || (still && !dirty)) return;
     last = now;
-    // slow GPU or software rendering: drop resolution, then stop animating and redraw only on input
-    if (!still && skip-- <= 0) {
-      const degrade = () => { if (scale > 0.5) scale = 0.45; else still = true; sampled = 0; sum = 0; bad = 0; resize(); };
-      if (raw > 200 && ++bad >= 2) degrade();
+    canvas.dataset.state = still ? 'still' : `level${level}`; // visible in devtools: why the rain is or is not moving
+    // a frame that arrives much later than asked for means the machine cannot keep up: step down one level
+    // the first seconds are page load (fonts, the graph, analytics): their stalls say nothing about the GPU
+    if (!still && now - born > 3000 && skip-- <= 0) {
+      const degrade = () => {
+        if (level < LEVELS.length - 1) { level++; scale = LEVELS[level].scale; resize(); }
+        sampled = 0; sum = 0; bad = 0; skip = 4;
+      };
+      const late = raw - step;
+      if (late > 200 && ++bad >= 2) degrade();
       else {
-        sum += Math.min(raw, 200);
-        if (++sampled >= 6) { if (sum / sampled > 85) degrade(); sampled = 0; sum = 0; bad = 0; }
+        sum += Math.min(late, 200);
+        if (++sampled >= 8) { if (sum / sampled > 45) degrade(); sampled = 0; sum = 0; bad = 0; }
       }
     }
     const k = still ? 1 : 0.08;

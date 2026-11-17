@@ -138,6 +138,62 @@ test.describe('backdrop', () => {
   });
 });
 
+test.describe('backdrop motion', () => {
+  // A screenshot cannot tell a frozen background from a moving one: count the frames actually drawn
+  // while nobody touches the page, after the load has settled.
+  const drawsIn = async (page: Page, ms: number) => {
+    const a = await page.evaluate(() => (window as any).__draws as number);
+    await page.waitForTimeout(ms);
+    return (await page.evaluate(() => (window as any).__draws as number)) - a;
+  };
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as any).__draws = 0;
+      const orig = WebGLRenderingContext.prototype.drawArrays;
+      WebGLRenderingContext.prototype.drawArrays = function (...a: Parameters<typeof orig>) {
+        if ((this.canvas as HTMLCanvasElement).id === 'backdrop') (window as any).__draws++;
+        return orig.apply(this, a);
+      };
+    });
+  });
+
+  for (const path of ['/en-us/writeups/', '/pt-br/']) {
+    test(`${path}: the rain keeps falling with no input, even after load stalls`, async ({ page }) => {
+      test.slow();
+      await page.goto(path);
+      test.skip(!(await hasWebGL(page)), 'no WebGL in this browser');
+      // stall the main thread twice, as fonts, the graph and analytics do during load
+      for (let i = 0; i < 3; i++) await page.evaluate(() => { const t = performance.now(); while (performance.now() - t < 350); });
+      await expect(page.locator('#backdrop')).toHaveClass(/(^|\s)on(\s|$)/, { timeout: 20_000 });
+      await page.waitForTimeout(5000);
+      // a real GPU draws ~60 here; a CPU renderer also drawing the 3D graph manages a few, which is still motion
+      expect(await drawsIn(page, 3000), 'frames drawn in 3 s').toBeGreaterThanOrEqual(2);
+      await expect(page.locator('#backdrop')).not.toHaveAttribute('data-state', 'still');
+    });
+  }
+
+  test('on a slow machine it degrades but still moves', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium devtools feature');
+    test.slow();
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });
+    await page.goto('/en-us/writeups/');
+    test.skip(!(await hasWebGL(page)), 'no WebGL in this browser');
+    await expect(page.locator('#backdrop')).toHaveClass(/(^|\s)on(\s|$)/, { timeout: 30_000 });
+    await page.waitForTimeout(8000);
+    expect(await drawsIn(page, 4000), 'frames drawn in 4 s').toBeGreaterThanOrEqual(6);
+  });
+
+  test('reduced motion: drawn once, then still', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/en-us/writeups/');
+    test.skip(!(await hasWebGL(page)), 'no WebGL in this browser');
+    await expect(page.locator('#backdrop')).toHaveClass(/(^|\s)on(\s|$)/, { timeout: 20_000 });
+    await page.waitForTimeout(2000);
+    expect(await drawsIn(page, 2000)).toBeLessThanOrEqual(1);
+  });
+});
+
 test.describe('contact', () => {
   test('email and WhatsApp are reachable on every page size', async ({ page }) => {
     await page.goto('/pt-br/');

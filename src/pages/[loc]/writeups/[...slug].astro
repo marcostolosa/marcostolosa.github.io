@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
+import Redirect from '../../../components/Redirect.astro';
 import { abs, authorRef, breadcrumbSchema, graph as ld, ogImage } from '../../../data/seo';
 import { profile } from '../../../data/profile';
 import { htmlLang, locales, localize, slugOf, urlPrefix, type Lang } from '../../../i18n/ui';
@@ -9,13 +10,25 @@ export async function getStaticPaths() {
   const writeups = await getCollection('writeups', (w) => !w.data.draft);
   // each writeup lives under the locale it is written in
   const ids = new Set(writeups.map((w) => w.id));
-  return writeups.map((w) => ({
+  const current = writeups.map((w) => ({
     params: { loc: urlPrefix[w.data.lang as Lang], slug: slugOf(w.id) },
-    props: { w, paired: !!w.data.pair && ids.has(w.data.pair) },
+    props: { w, paired: !!w.data.pair && ids.has(w.data.pair), redirect: undefined as string | undefined },
   }));
+  // An earlier URL scheme used the content id, with its "-en" suffix, as the slug: /en-us/writeups/htb-redeye-en/.
+  // Google still lists those addresses (they carry most of the search clicks), so they forward to the current slug
+  // instead of answering 404.
+  const legacy = writeups
+    .filter((w) => slugOf(w.id) !== w.id)
+    .map((w) => ({
+      params: { loc: urlPrefix[w.data.lang as Lang], slug: w.id },
+      props: { w, paired: false, redirect: localize(`/writeups/${slugOf(w.id)}/`, w.data.lang as Lang) as string | undefined },
+    }));
+  return [...current, ...legacy];
 }
-const { w, paired } = Astro.props;
-const { Content, headings } = await render(w);
+const { w, paired, redirect } = Astro.props;
+const rendered = redirect ? undefined : await render(w);
+const Content = rendered?.Content;
+const headings = rendered?.headings ?? [];
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const toc = headings.filter((h) => h.depth === 2);
 const lang = w.data.lang as Lang;
@@ -44,6 +57,7 @@ const schema = ld(
   breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)], ['Writeups', localize('/writeups/', lang)], [w.data.title, self]]),
 );
 ---
+{redirect ? <Redirect to={redirect} /> : (
 <Base
   title={w.data.seoTitle ?? w.data.title}
   description={w.data.description ?? w.data.summary}
@@ -84,6 +98,7 @@ const schema = ld(
     </footer>
   </article>
 </Base>
+)}
 
 <style>
   .pane { padding: clamp(48px, 9vh, 88px) var(--pad) 80px; max-width: calc(72ch + 2 * var(--pad) + 120px); margin-inline: auto; }

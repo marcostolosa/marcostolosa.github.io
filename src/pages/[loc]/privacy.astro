@@ -1,0 +1,121 @@
+---
+// Privacy and cookie notice. It describes what the code in components/Analytics.astro actually does:
+// if that component changes, this page has to change with it.
+import Base from '../../layouts/Base.astro';
+import { profile } from '../../data/profile';
+import { abs, breadcrumbSchema, graph as ld } from '../../data/seo';
+import { localePaths, localize, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = localePaths;
+const lang = Astro.props.lang as Lang;
+const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
+const self = localize('/privacy/', lang);
+const mail = `mailto:${profile.email}?subject=${encodeURIComponent(L('Privacy request', 'Solicitação de privacidade'))}`;
+const updated = '2026-11-19';
+const schema = ld(breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)], [L('Privacy', 'Privacidade'), self]]));
+---
+<Base
+  title={L('Privacy and cookies | Marcos Tolosa (Tr0p)', 'Privacidade e cookies | Marcos Tolosa (Tr0p)')}
+  description={L(
+    'What this site stores, what it measures only after you accept, and how to change your choice or reach me about your data.',
+    'O que este site guarda, o que mede só depois que você aceita, e como mudar a escolha ou falar comigo sobre seus dados.',
+  )}
+  lang={lang}
+  schema={schema}
+  quiet
+>
+  <article class="priv">
+    <header>
+      <p class="cmd" aria-hidden="true"><b>tr0p@mindsecurity</b>:~$ <i>cat privacy.md</i></p>
+      <h1>{L('Privacy and cookies', 'Privacidade e cookies')}</h1>
+      <p class="upd">{L('Last updated', 'Última atualização')}: <time datetime={updated}>{updated}</time></p>
+    </header>
+
+    <section aria-labelledby="who">
+      <h2 id="who">{L('Who is responsible', 'Quem é o responsável')}</h2>
+      <p>{L(
+        `This site is run by ${profile.name} (${profile.handle}), Rio de Janeiro, Brazil. For anything about your data, write to`,
+        `Este site é mantido por ${profile.name} (${profile.handle}), Rio de Janeiro, Brasil. Para qualquer assunto sobre seus dados, escreva para`,
+      )} <a href={mail}>{profile.email}</a>.</p>
+    </section>
+
+    <section aria-labelledby="always">
+      <h2 id="always">{L('What happens without your consent', 'O que acontece sem o seu consentimento')}</h2>
+      <ul>
+        <li>{L(
+          'The site is static and served by GitHub Pages behind Cloudflare. Like any web host, they process technical request data (IP address, browser, requested page) to deliver the site and protect it from abuse. Cloudflare may also run bot detection and aggregate analytics.',
+          'O site é estático e servido pelo GitHub Pages, atrás do Cloudflare. Como qualquer hospedagem, eles processam dados técnicos da requisição (endereço IP, navegador, página pedida) para entregar o site e protegê-lo de abuso. O Cloudflare também pode executar detecção de bots e analítica agregada.',
+        )}</li>
+        <li>{L(
+          'Your browser keeps two small values on your device, never sent to a server by this site: the language you picked (lang) and your cookie choice (consent).',
+          'Seu navegador guarda dois valores pequenos no seu dispositivo, que este site não envia a nenhum servidor: o idioma escolhido (lang) e a sua escolha sobre cookies (consent).',
+        )}</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="consent">
+      <h2 id="consent">{L('What is measured only if you press Accept', 'O que só é medido se você apertar Aceitar')}</h2>
+      <ul>
+        <li><b>Google Analytics 4:</b> {L(
+          'pages viewed, scrolling, clicks on links (including the e-mail and WhatsApp buttons, recorded without the address), approximate location and device information. It sets cookies.',
+          'páginas vistas, rolagem, cliques em links (inclusive nos botões de e-mail e WhatsApp, registrados sem o endereço), localização aproximada e informações do dispositivo. Define cookies.',
+        )}</li>
+        <li><b>Microsoft Clarity:</b> {L(
+          'session recordings and heatmaps showing how pages are used (clicks, scrolls, navigation). It sets cookies.',
+          'gravações de sessão e mapas de calor que mostram como as páginas são usadas (cliques, rolagem, navegação). Define cookies.',
+        )}</li>
+        <li>{L(
+          'Before you choose, every Google storage type is denied (Consent Mode). Accept grants analytics storage only; advertising storage, advertising user data and ad personalization stay denied.',
+          'Antes da sua escolha, todos os tipos de armazenamento do Google ficam negados (Consent Mode). Aceitar libera só o armazenamento de analítica; armazenamento de publicidade, dados de usuário para anúncios e personalização continuam negados.',
+        )}</li>
+        <li>{L(
+          'If you press Decline, none of these scripts load.',
+          'Se você apertar Recusar, nenhum desses scripts é carregado.',
+        )}</li>
+        <li>{L(
+          'Browsers that send the Global Privacy Control signal, and automated browsers, are not measured and do not see the banner.',
+          'Navegadores que enviam o sinal Global Privacy Control, e navegadores automatizados, não são medidos e não veem o banner.',
+        )}</li>
+      </ul>
+      <p>{L(
+        'Google and Microsoft may process this data in other countries. How long it is kept depends on the retention settings of each service.',
+        'Google e Microsoft podem tratar esses dados em outros países. O tempo de guarda depende das configurações de retenção de cada serviço.',
+      )}</p>
+    </section>
+
+    <section aria-labelledby="choice">
+      <h2 id="choice">{L('Changing your mind', 'Mudando de ideia')}</h2>
+      <p>{L(
+        'Use "Cookie settings" in the footer of any page to choose again. You can also clear this site\'s data in your browser.',
+        'Use "Cookies" no rodapé de qualquer página para escolher de novo. Você também pode apagar os dados deste site no navegador.',
+      )}</p>
+    </section>
+
+    <section aria-labelledby="rights">
+      <h2 id="rights">{L('Your rights', 'Seus direitos')}</h2>
+      <p>{L(
+        'Under the LGPD (Brazil) and the GDPR (EU), you can ask for access, correction or deletion of your data, withdraw consent at any time, and complain to your data protection authority. Write to the address above and I will answer.',
+        'Pela LGPD e pelo GDPR (UE), você pode pedir acesso, correção ou eliminação dos seus dados, retirar o consentimento a qualquer momento e reclamar à sua autoridade de proteção de dados. Escreva para o endereço acima e eu respondo.',
+      )}</p>
+    </section>
+
+    <section aria-labelledby="links">
+      <h2 id="links">{L('Other sites', 'Outros sites')}</h2>
+      <p>{L(
+        'Links to GitHub, HackerOne, Bugcrowd, LinkedIn and other services lead to sites with their own privacy policies.',
+        'Links para GitHub, HackerOne, Bugcrowd, LinkedIn e outros serviços levam a sites com políticas de privacidade próprias.',
+      )}</p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .priv { max-width: 720px; margin: 0 auto; padding: calc(var(--bar) + 40px) var(--pad) 96px; }
+  .priv h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 8px 0 8px; color: var(--fg-hi); }
+  .priv h2 { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acc); margin: 36px 0 10px; }
+  .priv p, .priv li { color: var(--dim); line-height: 1.7; }
+  .priv li b { color: var(--fg); }
+  .priv ul { padding-left: 1.2em; }
+  .priv a { color: var(--sym); }
+  .priv .upd { font-size: 13px; }
+</style>

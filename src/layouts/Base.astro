@@ -114,7 +114,7 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     <footer class="foot">
       <p>{t('authorized')} <span>{t('method')}</span></p>
       <p translate="no">{profile.name} ({profile.handle}), {tr(profile.base, lang)}</p>
-      <p><a href="#cookies" data-consent-open>{t('cookies')}</a></p>
+      <p><a href={localize('/privacy/', lang)}>{t('privacy')}</a> · <a href="#cookies" data-consent-open>{t('cookies')}</a></p>
     </footer>
 
     <Analytics lang={lang} />

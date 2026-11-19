@@ -119,7 +119,7 @@ export const ocrack: ToolPage = {
   slug: 'ocrack',
   name: 'OCRack',
   tint: 'tool',
-  title: 'OCRack: translate and OCR any PDF with AI, from your terminal',
+  title: 'OCRack: translate and OCR any PDF with AI, in your terminal',
   description:
     'OCRack is a Python CLI that extracts images, OCRs text and AI-translates PDFs while preserving layout, powered by PaddleOCR, PyMuPDF and OpenAI GPT models.',
   tagline: 'Translate any PDF with AI. Layout, images and all.',
@@ -295,9 +295,9 @@ export const atticus: ToolPage = {
 /** /pt-br/atticus/: same page, same commands, Portuguese prose. */
 export const atticusPt: ToolPage = {
   ...atticus,
-  title: 'Atticus: assistente de voz em overlay para Omarchy e Hyprland',
+  title: 'Atticus: assistente de voz em overlay para Omarchy/Hyprland',
   description:
-    'Atticus é um assistente de voz em overlay para o Omarchy (Hyprland/Wayland): hotkey ou wake word, fala local em português e inglês, comandos de shell em sandbox.',
+    'Atticus é um assistente de voz em overlay para o Omarchy (Hyprland/Wayland): hotkey ou wake word, fala local em português e inglês, shell em sandbox.',
   tagline: 'Aperte uma tecla, fale, ouça a resposta. No seu próprio desktop Linux.',
   lede: 'O Atticus coloca um painel pequeno, sempre visível, no canto da tela. Ele transcreve português do Brasil ou inglês com `faster-whisper`, responde com uma voz neural do `Piper` e passa todo comando que o modelo executa por uma sandbox `bubblewrap`.',
   badges: [['plataforma', 'Omarchy · Hyprland'], ['licença', 'MIT'], ['stack', 'GTK4 · faster-whisper · Piper'], ['fala', 'local']],
@@ -375,7 +375,7 @@ export const atticusPt: ToolPage = {
 /** /pt-br/manw-ng/ */
 export const manwPt: ToolPage = {
   ...manw,
-  title: 'MANW-NG: documentação e execução da API do Windows, direto do terminal',
+  title: 'MANW-NG: docs e execução da API do Windows no terminal',
   description:
     'MANW-NG é uma CLI em Python para reversers: extrai documentação estruturada de Win32/NTAPI do Microsoft Learn e executa APIs do Windows direto via ctypes.',
   tagline: 'Documentação e execução da API do Windows, direto do seu terminal.',
@@ -444,7 +444,7 @@ export const manwPt: ToolPage = {
 /** /pt-br/ocrack/ */
 export const ocrackPt: ToolPage = {
   ...ocrack,
-  title: 'OCRack: traduza e faça OCR de qualquer PDF com IA, direto do terminal',
+  title: 'OCRack: traduza e faça OCR de PDFs com IA no terminal',
   description:
     'OCRack é uma CLI em Python que extrai imagens, faz OCR do texto e traduz PDFs com IA preservando o layout, usando PaddleOCR, PyMuPDF e os modelos GPT da OpenAI.',
   tagline: 'Traduza qualquer PDF com IA. Com layout, imagens e tudo.',
@@ -619,9 +619,9 @@ export const anubis: ToolPage = {
 /** /pt-br/anubis/: same page, same commands, Portuguese prose. */
 export const anubisPt: ToolPage = {
   ...anubis,
-  title: 'ANUBIS: orquestrador de agentes de IA para pentest e bug bounty',
+  title: 'ANUBIS: orquestrador de IA para pentest e bug bounty',
   description:
-    'O ANUBIS (4NUB15) orquestra agentes de IA que rodam ferramentas ofensivas reais em um sandbox Kali, provam vulnerabilidades com PoC e exportam relatórios com CVSS.',
+    'O ANUBIS (4NUB15) orquestra agentes de IA que rodam ferramentas ofensivas em um sandbox Kali, provam vulnerabilidades com PoC e exportam relatórios com CVSS.',
   tagline: 'Agentes de IA que rodam ferramentas ofensivas de verdade, provam o bug e guardam os recibos.',
   lede: 'O ANUBIS, com a marca 4NUB15, orquestra agentes especializados em recon, exploit, pós-exploração, relatório e reteste. Eles rodam ferramentas reais dentro de um sandbox Docker, registram o que tentaram em um grafo e ficam dentro do escopo que você escreveu em um arquivo de `RoE`.',
   badges: [['python', '3.12+'], ['licença', 'Apache-2.0'], ['sandbox', 'Docker · Kali'], ['status', 'pré-alpha']],

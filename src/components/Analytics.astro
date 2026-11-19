@@ -5,7 +5,7 @@
 // ads are actually configured. Browsers that send Global Privacy Control and automated browsers (crawlers,
 // tests, Lighthouse) are not measured and never see the banner.
 import { analytics } from '../data/analytics';
-import { tr, ui, type Lang } from '../i18n/ui';
+import { localize, tr, ui, type Lang } from '../i18n/ui';
 
 interface Props { lang?: Lang }
 const { lang = 'en' } = Astro.props;
@@ -15,6 +15,8 @@ const text = {
   accept: tr(ui.accept, lang),
   decline: tr(ui.decline, lang),
   label: tr(ui.consentLabel, lang),
+  privacy: tr(ui.privacy, lang),
+  privacyHref: localize('/privacy/', lang),
 };
 ---
 {(ga4 || clarity) && (
@@ -100,7 +102,9 @@ const text = {
         var done = function (v) { write(v); box.remove(); if (v === 'granted') load(); };
         ok.addEventListener('click', function () { done('granted'); });
         no.addEventListener('click', function () { done('denied'); });
-        box.appendChild(p); box.appendChild(ok); box.appendChild(no);
+        var more = d.createElement('a');
+        more.className = 'ck-more'; more.href = text.privacyHref; more.textContent = text.privacy;
+        box.appendChild(p); box.appendChild(ok); box.appendChild(no); box.appendChild(more);
         d.body.appendChild(box);
       }
 
@@ -131,6 +135,8 @@ const text = {
   }
   .ck .ck-yes { background: var(--acc); border-color: var(--acc); color: #04110b; }
   .ck button:hover { border-color: var(--acc); }
+  .ck .ck-more { color: var(--sym); margin-left: auto; font-size: 12px; }
+  .ck .ck-more:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
   .ck button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
   @media (max-width: 480px) { .ck { left: 8px; right: 8px; bottom: 8px; max-width: none; } }
 </style>

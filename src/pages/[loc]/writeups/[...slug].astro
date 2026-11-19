@@ -47,7 +47,7 @@ const schema = ld(
     headline: w.data.title,
     description: w.data.description ?? w.data.summary,
     datePublished: w.data.date.toISOString(),
-    dateModified: w.data.date.toISOString(),
+    dateModified: (w.data.updated ?? w.data.date).toISOString(),
     inLanguage: htmlLang[lang],
     image: abs(ogImage.src),
     keywords: w.data.tags.join(', '),

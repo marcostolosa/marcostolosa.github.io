@@ -43,8 +43,8 @@ const schema = ld(breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)],
       <h2 id="always">{L('What happens without your consent', 'O que acontece sem o seu consentimento')}</h2>
       <ul>
         <li>{L(
-          'The site is static and served by GitHub Pages behind Cloudflare. Like any web host, they process technical request data (IP address, browser, requested page) to deliver the site and protect it from abuse. Cloudflare may also run bot detection and aggregate analytics.',
-          'O site é estático e servido pelo GitHub Pages, atrás do Cloudflare. Como qualquer hospedagem, eles processam dados técnicos da requisição (endereço IP, navegador, página pedida) para entregar o site e protegê-lo de abuso. O Cloudflare também pode executar detecção de bots e analítica agregada.',
+          'The site is static and served by GitHub Pages behind Cloudflare. Like any web host, they process technical request data (IP address, browser, requested page) to deliver the site and protect it from abuse. Cloudflare, which sits in front of the site, may also run its own security checks.',
+          'O site é estático e servido pelo GitHub Pages, atrás do Cloudflare. Como qualquer hospedagem, eles processam dados técnicos da requisição (endereço IP, navegador, página pedida) para entregar o site e protegê-lo de abuso. O Cloudflare, que fica na frente do site, também pode executar verificações de segurança próprias.',
         )}</li>
         <li>{L(
           'Your browser keeps two small values on your device, never sent to a server by this site: the language you picked (lang) and your cookie choice (consent).',
@@ -57,12 +57,12 @@ const schema = ld(breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)],
       <h2 id="consent">{L('What is measured only if you press Accept', 'O que só é medido se você apertar Aceitar')}</h2>
       <ul>
         <li><b>Google Analytics 4:</b> {L(
-          'pages viewed, scrolling, clicks on links (including the e-mail and WhatsApp buttons, recorded without the address), approximate location and device information. It sets cookies.',
-          'páginas vistas, rolagem, cliques em links (inclusive nos botões de e-mail e WhatsApp, registrados sem o endereço), localização aproximada e informações do dispositivo. Define cookies.',
+          'pages viewed, scrolling, clicks on links (including the e-mail and WhatsApp buttons, recorded without the address), approximate location and device information. It sets cookies (such as _ga). Event data is kept for 2 months and user-level data for up to 14 months.',
+          'páginas vistas, rolagem, cliques em links (inclusive nos botões de e-mail e WhatsApp, registrados sem o endereço), localização aproximada e informações do dispositivo. Define cookies (como o _ga). Dados de evento ficam 2 meses e dados por usuário até 14 meses.',
         )}</li>
         <li><b>Microsoft Clarity:</b> {L(
-          'session recordings and heatmaps showing how pages are used (clicks, scrolls, navigation). It sets cookies.',
-          'gravações de sessão e mapas de calor que mostram como as páginas são usadas (cliques, rolagem, navegação). Define cookies.',
+          'session recordings and heatmaps showing how pages are used (clicks, scrolls, navigation). It sets cookies (_clck and _clsk). Microsoft keeps the recordings and dashboard data for up to 30 days. When you press Accept, your choice is also passed to Clarity (analytics storage granted, advertising storage denied).',
+          'gravações de sessão e mapas de calor que mostram como as páginas são usadas (cliques, rolagem, navegação). Define cookies (_clck e _clsk). A Microsoft guarda as gravações e os dados do painel por até 30 dias. Ao apertar Aceitar, a sua escolha também é repassada ao Clarity (armazenamento de analítica liberado, de publicidade negado).',
         )}</li>
         <li>{L(
           'Before you choose, every Google storage type is denied (Consent Mode). Accept grants analytics storage only; advertising storage, advertising user data and ad personalization stay denied.',
@@ -78,8 +78,8 @@ const schema = ld(breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)],
         )}</li>
       </ul>
       <p>{L(
-        'Google and Microsoft may process this data in other countries. How long it is kept depends on the retention settings of each service.',
-        'Google e Microsoft podem tratar esses dados em outros países. O tempo de guarda depende das configurações de retenção de cada serviço.',
+        'The legal basis is your consent (LGPD art. 7, I; GDPR art. 6(1)(a)). Google and Microsoft may process this data in other countries, including the United States.',
+        'A base legal é o seu consentimento (LGPD, art. 7º, I; GDPR, art. 6(1)(a)). Google e Microsoft podem tratar esses dados em outros países, inclusive nos Estados Unidos.',
       )}</p>
     </section>
 
@@ -94,16 +94,16 @@ const schema = ld(breadcrumbSchema([[L('Home', 'Início'), localize('/', lang)],
     <section aria-labelledby="rights">
       <h2 id="rights">{L('Your rights', 'Seus direitos')}</h2>
       <p>{L(
-        'Under the LGPD (Brazil) and the GDPR (EU), you can ask for access, correction or deletion of your data, withdraw consent at any time, and complain to your data protection authority. Write to the address above and I will answer.',
-        'Pela LGPD e pelo GDPR (UE), você pode pedir acesso, correção ou eliminação dos seus dados, retirar o consentimento a qualquer momento e reclamar à sua autoridade de proteção de dados. Escreva para o endereço acima e eu respondo.',
+        'Under the LGPD (Brazil) and the GDPR (EU), you can ask for access, correction or deletion of your data, withdraw consent at any time, and complain to your data protection authority (in Brazil, the ANPD). Write to the address above and I will answer.',
+        'Pela LGPD e pelo GDPR (UE), você pode pedir acesso, correção ou eliminação dos seus dados, retirar o consentimento a qualquer momento e reclamar à sua autoridade de proteção de dados (no Brasil, a ANPD). Escreva para o endereço acima e eu respondo.',
       )}</p>
     </section>
 
     <section aria-labelledby="links">
       <h2 id="links">{L('Other sites', 'Outros sites')}</h2>
       <p>{L(
-        'Links to GitHub, HackerOne, Bugcrowd, LinkedIn and other services lead to sites with their own privacy policies.',
-        'Links para GitHub, HackerOne, Bugcrowd, LinkedIn e outros serviços levam a sites com políticas de privacidade próprias.',
+        'Links to GitHub, HackerOne, Bugcrowd, LinkedIn and other services lead to sites with their own privacy policies. If you write by e-mail or WhatsApp, those services process your message under their own policies.',
+        'Links para GitHub, HackerOne, Bugcrowd, LinkedIn e outros serviços levam a sites com políticas de privacidade próprias. Se você escrever por e-mail ou WhatsApp, esses serviços tratam a sua mensagem segundo as políticas deles.',
       )}</p>
     </section>
   </article>

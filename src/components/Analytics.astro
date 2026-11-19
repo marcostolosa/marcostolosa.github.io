@@ -48,6 +48,9 @@ const text = {
         }
         if (clarity) {
           window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+          // Since 31 Oct 2025 Clarity requires a consent signal for visits from the EEA, UK and Switzerland.
+          // Keys are case sensitive (Microsoft's CMP guide); send both explicitly. Ads storage stays denied.
+          window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' });
           var c = d.createElement('script');
           c.async = true;
           c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);

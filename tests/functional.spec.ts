@@ -219,7 +219,10 @@ test('every internal link resolves', async ({ page }) => {
 });
 
 test('every image on the site opens full screen and zooms', async ({ page }) => {
-  test.slow(); // walks every route, at a 2560px viewport on desktop
+  // Walks every route and every image on it, at a 2560px viewport on desktop. The site keeps
+  // growing (more writeups, more screenshots), so give it a fixed, generous budget instead of
+  // test.slow()'s multiplier of the (much shorter) default, which WebKit on CI can outrun.
+  test.setTimeout(300_000);
   // big enough that the screenshots have to be scaled up to fill it
   if (!page.viewportSize() || page.viewportSize()!.width > 1000) await page.setViewportSize({ width: 2560, height: 1440 });
   const vp = page.viewportSize()!;

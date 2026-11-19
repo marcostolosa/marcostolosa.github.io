@@ -1,6 +1,6 @@
 ---
 title: "HTB RedEye: de um RCE no GeoNetwork ao Domain Admin pelo ADCS"
-summary: "Uma caixa multi-máquina: o front leva ao GN01, o serviço de ingest leva ao domínio, e uma política de certificado gravável no DC01 entrega o Administrator. O caminho completo, com o porquê de cada passo."
+summary: "Uma box multi-máquina: o front leva ao GN01, o serviço de ingest leva ao domínio, e uma política de certificado gravável no DC01 entrega o Administrator. O caminho completo, com o porquê de cada passo."
 seoTitle: "HTB RedEye: de RCE no GeoNetwork a Domain Admin via ADCS"
 description: "Writeup do HTB RedEye: um RCE no GeoNetwork leva ao GN01, o serviço de ingest leva ao domínio e uma política de certificado ADCS gravável dá o Domain Admin."
 date: 2026-11-16
@@ -11,13 +11,13 @@ pair: htb-redeye-en
 draft: false
 ---
 
-A RedEye é uma caixa multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo não é a borda, é o domínio. Este writeup segue a cadeia que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo, não só o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
+A RedEye é uma box multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo não é a borda, é o domínio. Este writeup segue a chain que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo, não só o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
 
 As saídas de terminal foram organizadas em painéis legíveis a partir dos registros da sessão; o print de RDP é uma captura real. Senhas, hashes e flags aparecem omitidos.
 
 ## O cenário
 
-A caixa foi redeployada no meio da sessão. O front mudou de `10.129.28.102` para `10.129.28.183`, mas o layout não: o endereço é a NIC externa do DC01 com DNAT para a rede interna, e os mesmos três hosts continuaram atrás dele.
+A box foi redeployada no meio da sessão. O front mudou de `10.129.28.102` para `10.129.28.183`, mas o layout não: o endereço é a NIC externa do DC01 com DNAT para a rede interna, e os mesmos três hosts continuaram atrás dele.
 
 | Host | IP | Papel |
 | --- | --- | --- |
@@ -28,9 +28,9 @@ A caixa foi redeployada no meio da sessão. O front mudou de `10.129.28.102` par
 
 O front não expõe 445, 636 nem 135. O 443 termina no ADFS do DC01, mas sem credencial é só uma tela de login. O caminho que dava execução era o GN01, e é lá que o primeiro RCE cai.
 
-![Mapa da cadeia: o acesso começa no formatter do GeoNetwork e termina no certificado emitido pelo CA do DC01](/img/redeye-01-path.webp)
+![Mapa da chain: o acesso começa no formatter do GeoNetwork e termina no certificado emitido pelo CA do DC01](/img/redeye-01-path.webp)
 
-A cadeia vencedora tem seis passos:
+A chain vencedora tem seis passos:
 
 1. **RCE no GeoNetwork** (GN01), sem login, pelo upload de formatter.
 2. **Escrita arbitrária + log4j2**, para transformar o RCE num canal estável.
@@ -186,7 +186,7 @@ Depois disso, `POST /api/v1/users.register` cria uma conta pelo fluxo público. 
 
 ![Injeção no barramento do Rocket.Chat e o registro de uma conta que nasce com role admin](/img/redeye-05-rocketchat.webp)
 
-O mesmo canal ainda aceita `watch.integrations` com `clientAction: inserted`, o que permite inserir um webhook de saída sem passar pela API. Não precisei ir além para a cadeia do domínio, mas o primitivo está lá. A lição é que autorização no barramento não é opcional: quem publica um evento controla o estado que o evento atualiza.
+O mesmo canal ainda aceita `watch.integrations` com `clientAction: inserted`, o que permite inserir um webhook de saída sem passar pela API. Não precisei ir além para a chain do domínio, mas o primitivo está lá. A lição é que autorização no barramento não é opcional: quem publica um evento controla o estado que o evento atualiza.
 
 ## O domínio e o WKSTN01
 
@@ -277,7 +277,7 @@ Got hash for 'administrator@airways.htb': <redacted>
 
 O resto é pass-the-hash: usar o hash NT no lugar da senha. SMB no DC01 como `airways.htb/Administrator`, `C$`, e o `root.txt` no desktop. Domain Users → Domain Admin, sem reiniciar o CA e sem interação.
 
-![A política do TameMyCerts, o certificado com SID -500 e a cadeia PKINIT até o Domain Admin](/img/redeye-07-adcs.webp)
+![A política do TameMyCerts, o certificado com SID -500 e a chain PKINIT até o Domain Admin](/img/redeye-07-adcs.webp)
 
 O KDC não comparou o SID com a conta que fez o pedido; usou o SID do certificado. O certificado é da isabel, mas a identidade que ele carrega é a do Administrator. É essa diferença que o módulo de política deveria ter impedido.
 
@@ -297,7 +297,7 @@ O KDC não comparou o SID com a conta que fez o pedido; usou o SID do certificad
 
 ## Rotas que fecharam
 
-A caixa é grande, e a maior parte do tempo foi gasta em rotas que não fecharam. Vale registrar para não repetir:
+A box é grande, e a maior parte do tempo foi gasta em rotas que não fecharam. Vale registrar para não repetir:
 
 - **ESC1–ESC8** não estavam disponíveis. São as variações clássicas de abuso de template (SAN que o requerente pode escolher, enrollment aberto, relay para HTTP etc.). O `OfflineRouter` tinha SAN que o requerente podia escolher, mas sem direito de enrollment.
 - **ESC13/GPO** (abuso de OID de grupo dentro do certificado): `GPO-Auditors` era honeypot, e a varredura de ACLs com o parser do descritor de segurança (SD) correto não deu `WriteProperty` útil em GPO aplicado ao DC.
@@ -306,7 +306,7 @@ A caixa é grande, e a maior parte do tempo foi gasta em rotas que não fecharam
 - **SQL no DC01**: apenas WID (Windows Internal Database), sem TCP 1433.
 - **O hash DCC2 do Administrator** (credencial em cache no WKSTN01) foi esgotado no crack; as proteções `DPAPI`/Vault do WKSTN01 não entregaram nada utilizável.
 - **Grupos built-in privilegiados** estavam vazios. **ADFS `/policy`** recusou as ações. **Root no GN01** e **hijack do XML de tarefas agendadas** não passaram.
-- A caixa ainda caiu no meio da sessão e voltou com outro IP. O redeploy não mudou o estado do domínio.
+- A box ainda caiu no meio da sessão e voltou com outro IP. O redeploy não mudou o estado do domínio.
 
 ## O que eu levaria para o próximo alvo
 
@@ -314,6 +314,6 @@ O diretório de política do CA é a materialização de uma ideia simples: se o
 
 O segundo detalhe é o KDC. Um certificado com SID `-500` não é um certificado de Administrator: é um certificado de outra pessoa que diz ser Administrator. O PKINIT não validou a identidade do requerente contra o SID quando a política reescreveu o certificado. A lição é tratar a extensão SID como dado de autorização, não como decoração.
 
-O terceiro é a fronteira. `127.0.0.1` não é autenticação depois que você tem código no host. O transporter do Moleculer, o cache de settings e o registro público formam uma cadeia de três passos que cria um admin do zero. O mesmo raciocínio vale para o `notify.env`: uma senha de serviço de chat era a senha de domínio de uma pessoa, e o domínio não tinha lockout.
+O terceiro é a fronteira. `127.0.0.1` não é autenticação depois que você tem código no host. O transporter do Moleculer, o cache de settings e o registro público formam uma chain de três passos que cria um admin do zero. O mesmo raciocínio vale para o `notify.env`: uma senha de serviço de chat era a senha de domínio de uma pessoa, e o domínio não tinha lockout.
 
-Por último, o `raster2pgsql`: nome de arquivo não é identificador confiável. O `\!` do psql transforma uma injeção de nome de tabela em shell. Se o serviço roda como uma conta de serviço, o banco é o menor dos problemas. E se a zona DNS do AD aceita `CreateChild` de qualquer usuário autenticado, a coerção NTLM vira uma questão de tempo, mesmo que nessa caixa ela não tenha fechado.
+Por último, o `raster2pgsql`: nome de arquivo não é identificador confiável. O `\!` do psql transforma uma injeção de nome de tabela em shell. Se o serviço roda como uma conta de serviço, o banco é o menor dos problemas. E se a zona DNS do AD aceita `CreateChild` de qualquer usuário autenticado, a coerção NTLM vira uma questão de tempo, mesmo que nessa box ela não tenha fechado.

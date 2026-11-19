@@ -1,6 +1,6 @@
 ---
 title: "HTB Unclaimed: prompt injection, sysadmin no MSSQL e Backup Operators"
-summary: "Uma caixa Windows cujo único ponto de entrada é um chatbot de bagagem. A injeção de prompt entrega um código de override, o SQL entrega sysadmin e um proxy do SQL Agent entrega a conta que lê o root.txt."
+summary: "Uma box Windows cujo único ponto de entrada é um chatbot de bagagem. A injeção de prompt entrega um código de override, o SQL entrega sysadmin e um proxy do SQL Agent entrega a conta que lê o root.txt."
 seoTitle: "HTB Unclaimed: prompt injection, MSSQL e Backup Operators"
 description: "Writeup do HTB Unclaimed: prompt injection num chatbot de bagagem vaza um código de override, o SQL dá sysadmin no MSSQL e um proxy do SQL Agent lê o root.txt."
 date: 2026-11-10

@@ -1,6 +1,6 @@
 ---
 title: "HTB Takeoff: SSTI em Go, QR forjado e root via n8n com bind mount"
-summary: "Uma caixa de voos: um template Go vaza a chave que assina os QRs de check-in, o check-in forjado executa comando como www-data, e uma API key do n8n some em um root de container que compartilha o home do host."
+summary: "Uma box de voos: um template Go vaza a chave que assina os QRs de check-in, o check-in forjado executa comando como www-data, e uma API key do n8n some em um root de container que compartilha o home do host."
 seoTitle: "HTB Takeoff: SSTI, QR forjado e root via n8n"
 description: "Writeup do HTB Takeoff: um SSTI em Go vaza a chave HMAC dos QRs, um check-in forjado dá RCE como www-data, e a API key do n8n leva a root no host."
 date: 2026-11-03
@@ -13,7 +13,7 @@ pair: htb-takeoff-en
 draft: false
 ---
 
-Takeoff é uma caixa Linux do Hack The Box: uma única aplicação web, "HTB Airways Booking", escrita em Go com Echo. Nenhum outro host no escopo, nenhum writeup consultado: a cadeia inteira foi descoberta e provada contra o alvo. Este writeup segue a ordem em que ela aconteceu, da leitura de um arquivo até o `euid=0` no host.
+Takeoff é uma box Linux do Hack The Box: uma única aplicação web, "HTB Airways Booking", escrita em Go com Echo. Nenhum outro host no escopo, nenhum writeup consultado: a chain inteira foi descoberta e provada contra o alvo. Este writeup segue a ordem em que ela aconteceu, da leitura de um arquivo até o `euid=0` no host.
 
 As saídas de terminal foram organizadas em painéis legíveis a partir dos registros da sessão; as capturas de tela são reais. Senhas, hashes e flags aparecem redigidos ou editados.
 
@@ -45,7 +45,7 @@ Uma nuance chamou atenção: expressões puramente aritméticas como `{{7*7}}` n
 
 ![SSTI lendo /proc/self/environ pela pré-visualização do ticket](/img/takeoff-02-ssti.webp)
 
-Apontar o `.File` para `/proc/self/environ` do `htb-air.service` devolveu o ambiente completo do processo, com duas variáveis que decidiram o resto da cadeia:
+Apontar o `.File` para `/proc/self/environ` do `htb-air.service` devolveu o ambiente completo do processo, com duas variáveis que decidiram o resto da chain:
 
 - `TICKET_VALIDATION_TOKEN`: a chave HMAC-SHA256 que assina os QRs de check-in.
 - `N8N_API_KEY`: uma API key para a instância n8n interna.
@@ -125,7 +125,7 @@ O binário SUID criado para o teste (`/home/kpark/.x`) foi removido no encerrame
 
 Um achado menor ficou pelo caminho: `POST /api/check-in` aceita um QR de check-in sem exigir sessão e sem checar o dono do bilhete. Como a assinatura HMAC ainda protege contra forja sem a chave, o impacto é replay anônimo com exposição de PII (nome, PNR, assento, e-mail do passageiro), não execução, mas é o mesmo endpoint que, com a chave vazada, virou o ponto de RCE.
 
-A lição que levo desta é sobre onde um segredo pode morar: a `TICKET_VALIDATION_TOKEN` e a `N8N_API_KEY` não precisavam estar no environment de um processo que também tem uma SSTI alcançável: um secret manager com escopo mínimo teria matado a cadeia inteira na etapa 1. E a parte do bind mount é um lembrete de que "root dentro do container" só é uma fronteira real quando o que o container pode escrever no host também é tratado como superfície. `/home` sem `nosuid` mais um diretório montado como `/root` de um serviço de automação é, na prática, root no host esperando para acontecer.
+A lição que levo desta é sobre onde um segredo pode morar: a `TICKET_VALIDATION_TOKEN` e a `N8N_API_KEY` não precisavam estar no environment de um processo que também tem uma SSTI alcançável: um secret manager com escopo mínimo teria matado a chain inteira na etapa 1. E a parte do bind mount é um lembrete de que "root dentro do container" só é uma fronteira real quando o que o container pode escrever no host também é tratado como superfície. `/home` sem `nosuid` mais um diretório montado como `/root` de um serviço de automação é, na prática, root no host esperando para acontecer.
 
 **Remediação, em ordem de impacto:**
 

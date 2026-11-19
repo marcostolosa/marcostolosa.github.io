@@ -13,6 +13,8 @@ const all = [
   { path: '/pt-br/ocrack/', lang: 'pt-BR' },
   { path: '/en-us/atticus/', lang: 'en-US' },
   { path: '/pt-br/atticus/', lang: 'pt-BR' },
+  { path: '/en-us/anubis/', lang: 'en-US' },
+  { path: '/pt-br/anubis/', lang: 'pt-BR' },
   { path: '/en-us/writeups/fixture-article/', lang: 'en-US', fixture: true },
 ] as const;
 export const pages = all.filter((p) => !(LIVE && 'fixture' in p));

@@ -520,9 +520,193 @@ export const ocrackPt: ToolPage = {
   closing: 'Traduza os livros que as outras ferramentas ignoram. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
 };
 
+export const anubis: ToolPage = {
+  slug: 'anubis',
+  name: 'ANUBIS',
+  tint: 'vuln',
+  title: 'ANUBIS: an AI agent orchestrator for pentest and bug bounty',
+  description:
+    'ANUBIS (4NUB15) orchestrates AI agents that run real offensive tools in a Kali sandbox, prove vulnerabilities with PoC and export CVSS-scored reports.',
+  tagline: 'AI agents that run real offensive tools, prove the bug, and keep the receipts.',
+  lede: 'ANUBIS, branded 4NUB15, orchestrates specialised agents for recon, exploit, post-exploit, reporting and retest. They run real tools inside a Docker sandbox, record what they tried in a graph, and stay inside a scope you wrote down in a `RoE` file.',
+  badges: [['python', '3.12+'], ['license', 'Apache-2.0'], ['sandbox', 'Docker · Kali'], ['status', 'pre-alpha']],
+  repo: 'https://github.com/marcostolosa/anubis',
+  demo: {
+    title: 'tr0p@kali: ~/anubis',
+    lines: [
+      { cmd: 'anubis scan --target https://app.example.test --scope roe.yml --multi' },
+      { out: '<span class="s">[+]</span> scope loaded: <span class="n">1</span> client, <span class="n">1</span> target, authorizer verified' },
+      { out: '<span class="k">planner</span>  dispatch <span class="s">recon</span> → surface of app.example.test' },
+      { out: '<span class="k">guard</span>    <span class="c">nmap -sV app.example.test</span>  allowed · in scope' },
+      { out: '<span class="k">guard</span>    <span class="c">sqlmap … --os-shell</span>  <span class="s">denied</span> · destructive' },
+      { gap: true },
+      { note: 'findings carry CVSS, OWASP and a PoC' },
+      { out: '<span class="s">[+]</span> 1 finding(s): [high] SQL injection on /api/items' },
+      { out: '<span class="s">[+]</span> report sysreptor saved to anubis_runs/reports/' },
+    ],
+  },
+  features: {
+    intro: 'A scanner flags. ANUBIS tries to prove it, and refuses to touch anything outside the scope you gave it.',
+    items: [
+      { name: 'Specialised agents', desc: 'An orchestrator plus recon, exploit, post-exploit, reporter and retester roles, each with only the tools its job needs.' },
+      { name: 'Graph of agents', desc: 'In `--multi` mode a planner dispatches workers in parallel. They exchange messages and write back to shared state.' },
+      { name: 'Dual graph', desc: 'An asset graph records what exists. An exploration graph records what was tried and why, with a coverage ledger, saved atomically per run.' },
+      { name: 'Real tools in a sandbox', desc: 'Commands run inside an ephemeral Docker container on a Kali image, wrapped in `timeout`. Nothing runs on your host.' },
+      { name: 'Guardrails, not decoration', desc: 'Scope and RoE with `out_of_scope` precedence, an approval rule engine, a noise governor, token and turn budgets, and nonce-marked untrusted output against prompt injection.' },
+      { name: 'Skills as playbooks', desc: 'Loadable `SKILL.md` packs for API recon, API security, OWASP Top 10, web app and general pentesting. The agent loads one when the task needs it.' },
+      { name: 'Any LLM, with failover', desc: 'A LiteLLM gateway picks the model, falls back across providers and enforces the budget. You bring your own key.' },
+      { name: 'Reports you can hand over', desc: 'One versioned contract, `4nub15.findings/v1`, exported as JSON, CSV, Markdown, SARIF 2.1.0 or a `reptor finding` file for SysReptor.' },
+    ],
+  },
+  usage: {
+    intro: 'Write the scope first. A scan without an authorised target does not start.',
+    modes: [
+      {
+        name: 'Scan a target', tag: 'self-hosted CLI',
+        desc: 'Pick a mode with `--scan-mode quick|balanced|deep`. `deep` turns on the multi-agent planner, and `--multi` does it for any mode. With `-n` the exit code is non-zero when findings exist, so it fits CI.',
+        cmds: ['anubis scan -t https://app.example.test --scope roe.yml', 'anubis scan -t ./my-app --scan-mode deep', 'anubis scan -t https://app.example.test --scope roe.yml -n --multi'],
+      },
+      {
+        name: 'Export the report', tag: 'json · csv · md · sarif · sysreptor',
+        desc: 'Choose a format or let the file extension decide. Without an output path the file lands in `anubis_runs/reports/`.',
+        cmds: ['anubis scan -t https://app.example.test --scope roe.yml --report-format sysreptor', 'anubis scan -t ./my-app --report-output findings.sarif', 'cat findings.sysreptor.json | reptor finding'],
+      },
+      {
+        name: 'Inspect', tag: 'skills · runs',
+        desc: 'List the skill packs the agents can load, or open a finished run in the viewer.',
+        cmds: ['anubis skills', 'anubis view'],
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Agent loop',
+    intro: 'Every command an agent wants to run goes through the same gates before it touches a target.',
+    steps: [
+      { name: 'Scope', desc: 'The RoE file names the client, targets and authorizer. Out of scope always wins.' },
+      { name: 'Plan', desc: 'The planner splits the goal into intents and dispatches workers.' },
+      { name: 'Guard', desc: 'Approval rules, noise limits and budgets allow or deny each command.' },
+      { name: 'Sandbox', desc: 'The command runs in the Kali container, under a timeout.' },
+      { name: 'Record', desc: 'Assets, attempts and findings go into the dual graph.' },
+      { name: 'Report', desc: 'Findings export with CVSS, OWASP, PoC and evidence IDs.' },
+    ],
+  },
+  numbers: [
+    ['Agent roles', '6'],
+    ['Skill packs', '5'],
+    ['Report formats', '5'],
+    ['Guard layers', '5'],
+  ],
+  install: {
+    intro: 'Clone and install in editable mode. You get the `anubis` console command.',
+    cmd: 'git clone https://github.com/marcostolosa/anubis.git && cd anubis && pip install -e ".[dev,sandbox,db]"',
+    notes: [
+      'Requires Python 3.12+ and Docker for the sandbox.',
+      'Bring your own LLM key. LiteLLM supports most providers.',
+      'Pre-alpha: expect rough edges. The proxy recorder is not in the normal scan path yet.',
+      'Authorized targets only: your own lab, your organization, or a program within its published scope.',
+    ],
+  },
+  closing: 'Agents that prove the bug and stay in scope. Star it on GitHub, file an issue, or send a pull request.',
+  docs: 'https://github.com/marcostolosa/anubis#readme',
+  links: [
+    { label: 'GitHub', href: 'https://github.com/marcostolosa/anubis' },
+    { label: 'Issues', href: 'https://github.com/marcostolosa/anubis/issues' },
+    { label: 'SysReptor', href: 'https://github.com/Syslifters/sysreptor' },
+    { label: 'LiteLLM', href: 'https://github.com/BerriAI/litellm' },
+  ],
+};
+
+/** /pt-br/anubis/: same page, same commands, Portuguese prose. */
+export const anubisPt: ToolPage = {
+  ...anubis,
+  title: 'ANUBIS: orquestrador de agentes de IA para pentest e bug bounty',
+  description:
+    'O ANUBIS (4NUB15) orquestra agentes de IA que rodam ferramentas ofensivas reais em um sandbox Kali, provam vulnerabilidades com PoC e exportam relatórios com CVSS.',
+  tagline: 'Agentes de IA que rodam ferramentas ofensivas de verdade, provam o bug e guardam os recibos.',
+  lede: 'O ANUBIS, com a marca 4NUB15, orquestra agentes especializados em recon, exploit, pós-exploração, relatório e reteste. Eles rodam ferramentas reais dentro de um sandbox Docker, registram o que tentaram em um grafo e ficam dentro do escopo que você escreveu em um arquivo de `RoE`.',
+  badges: [['python', '3.12+'], ['licença', 'Apache-2.0'], ['sandbox', 'Docker · Kali'], ['status', 'pré-alpha']],
+  demo: {
+    title: anubis.demo.title,
+    lines: [
+      { cmd: 'anubis scan --target https://app.example.test --scope roe.yml --multi' },
+      { out: '<span class="s">[+]</span> escopo carregado: <span class="n">1</span> cliente, <span class="n">1</span> alvo, autorizador verificado' },
+      { out: '<span class="k">planner</span>  despacha <span class="s">recon</span> → superfície de app.example.test' },
+      { out: '<span class="k">guard</span>    <span class="c">nmap -sV app.example.test</span>  permitido · no escopo' },
+      { out: '<span class="k">guard</span>    <span class="c">sqlmap … --os-shell</span>  <span class="s">negado</span> · destrutivo' },
+      { gap: true },
+      { note: 'os findings trazem CVSS, OWASP e um PoC' },
+      { out: '<span class="s">[+]</span> 1 finding(s): [high] SQL injection em /api/items' },
+      { out: '<span class="s">[+]</span> relatório sysreptor salvo em anubis_runs/reports/' },
+    ],
+  },
+  features: {
+    intro: 'Um scanner sinaliza. O ANUBIS tenta provar, e se recusa a encostar em qualquer coisa fora do escopo que você deu.',
+    items: [
+      { name: 'Agentes especializados', desc: 'Um orquestrador mais os papéis de recon, exploit, pós-exploração, reporter e retester, cada um com só as ferramentas que o trabalho pede.' },
+      { name: 'Graph of agents', desc: 'No modo `--multi`, um planner despacha workers em paralelo. Eles trocam mensagens e escrevem no estado compartilhado.' },
+      { name: 'Grafo duplo', desc: 'Um grafo de ativos registra o que existe. Um grafo de exploração registra o que foi tentado e por quê, com um ledger de cobertura, salvo de forma atômica por run.' },
+      { name: 'Ferramentas reais em sandbox', desc: 'Os comandos rodam em um container Docker efêmero com imagem Kali, sob `timeout`. Nada roda no seu host.' },
+      { name: 'Guard-rails de verdade', desc: 'Escopo e RoE com precedência de `out_of_scope`, motor de regras de aprovação, controle de ruído, budgets de tokens e turnos, e saída não confiável marcada com nonce contra prompt injection.' },
+      { name: 'Skills como playbooks', desc: 'Pacotes `SKILL.md` carregáveis para recon de API, segurança de API, OWASP Top 10, apps web e pentest geral. O agente carrega um quando a tarefa pede.' },
+      { name: 'Qualquer LLM, com failover', desc: 'Um gateway LiteLLM escolhe o modelo, cai para outros provedores e aplica o budget. A chave é sua.' },
+      { name: 'Relatórios prontos para entregar', desc: 'Um contrato versionado, `4nub15.findings/v1`, exportado em JSON, CSV, Markdown, SARIF 2.1.0 ou um arquivo `reptor finding` para o SysReptor.' },
+    ],
+  },
+  usage: {
+    intro: 'Escreva o escopo primeiro. Um scan sem alvo autorizado não começa.',
+    modes: [
+      {
+        name: 'Varrer um alvo', tag: 'CLI self-hosted',
+        desc: 'Escolha o modo com `--scan-mode quick|balanced|deep`. O `deep` liga o planner multiagente, e o `--multi` faz isso em qualquer modo. Com `-n` o código de saída é diferente de zero quando há findings, então serve para CI.',
+        cmds: anubis.usage.modes[0].cmds,
+      },
+      {
+        name: 'Exportar o relatório', tag: 'json · csv · md · sarif · sysreptor',
+        desc: 'Escolha um formato ou deixe a extensão do arquivo decidir. Sem caminho de saída, o arquivo vai para `anubis_runs/reports/`.',
+        cmds: anubis.usage.modes[1].cmds,
+      },
+      {
+        name: 'Inspecionar', tag: 'skills · runs',
+        desc: 'Liste os pacotes de skills que os agentes podem carregar, ou abra um run concluído no viewer.',
+        cmds: anubis.usage.modes[2].cmds,
+      },
+    ],
+  },
+  pipeline: {
+    title: 'Loop do agente',
+    intro: 'Todo comando que um agente quer rodar passa pelas mesmas barreiras antes de tocar um alvo.',
+    steps: [
+      { name: 'Escopo', desc: 'O RoE nomeia cliente, alvos e autorizador. O fora de escopo sempre vence.' },
+      { name: 'Plano', desc: 'O planner divide o objetivo em intents e despacha workers.' },
+      { name: 'Guard', desc: 'Regras de aprovação, limites de ruído e budgets permitem ou negam cada comando.' },
+      { name: 'Sandbox', desc: 'O comando roda no container Kali, sob timeout.' },
+      { name: 'Registro', desc: 'Ativos, tentativas e findings vão para o grafo duplo.' },
+      { name: 'Relatório', desc: 'Os findings saem com CVSS, OWASP, PoC e IDs de evidência.' },
+    ],
+  },
+  numbers: [
+    ['Papéis de agente', '6'],
+    ['Pacotes de skills', '5'],
+    ['Formatos de relatório', '5'],
+    ['Camadas de guard', '5'],
+  ],
+  install: {
+    intro: 'Clone e instale em modo editável. Você ganha o comando `anubis`.',
+    cmd: anubis.install.cmd,
+    notes: [
+      'Requer Python 3.12+ e Docker para o sandbox.',
+      'Traga a sua chave de LLM. O LiteLLM suporta a maioria dos provedores.',
+      'Pré-alpha: espere arestas. O gravador de proxy ainda não está no caminho normal do scan.',
+      'Somente alvos autorizados: seu próprio lab, sua organização, ou um programa dentro do escopo publicado.',
+    ],
+  },
+  closing: 'Agentes que provam o bug e ficam no escopo. Dê uma estrela no GitHub, abra uma issue ou mande um pull request.',
+};
+
 /** Every landing page, by URL slug then locale: /en-us/<slug>/ and /pt-br/<slug>/. */
 export const toolPages: Record<string, Record<Lang, ToolPage>> = {
   'manw-ng': { en: manw, 'pt-br': manwPt },
   ocrack: { en: ocrack, 'pt-br': ocrackPt },
   atticus: { en: atticus, 'pt-br': atticusPt },
+  anubis: { en: anubis, 'pt-br': anubisPt },
 };

@@ -138,6 +138,16 @@ export const tools: { name: string; href: string; repo?: string; desc: T; tags: 
     tags: 'python · wayland · voice ai',
   },
   {
+    name: 'ANUBIS',
+    href: '/anubis/',
+    repo: 'https://github.com/marcostolosa/anubis',
+    desc: {
+      en: 'Orchestrator of AI agents for pentest and bug bounty. Real tools in a Kali sandbox, scope guardrails, proof-of-concept findings and SARIF/SysReptor reports.',
+      'pt-br': 'Orquestrador de agentes de IA para pentest e bug bounty. Ferramentas reais em sandbox Kali, guard-rails de escopo, findings com PoC e relatórios SARIF/SysReptor.',
+    },
+    tags: 'python · ai agents · offsec',
+  },
+  {
     name: 'ARCTAX',
     href: 'https://github.com/marcostolosa/arctax',
     desc: {

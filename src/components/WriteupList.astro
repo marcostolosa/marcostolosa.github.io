@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { abs, authorRef, breadcrumbSchema, graph as ld } from '../data/seo';
-import { htmlLang, langLabel, localize, type Lang } from '../i18n/ui';
+import { htmlLang, langLabel, localize, slugOf, type Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -30,7 +30,7 @@ const schema = ld(
     blogPost: writeups.map((w) => ({
       '@type': 'BlogPosting',
       headline: w.data.title,
-      url: abs(localize(`/writeups/${w.id}/`, lang)),
+      url: abs(localize(`/writeups/${slugOf(w.id)}/`, lang)),
       datePublished: w.data.date.toISOString(),
       author: authorRef,
     })),
@@ -57,7 +57,7 @@ const schema = ld(
     <ol class="list">
       {writeups.map((w) => (
         <li>
-          <a href={localize(`/writeups/${w.id}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>
+          <a href={localize(`/writeups/${slugOf(w.id)}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>
             <span class="meta a" translate="no">{fmt(w.data.date)} · {langLabel[w.data.lang]}{w.data.cve && <> · {w.data.cve}</>}{w.data.severity && <> · {w.data.severity}</>}</span>
             <span class="t">{w.data.title}</span>
             <span class="sum">{w.data.summary}</span>

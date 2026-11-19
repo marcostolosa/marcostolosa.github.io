@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import { buildGraph, typeName, type NodeType } from '../data/graph';
 import { disclosures, hallOfFame, imports, links, platforms, profile, tools } from '../data/profile';
 import { graph as ld, personSchema, websiteSchema } from '../data/seo';
-import { localize, tr, type Lang } from '../i18n/ui';
+import { localize, slugOf, tr, type Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -18,7 +18,7 @@ const mail = `mailto:${profile.email}?subject=${encodeURIComponent(L('Engagement
 const targetName: Record<string, string> = { samba: 'Samba', wegia: 'WeGIA', us_gov: 'NCUA', be_gov: L('Belgian Government', 'Governo da Bélgica'), ba: 'British Airways' };
 
 // --- the graph: same data as the sections below, laid out at build time
-const graph = buildGraph(lang, writeups.map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${w.id}/`, w.data.lang) })));
+const graph = buildGraph(lang, writeups.map((w) => ({ id: w.id, title: w.data.title, summary: w.data.summary, href: localize(`/writeups/${slugOf(w.id)}/`, w.data.lang) })));
 const start = graph.nodes.findIndex((n) => n.id === 'vuln:CVE-2025-10230');
 const first = graph.nodes[start];
 const neighbours = (i: number) => graph.edges.filter(([a, b]) => a === i || b === i).map(([a, b]) => (a === i ? b : a));
@@ -165,7 +165,7 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
         {writeups.slice(0, 5).map((w) => (
           <li>
             <span class="id" translate="no">{fmt(w.data.date)}</span>
-            <a href={localize(`/writeups/${w.id}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>{w.data.title}</a>
+            <a href={localize(`/writeups/${slugOf(w.id)}/`, w.data.lang)} hreflang={w.data.lang} lang={w.data.lang === 'en' ? 'en-US' : 'pt-BR'}>{w.data.title}</a>
           </li>
         ))}
       </ol>

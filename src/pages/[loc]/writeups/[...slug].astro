@@ -3,14 +3,14 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import { abs, authorRef, breadcrumbSchema, graph as ld, ogImage } from '../../../data/seo';
 import { profile } from '../../../data/profile';
-import { htmlLang, locales, localize, urlPrefix, type Lang } from '../../../i18n/ui';
+import { htmlLang, locales, localize, slugOf, urlPrefix, type Lang } from '../../../i18n/ui';
 
 export async function getStaticPaths() {
   const writeups = await getCollection('writeups', (w) => !w.data.draft);
   // each writeup lives under the locale it is written in
   const ids = new Set(writeups.map((w) => w.id));
   return writeups.map((w) => ({
-    params: { loc: urlPrefix[w.data.lang as Lang], slug: w.id },
+    params: { loc: urlPrefix[w.data.lang as Lang], slug: slugOf(w.id) },
     props: { w, paired: !!w.data.pair && ids.has(w.data.pair) },
   }));
 }
@@ -20,10 +20,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const toc = headings.filter((h) => h.depth === 2);
 const lang = w.data.lang as Lang;
 const L = (en: string, pt: string) => (lang === 'en' ? en : pt);
-const self = localize(`/writeups/${w.id}/`, lang);
+const self = localize(`/writeups/${slugOf(w.id)}/`, lang);
 const otherLang: Lang = lang === 'en' ? 'pt-br' : 'en';
 // Paired translations link to each other; without a pair the switch goes to that language's index.
-const other = localize(paired ? `/writeups/${w.data.pair}/` : '/writeups/', otherLang);
+const other = localize(paired ? `/writeups/${slugOf(w.data.pair!)}/` : '/writeups/', otherLang);
 const alternates = { [lang]: self, [otherLang]: other } as Record<Lang, string>;
 const schema = ld(
   {

@@ -182,7 +182,7 @@ test.describe('language switch', () => {
 test('addresses from before the /en-us/ and /pt-br/ layout still land on the page', async ({ page }) => {
   const moved: [string, string][] = [
     ['/writeups/', '/en-us/writeups/'],
-    ['/writeups/htb-unclaimed-en/', '/en-us/writeups/htb-unclaimed-en/'],
+    ['/writeups/htb-unclaimed-en/', '/en-us/writeups/htb-unclaimed/'],
     ['/writeups/htb-unclaimed/', '/pt-br/writeups/htb-unclaimed/'],
     ['/manw-ng/', '/en-us/manw-ng/'],
     ['/ocrack/', '/en-us/ocrack/'],

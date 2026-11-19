@@ -2,13 +2,13 @@
 // Addresses from before writeups moved under their locale: /writeups/<id>/ -> /<locale>/writeups/<id>/.
 import { getCollection } from 'astro:content';
 import Redirect from '../../components/Redirect.astro';
-import { localize, type Lang } from '../../i18n/ui';
+import { localize, slugOf, type Lang } from '../../i18n/ui';
 
 export async function getStaticPaths() {
   const writeups = await getCollection('writeups', (w) => !w.data.draft);
   return [
     { params: { slug: undefined }, props: { to: localize('/writeups/', 'en') } },
-    ...writeups.map((w) => ({ params: { slug: w.id }, props: { to: localize(`/writeups/${w.id}/`, w.data.lang as Lang) } })),
+    ...writeups.map((w) => ({ params: { slug: w.id }, props: { to: localize(`/writeups/${slugOf(w.id)}/`, w.data.lang as Lang) } })),
   ];
 }
 ---

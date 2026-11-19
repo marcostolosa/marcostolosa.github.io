@@ -20,6 +20,9 @@ export const localize = (path: string, lang: Lang) => `/${urlPrefix[lang]}${path
 /** getStaticPaths entries for a page that exists in every locale under src/pages/[loc]/. */
 export const localePaths = () => locales.map((lang) => ({ params: { loc: urlPrefix[lang] }, props: { lang } }));
 
+/** URL slug of a writeup: the file id without its language suffix, since the locale is already in the path. 'htb-redeye-en' -> 'htb-redeye'. */
+export const slugOf = (id: string) => id.replace(/-en$/, '');
+
 /** Strip the locale prefix from a pathname: '/pt-br/writeups/' -> '/writeups/'. */
 export const unlocalize = (path: string) => path.replace(/^\/(en-us|pt-br)(?=\/|$)/, '') || '/';
 

@@ -1,7 +1,7 @@
 // Structured data (JSON-LD) and the list of indexable URLs. One place, so the sitemap, llms.txt and
 // the pages cannot disagree about what exists.
 import { getCollection } from 'astro:content';
-import { htmlLang, locales, localize, type Lang } from '../i18n/ui';
+import { htmlLang, locales, localize, slugOf, type Lang } from '../i18n/ui';
 import { links, profile } from './profile';
 import { toolPages } from './toolpages';
 
@@ -68,9 +68,9 @@ export async function sitemapEntries(): Promise<SitemapEntry[]> {
     ...both('/writeups/'),
     ...writeups.map((w) => {
       const lang = w.data.lang as Lang;
-      const path = localize(`/writeups/${w.id}/`, lang);
+      const path = localize(`/writeups/${slugOf(w.id)}/`, lang);
       const other: Lang = lang === 'en' ? 'pt-br' : 'en';
-      const pair = w.data.pair && ids.has(w.data.pair) ? { [other]: localize(`/writeups/${w.data.pair}/`, other) } : {};
+      const pair = w.data.pair && ids.has(w.data.pair) ? { [other]: localize(`/writeups/${slugOf(w.data.pair)}/`, other) } : {};
       return { path, lang, alternates: { [lang]: path, ...pair }, lastmod: w.data.date };
     }),
     ...Object.keys(toolPages).flatMap((tool) => both(`/${tool}/`)),

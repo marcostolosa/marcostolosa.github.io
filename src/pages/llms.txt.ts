@@ -3,14 +3,14 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { abs } from '../data/seo';
 import { disclosures, hallOfFame, links, profile, tools } from '../data/profile';
-import { localize, type Lang } from '../i18n/ui';
+import { localize, slugOf, type Lang } from '../i18n/ui';
 
 export const GET: APIRoute = async () => {
   const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   const list = (lang: Lang) =>
     writeups
       .filter((w) => w.data.lang === lang)
-      .map((w) => `- [${w.data.title}](${abs(localize(`/writeups/${w.id}/`, lang))}): ${w.data.summary}`)
+      .map((w) => `- [${w.data.title}](${abs(localize(`/writeups/${slugOf(w.id)}/`, lang))}): ${w.data.summary}`)
       .join('\n');
 
   const body = `# ${profile.name} (${profile.handle})

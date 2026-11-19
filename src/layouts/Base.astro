@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import Analytics from '../components/Analytics.astro';
+// The Latin subset of the mono face is what every page paints first; preloading it ends the layout shift
+// that came from the swap from the fallback monospace.
+import monoLatin from '@fontsource-variable/red-hat-mono/files/red-hat-mono-latin-wght-normal.woff2?url';
 import { profile } from '../data/profile';
 import { abs, ogImage } from '../data/seo';
 import { defaultLang, htmlLang, langLabel, langName, localize, locales, tr, ui, unlocalize, type Lang } from '../i18n/ui';
@@ -65,6 +68,7 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g, '\\u003c')} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
     <script is:inline>
       // Remember an explicit language choice. Delegated from <head> so it works before any module script loads.
       document.addEventListener('click', function (e) {

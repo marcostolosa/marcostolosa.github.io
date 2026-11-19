@@ -449,11 +449,12 @@ const payload = JSON.stringify({ graph, start, strings }).replace(/</g, '\\u003c
 
   .tools { list-style: none; padding: 0; border-top: 1px solid var(--line); }
   .tools li { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.6fr) minmax(0, 0.9fr); gap: 6px 28px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--line); }
-  .tn { display: inline-flex; align-items: center; min-height: 44px; font: 700 1.3rem/1.15 var(--mono); letter-spacing: -0.04em; color: var(--t-tool); text-decoration: none; }
+  .tn { display: inline-flex; align-items: center; min-height: 44px; padding-block: 10px; font: 700 1.3rem/1.15 var(--mono); letter-spacing: -0.04em; color: var(--t-tool); text-decoration: none; }
   .tn::before { content: './'; color: var(--addr); font-weight: 400; }
   .tn:hover { color: var(--fg-hi); }
   .td { color: var(--fg); max-width: 58ch; }
   .tt { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: flex-end; color: var(--addr); font-size: 0.92rem; }
+  .tt a { display: inline-flex; align-items: center; min-height: 44px; }
   .arsenal { margin-top: 22px; color: var(--dim); font-size: 0.95rem; max-width: 90ch; }
   .arsenal span { color: var(--fg-hi); font-weight: 700; margin-right: 6px; }
 

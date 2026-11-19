@@ -169,6 +169,12 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
       @media (max-width: 720px) {
         .sec .opt { display: none; }
       }
+      @media (max-width: 480px) {
+        .tb { gap: 8px; padding-inline: 12px; }
+        .brand .at { display: none; }
+        .sec { gap: 12px; font-size: 0.78rem; }
+        .lang a { min-width: 36px; padding-inline: 6px; }
+      }
     </style>
   </body>
 </html>

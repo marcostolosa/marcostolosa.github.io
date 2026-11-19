@@ -30,6 +30,7 @@ export const ui = {
   skip: { en: 'Skip to content', 'pt-br': 'Pular para o conteúdo' },
   nav: { en: 'Sections', 'pt-br': 'Seções' },
   findings: { en: 'Findings', 'pt-br': 'Achados' },
+  pentest: { en: 'Pentest', 'pt-br': 'Pentest' },
   tools: { en: 'Tools', 'pt-br': 'Ferramentas' },
   writeups: { en: 'Writeups', 'pt-br': 'Writeups' },
   contact: { en: 'Contact', 'pt-br': 'Contato' },

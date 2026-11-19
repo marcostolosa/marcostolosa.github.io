@@ -5,6 +5,8 @@ export const LIVE = !!process.env.BASE_URL;
 const all = [
   { path: '/en-us/', lang: 'en-US', home: true },
   { path: '/pt-br/', lang: 'pt-BR', home: true },
+  { path: '/en-us/pentest/', lang: 'en-US' },
+  { path: '/pt-br/pentest/', lang: 'pt-BR' },
   { path: '/en-us/writeups/', lang: 'en-US' },
   { path: '/pt-br/writeups/', lang: 'pt-BR' },
   { path: '/en-us/manw-ng/', lang: 'en-US' },

@@ -87,6 +87,7 @@ const t = (k: keyof typeof ui) => tr(ui[k], lang);
         <span class="visually-hidden">{t('home')}</span>
       </a>
       <nav class="sec" aria-label={t('nav')}>
+        <a href={localize('/pentest/', lang)} aria-current={base === '/pentest/' ? 'page' : undefined}>{t('pentest')}</a>
         <a class="opt" href={localize('/#disclosures', lang)}>{t('findings')}</a>
         <a class="opt" href={localize('/#tools', lang)}>{t('tools')}</a>
         <a href={localize('/writeups/', lang)} aria-current={base.startsWith('/writeups') ? 'page' : undefined}>{t('writeups')}</a>

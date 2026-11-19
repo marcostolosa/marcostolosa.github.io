@@ -85,6 +85,7 @@ export async function sitemapEntries(): Promise<SitemapEntry[]> {
   // the home, the writeups index and the tool pages. Search engines ignore a lastmod they cannot trust.
   const homeMod = gitDate('src/data/profile.ts', 'src/components/Home.astro');
   const toolMod = gitDate('src/data/toolpages.ts');
+  const pentestMod = gitDate('src/components/PentestLanding.astro');
   const both = (path: string, lastmod?: Date): SitemapEntry[] => {
     const alternates = Object.fromEntries(locales.map((l) => [l, localize(path, l)])) as Record<Lang, string>;
     return locales.map((lang) => ({ path: alternates[lang], lang, alternates, lastmod }));
@@ -95,6 +96,7 @@ export async function sitemapEntries(): Promise<SitemapEntry[]> {
   const newestWriteup = writeups.reduce<Date | undefined>((a, w) => (!a || mod(w) > a ? mod(w) : a), undefined);
   return [
     ...both('/', homeMod),
+    ...both('/pentest/', pentestMod),
     ...both('/writeups/', newestWriteup),
     ...writeups.map((w) => {
       const lang = w.data.lang as Lang;

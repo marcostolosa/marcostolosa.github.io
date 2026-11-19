@@ -43,22 +43,6 @@ const text = {
           g.async = true;
           g.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4);
           d.head.appendChild(g);
-          // Which link, and in which part of the page. Page views, scroll depth and outbound clicks come from
-          // GA4's enhanced measurement.
-          d.addEventListener('click', function (e) {
-            var a = e.target && e.target.closest && e.target.closest('a[href]');
-            if (!a) return;
-            var sec = a.closest('section[id], header, nav, footer, article');
-            var href = a.getAttribute('href') || '';
-            var mail = href.indexOf('mailto:') === 0;
-            var wa = a.hostname === 'wa.me';
-            window.gtag('event', wa ? 'whatsapp_click' : mail ? 'contact_click' : 'link_click', {
-              link_url: mail ? 'mailto' : a.href,
-              link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
-              link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',
-              outbound: a.host !== location.host,
-            });
-          }, true);
         }
         if (clarity) {
           window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
@@ -67,6 +51,37 @@ const text = {
           c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);
           d.head.appendChild(c);
         }
+
+        // A compact, PII-free funnel shared by GA4 and Clarity. Campaign attribution itself is handled by GA4.
+        // Mark contact_click and whatsapp_click as key events in GA4, then import them into Google Ads.
+        var emit = function (name, params) {
+          if (ga4) window.gtag('event', name, params || {});
+          if (clarity) window.clarity('event', name);
+        };
+        var pageType = d.querySelector('[data-page-type]');
+        if (pageType) {
+          var type = pageType.getAttribute('data-page-type') || 'content';
+          emit('view_offer', { offer_name: type, page_language: d.documentElement.lang });
+          if (clarity) window.clarity('set', 'page_type', type);
+        }
+        d.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var sec = a.closest('section[id], header, nav, footer, article');
+          var href = a.getAttribute('href') || '';
+          var mail = href.indexOf('mailto:') === 0;
+          var wa = a.hostname === 'wa.me';
+          var name = a.getAttribute('data-track-event') || (wa ? 'whatsapp_click' : mail ? 'contact_click' : 'link_click');
+          emit(name, {
+            // Contact destinations and visible email addresses are deliberately masked: analytics must not receive PII.
+            link_url: mail ? 'mailto' : wa ? 'whatsapp' : a.href,
+            link_text: mail ? 'email' : (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+            link_section: a.getAttribute('data-track-location') || (sec ? sec.id || sec.tagName.toLowerCase() : 'page'),
+            link_label: a.getAttribute('data-track-label') || undefined,
+            page_language: d.documentElement.lang,
+            outbound: a.host !== location.host,
+          });
+        }, true);
       }
 
       function banner() {
@@ -111,7 +126,7 @@ const text = {
   }
   .ck p { margin: 0; flex: 1 1 100%; color: var(--dim); }
   .ck button {
-    min-height: 36px; padding: 0 14px; border-radius: 6px; cursor: pointer;
+    min-height: 44px; padding: 0 14px; border-radius: 6px; cursor: pointer;
     font: 600 12.5px/1 var(--mono); border: 1px solid var(--line); color: var(--fg); background: transparent;
   }
   .ck .ck-yes { background: var(--acc); border-color: var(--acc); color: #04110b; }

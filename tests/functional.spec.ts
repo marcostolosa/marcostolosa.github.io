@@ -13,9 +13,9 @@ test.describe('home', () => {
     }
   });
 
-  test('primary action is a mailto link', async ({ page }) => {
+  test('primary action opens the pentest offer and contact remains available', async ({ page }) => {
     await page.goto('/en-us/');
-    await expect(page.locator('#whoami a.btn')).toHaveAttribute('href', /^mailto:marcos\.tolosa@owasp\.org/);
+    await expect(page.locator('#whoami a.btn')).toHaveAttribute('href', '/en-us/pentest/');
     await expect(page.locator('#mail')).toHaveAttribute('href', /^mailto:/);
   });
 
@@ -146,7 +146,7 @@ test.describe('language switch', () => {
 
   test('home content is translated', async ({ page }) => {
     await page.goto('/pt-br/');
-    await expect(page.locator('#whoami a.btn')).toHaveText('Abrir um engajamento');
+    await expect(page.locator('#whoami a.btn')).toHaveText('Solicitar escopo');
     await expect(page.locator('#h-con')).toHaveText('Tem algo no escopo?');
   });
 

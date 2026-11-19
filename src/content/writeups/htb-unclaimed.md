@@ -162,7 +162,7 @@ O print saiu quando o host já respondia em 10.129.26.95. É a mesma máquina (U
 
 ## O que eu levaria para o próximo alvo
 
-O ponto de entrada não foi a rede, foi a camada de instrução. Um chatbot com ferramenta de banco é uma superfície de injeção como qualquer outra, e o system prompt é o mapa.
+O ponto de entrada foi a camada de instrução. Um chatbot com ferramenta de banco é uma superfície de injeção como qualquer outra, e o system prompt é o mapa.
 
 No SQL Server, `IMPERSONATE` é tão sensível quanto `sysadmin` e quase nunca aparece em auditoria. Uma consulta em `sys.server_permissions` resolve.
 

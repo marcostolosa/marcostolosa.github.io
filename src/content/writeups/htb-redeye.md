@@ -11,7 +11,7 @@ pair: htb-redeye-en
 draft: false
 ---
 
-A RedEye é uma box multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo não é a borda, é o domínio. Este writeup segue a chain que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo, não só o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
+A RedEye é uma box multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo é o domínio. Este writeup segue a chain que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo junto com o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
 
 As saídas de terminal foram organizadas em painéis legíveis a partir dos registros da sessão; o print de RDP é uma captura real. Senhas, hashes e flags aparecem omitidos.
 
@@ -202,7 +202,7 @@ S-1-5-21-829808936-2739584302-670142182-512    AIRWAYS\Domain Admins
 S-1-5-21-829808936-2739584302-670142182-1638   AIRWAYS\isabel.o
 ```
 
-Isso não é Domain Admin; é admin local da estação. Mas admin local lê `C$` e `ADMIN$`, e o `user.txt` estava no desktop do Administrator local. A verificação foi feita duas vezes, inclusive por SAMR, e o contraste com `gabby.t` é o teste que separa privilégio de coincidência:
+Isso é admin local da estação, aquém de Domain Admin. Mas admin local lê `C$` e `ADMIN$`, e o `user.txt` estava no desktop do Administrator local. A verificação foi feita duas vezes, inclusive por SAMR, e o contraste com `gabby.t` é o teste que separa privilégio de coincidência:
 
 ```text
 ISABEL USER_TXT_LEN: 34
@@ -312,7 +312,7 @@ A box é grande, e a maior parte do tempo foi gasta em rotas que não fecharam. 
 
 O diretório de política do CA é a materialização de uma ideia simples: se o módulo lê um arquivo cujo nome o atacante escolhe, e o diretório aceita arquivos novos, o atacante controla a política. Não é preciso escrever no serviço nem reiniciar nada. A correção é ACL restrita a Administrators/SYSTEM e uma política que não permita ao requerente impor SAN nem extensão SID. Para detectar, monitore escritas em `C:\PolicyFiles`, emissões com SID diferente do requerente e PKINIT de contas privilegiadas fora do padrão (eventos 4886/4887 e 4768).
 
-O segundo detalhe é o KDC. Um certificado com SID `-500` não é um certificado de Administrator: é um certificado de outra pessoa que diz ser Administrator. O PKINIT não validou a identidade do requerente contra o SID quando a política reescreveu o certificado. A lição é tratar a extensão SID como dado de autorização, não como decoração.
+O segundo detalhe é o KDC. Um certificado com SID `-500` vindo de outro requerente é um certificado de outra pessoa que diz ser Administrator. O PKINIT não validou a identidade do requerente contra o SID quando a política reescreveu o certificado. A lição é tratar a extensão SID como dado de autorização.
 
 O terceiro é a fronteira. `127.0.0.1` não é autenticação depois que você tem código no host. O transporter do Moleculer, o cache de settings e o registro público formam uma chain de três passos que cria um admin do zero. O mesmo raciocínio vale para o `notify.env`: uma senha de serviço de chat era a senha de domínio de uma pessoa, e o domínio não tinha lockout.
 

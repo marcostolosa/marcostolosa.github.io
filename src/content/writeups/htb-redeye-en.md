@@ -11,7 +11,7 @@ pair: htb-redeye
 draft: false
 ---
 
-RedEye is a multi-machine Hack The Box box. The address the platform gives you, `10.129.28.102`, is only the edge: behind it there are three machines, and the target is not the edge, it is the domain. This writeup follows the chain that worked, in the order it happened, and explains the mechanism behind each step, not just the command. The routes that closed and the lessons are at the end.
+RedEye is a multi-machine Hack The Box box. The address the platform gives you, `10.129.28.102`, is only the edge: behind it there are three machines, and the target is the domain. This writeup follows the chain that worked, in the order it happened, and explains the mechanism behind each step along with the command. The routes that closed and the lessons are at the end.
 
 The terminal outputs were arranged into readable panels from the session logs; the RDP screenshot is a real capture. Passwords, hashes and flags are omitted.
 
@@ -202,7 +202,7 @@ S-1-5-21-829808936-2739584302-670142182-512    AIRWAYS\Domain Admins
 S-1-5-21-829808936-2739584302-670142182-1638   AIRWAYS\isabel.o
 ```
 
-That is not Domain Admin; it is local admin on the workstation. But local admin reads `C$` and `ADMIN$`, and `user.txt` was on the local Administrator's desktop. I verified it twice, including over SAMR, and the contrast with `gabby.t` is the test that separates privilege from coincidence:
+That is local admin on the workstation, short of Domain Admin. But local admin reads `C$` and `ADMIN$`, and `user.txt` was on the local Administrator's desktop. I verified it twice, including over SAMR, and the contrast with `gabby.t` is the test that separates privilege from coincidence:
 
 ```text
 ISABEL USER_TXT_LEN: 34
@@ -312,7 +312,7 @@ The box is large, and most of the time went into routes that did not close. Wort
 
 The CA policy directory is the codification of a simple idea: if the module reads a file whose name the attacker chooses, and the directory accepts new files, the attacker controls the policy. There is no need to write to the service or restart anything. The fix is an ACL restricted to Administrators/SYSTEM and a policy that does not let the requester impose a SAN or the SID extension. For detection, monitor writes to `C:\PolicyFiles`, issuances where the SID differs from the requester, and PKINIT by privileged accounts outside the baseline (events 4886/4887 and 4768).
 
-The second detail is the KDC. A certificate with SID `-500` is not an Administrator certificate: it is someone else's certificate claiming to be the Administrator. PKINIT did not validate the requester's identity against the SID when the policy rewrote the certificate. The lesson is to treat the SID extension as authorization data, not decoration.
+The second detail is the KDC. A certificate with SID `-500` that came from another requester is someone else's certificate claiming to be the Administrator. PKINIT did not validate the requester's identity against the SID when the policy rewrote the certificate. The lesson is to treat the SID extension as authorization data.
 
 The third is the boundary. `127.0.0.1` is not authentication once you have code on the host. The Moleculer transporter, the settings cache and public registration form a three-step chain that creates an admin from nothing. The same reasoning applies to `notify.env`: a chat service password was a person's domain password, and the domain had no lockout.
 

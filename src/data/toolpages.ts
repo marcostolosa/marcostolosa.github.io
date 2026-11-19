@@ -83,7 +83,7 @@ export const manw: ToolPage = {
     intro: 'Each request cascades through five fallbacks until an authoritative match is found.',
     steps: [
       { name: 'Learn Search', desc: 'Queries the official Microsoft Learn Search API first.' },
-      { name: 'Smart URLs', desc: 'Generates and validates candidate doc URLs from patterns.' },
+      { name: 'Pattern-built URLs', desc: 'Generates and validates candidate doc URLs from patterns.' },
       { name: 'Classifier', desc: 'Heuristic header classification maps the function name.' },
       { name: 'Catalog', desc: 'Falls back to the bundled internal API catalog.' },
       { name: 'Offline map', desc: 'Resolves from the 61k+ offline JSON mapping as last resort.' },
@@ -141,13 +141,13 @@ export const ocrack: ToolPage = {
     ],
   },
   features: {
-    intro: 'Extraction, OCR, smart segmentation and rendering, chained end to end so a translated PDF comes out looking like the original.',
+    intro: 'Extraction, OCR, text chunking and rendering, chained end to end so a translated PDF comes out looking like the original.',
     items: [
       { name: 'Image extraction and reinsertion', desc: 'Figures are pulled out with their coordinates and dropped back into the translated document at the exact same position.' },
       { name: 'OCR with fallback', desc: 'PaddleOCR is the primary engine with `Tesseract` as an offline fallback, so scanned or image-only pages still get read.' },
-      { name: 'Smart chunking', desc: 'Intelligent text segmentation keeps translation context tight, improving accuracy on long, structured documents.' },
+      { name: 'Context-aware chunking', desc: 'Text segmentation keeps the translation context short and improves accuracy on long, structured documents.' },
       { name: 'Cost optimization', desc: 'Real-time token and cost tracking with OpenAI prompt caching: up to `50%` cheaper on repeated content.' },
-      { name: 'Robust and resumable', desc: 'Error handling, automatic retries and checkpoint recovery mean a long job survives flaky APIs and picks up where it stopped.' },
+      { name: 'Resumable', desc: 'Error handling, automatic retries and checkpoint recovery mean a long job survives flaky APIs and picks up where it stopped.' },
       { name: 'Rich terminal UI', desc: 'A professional `Rich`-powered interface shows live progress, chapter detection and per-page cost as it works.' },
     ],
   },
@@ -416,7 +416,7 @@ export const manwPt: ToolPage = {
     intro: 'Cada consulta passa por cinco fallbacks em cascata até encontrar uma correspondência confiável.',
     steps: [
       { name: 'Learn Search', desc: 'Consulta primeiro a API oficial de busca do Microsoft Learn.' },
-      { name: 'URLs inteligentes', desc: 'Gera e valida URLs candidatas de documentação a partir de padrões.' },
+      { name: 'URLs por padrão', desc: 'Gera e valida URLs candidatas de documentação a partir de padrões.' },
       { name: 'Classificador', desc: 'A classificação heurística de headers mapeia o nome da função.' },
       { name: 'Catálogo', desc: 'Recorre ao catálogo interno de APIs que acompanha a ferramenta.' },
       { name: 'Mapa offline', desc: 'Resolve pelo mapeamento JSON offline de 61 mil+ entradas, em último caso.' },
@@ -465,13 +465,13 @@ export const ocrackPt: ToolPage = {
     ],
   },
   features: {
-    intro: 'Extração, OCR, segmentação inteligente e renderização, encadeados de ponta a ponta para o PDF traduzido sair com a cara do original.',
+    intro: 'Extração, OCR, segmentação de texto e renderização, encadeados de ponta a ponta para o PDF traduzido sair com a cara do original.',
     items: [
       { name: 'Extração e reinserção de imagens', desc: 'As figuras são extraídas com suas coordenadas e devolvidas ao documento traduzido exatamente na mesma posição.' },
       { name: 'OCR com fallback', desc: 'O PaddleOCR é o motor principal, com o `Tesseract` como fallback offline, então páginas escaneadas ou só de imagem também são lidas.' },
-      { name: 'Chunking inteligente', desc: 'A segmentação inteligente do texto mantém o contexto da tradução enxuto e melhora a precisão em documentos longos e estruturados.' },
+      { name: 'Chunking com contexto', desc: 'A segmentação do texto mantém o contexto da tradução enxuto e melhora a precisão em documentos longos e estruturados.' },
       { name: 'Otimização de custo', desc: 'Acompanhamento de tokens e custo em tempo real com o prompt caching da OpenAI: até `50%` mais barato em conteúdo repetido.' },
-      { name: 'Robusto e retomável', desc: 'Tratamento de erros, novas tentativas automáticas e recuperação por checkpoint fazem um job longo sobreviver a APIs instáveis e continuar de onde parou.' },
+      { name: 'Retomável', desc: 'Tratamento de erros, novas tentativas automáticas e recuperação por checkpoint fazem um job longo sobreviver a APIs instáveis e continuar de onde parou.' },
       { name: 'Interface de terminal rica', desc: 'Uma interface profissional feita com `Rich` mostra o progresso ao vivo, a detecção de capítulos e o custo por página enquanto trabalha.' },
     ],
   },

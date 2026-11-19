@@ -3,6 +3,10 @@ name: Test & deploy
 on:
   push:
   pull_request:
+  schedule:
+    # Daily rebuild: the dollar price on the English /pentest/ page is converted from reais at build time
+    # (src/data/fx.ts), so a rebuild keeps it close to the market rate.
+    - cron: '23 9 * * *'
   workflow_dispatch:
     inputs:
       indexnow_all:

@@ -162,7 +162,7 @@ The screenshot was taken when the host already answered on 10.129.26.95. Same ma
 
 ## What I would carry to the next target
 
-The entry point was not the network, it was the instruction layer. A chatbot with a database tool is an injection surface like any other, and the system prompt is the map.
+The entry point was the instruction layer. A chatbot with a database tool is an injection surface like any other, and the system prompt is the map.
 
 On SQL Server, `IMPERSONATE` is as sensitive as `sysadmin` and almost never shows up in an audit. One query against `sys.server_permissions` settles it.
 

@@ -37,4 +37,9 @@ export const ui = {
   authorized: { en: 'Authorized targets only.', 'pt-br': 'Somente alvos autorizados.' },
   language: { en: 'Language', 'pt-br': 'Idioma' },
   home: { en: 'Home', 'pt-br': 'Início' },
+  consent: { en: 'Analytics cookies (GA4, Clarity) to see which pages help. Nothing else.', 'pt-br': 'Cookies de análise (GA4, Clarity) para ver quais páginas ajudam. Nada além disso.' },
+  consentLabel: { en: 'Cookie consent', 'pt-br': 'Consentimento de cookies' },
+  accept: { en: 'Accept', 'pt-br': 'Aceitar' },
+  decline: { en: 'Decline', 'pt-br': 'Recusar' },
+  cookies: { en: 'Cookie settings', 'pt-br': 'Cookies' },
 } satisfies Record<string, T>;

@@ -1,48 +1,121 @@
 ---
-// Google Analytics 4 and Microsoft Clarity, loaded on every page. Browsers that send Global Privacy Control
-// and automated browsers (crawlers, tests, Lighthouse) are not measured.
+// Google Analytics 4 and Microsoft Clarity, behind a small consent banner (GDPR, LGPD and the like).
+// Nothing is loaded, and no cookie is set, until the visitor presses Accept. Consent Mode v2 is declared first:
+// every storage type starts denied, and only analytics_storage is granted on Accept. ad_* stay denied until
+// ads are actually configured. Browsers that send Global Privacy Control and automated browsers (crawlers,
+// tests, Lighthouse) are not measured and never see the banner.
 import { analytics } from '../data/analytics';
+import { tr, ui, type Lang } from '../i18n/ui';
 
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
 const { ga4, clarity } = analytics;
+const text = {
+  msg: tr(ui.consent, lang),
+  accept: tr(ui.accept, lang),
+  decline: tr(ui.decline, lang),
+  label: tr(ui.consentLabel, lang),
+};
 ---
 {(ga4 || clarity) && (
-  <script is:inline define:vars={{ ga4, clarity }}>
+  <script is:inline define:vars={{ ga4, clarity, text }}>
     (function () {
       if (navigator.globalPrivacyControl || navigator.webdriver) return;
-      var d = document;
-      if (ga4) {
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', ga4);
-        var g = d.createElement('script');
-        g.async = true;
-        g.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4);
-        d.head.appendChild(g);
-        // Which link, and in which part of the page. Page views, scroll depth and outbound clicks come from
-        // GA4's enhanced measurement.
-        d.addEventListener('click', function (e) {
-          var a = e.target && e.target.closest && e.target.closest('a[href]');
-          if (!a) return;
-          var sec = a.closest('section[id], header, nav, footer, article');
-          var href = a.getAttribute('href') || '';
-          var mail = href.indexOf('mailto:') === 0;
-          var wa = a.hostname === 'wa.me';
-          window.gtag('event', wa ? 'whatsapp_click' : mail ? 'contact_click' : 'link_click', {
-            link_url: mail ? 'mailto' : a.href,
-            link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
-            link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',
-            outbound: a.host !== location.host,
-          });
-        }, true);
+      var d = document, KEY = 'consent', loaded = false;
+      var read = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+      var write = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      // Consent Mode v2: declared before any Google tag exists.
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied',
+      });
+
+      function load() {
+        if (loaded) return;
+        loaded = true;
+        window.gtag('consent', 'update', { analytics_storage: 'granted' });
+        if (ga4) {
+          window.gtag('js', new Date());
+          window.gtag('config', ga4);
+          var g = d.createElement('script');
+          g.async = true;
+          g.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4);
+          d.head.appendChild(g);
+          // Which link, and in which part of the page. Page views, scroll depth and outbound clicks come from
+          // GA4's enhanced measurement.
+          d.addEventListener('click', function (e) {
+            var a = e.target && e.target.closest && e.target.closest('a[href]');
+            if (!a) return;
+            var sec = a.closest('section[id], header, nav, footer, article');
+            var href = a.getAttribute('href') || '';
+            var mail = href.indexOf('mailto:') === 0;
+            var wa = a.hostname === 'wa.me';
+            window.gtag('event', wa ? 'whatsapp_click' : mail ? 'contact_click' : 'link_click', {
+              link_url: mail ? 'mailto' : a.href,
+              link_text: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+              link_section: sec ? sec.id || sec.tagName.toLowerCase() : 'page',
+              outbound: a.host !== location.host,
+            });
+          }, true);
+        }
+        if (clarity) {
+          window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+          var c = d.createElement('script');
+          c.async = true;
+          c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);
+          d.head.appendChild(c);
+        }
       }
-      if (clarity) {
-        window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
-        var c = d.createElement('script');
-        c.async = true;
-        c.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(clarity);
-        d.head.appendChild(c);
+
+      function banner() {
+        if (d.getElementById('ck')) return;
+        var box = d.createElement('div');
+        box.id = 'ck';
+        box.className = 'ck';
+        box.setAttribute('role', 'region');
+        box.setAttribute('aria-label', text.label);
+        var p = d.createElement('p');
+        p.textContent = text.msg;
+        var ok = d.createElement('button');
+        ok.type = 'button'; ok.className = 'ck-yes'; ok.textContent = text.accept;
+        var no = d.createElement('button');
+        no.type = 'button'; no.className = 'ck-no'; no.textContent = text.decline;
+        var done = function (v) { write(v); box.remove(); if (v === 'granted') load(); };
+        ok.addEventListener('click', function () { done('granted'); });
+        no.addEventListener('click', function () { done('denied'); });
+        box.appendChild(p); box.appendChild(ok); box.appendChild(no);
+        d.body.appendChild(box);
       }
+
+      var saved = read();
+      if (saved === 'granted') load();
+      else if (saved !== 'denied') banner();
+      // The footer link reopens the choice.
+      d.addEventListener('click', function (e) {
+        var b = e.target && e.target.closest && e.target.closest('[data-consent-open]');
+        if (b) { e.preventDefault(); banner(); }
+      });
     })();
   </script>
 )}
+
+<style is:global>
+  .ck {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+    max-width: min(420px, calc(100vw - 32px)); padding: 12px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    font: 12.5px/1.5 var(--mono); color: var(--fg);
+  }
+  .ck p { margin: 0; flex: 1 1 100%; color: var(--dim); }
+  .ck button {
+    min-height: 36px; padding: 0 14px; border-radius: 6px; cursor: pointer;
+    font: 600 12.5px/1 var(--mono); border: 1px solid var(--line); color: var(--fg); background: transparent;
+  }
+  .ck .ck-yes { background: var(--acc); border-color: var(--acc); color: #04110b; }
+  .ck button:hover { border-color: var(--acc); }
+  .ck button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  @media (max-width: 480px) { .ck { left: 8px; right: 8px; bottom: 8px; max-width: none; } }
+</style>

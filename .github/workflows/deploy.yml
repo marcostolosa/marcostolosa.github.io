@@ -4,6 +4,11 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      indexnow_all:
+        description: Resubmit every URL in the sitemap to IndexNow, not only what changed
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -44,12 +49,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the sitemap's <lastmod> for the home, writeups index and tool pages is the date of the
+          # last commit that touched their source.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run build
+      # What the live site lists today, before this deploy replaces it. The IndexNow job submits the difference.
+      # If the fetch fails the file is empty and every URL counts as new, which is harmless.
+      - run: curl -fsS --retry 3 "https://mindsecurity.org/sitemap.xml?cb=${GITHUB_SHA}" -o prev-sitemap.xml || echo '<urlset/>' > prev-sitemap.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prev-sitemap
+          path: prev-sitemap.xml
+          retention-days: 1
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -67,3 +84,27 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  indexnow:
+    name: Notify IndexNow
+    needs: deploy
+    runs-on: ubuntu-latest
+    # A failed ping must not turn a good deploy red: the pages are already live.
+    continue-on-error: true
+    permissions:
+      contents: read
+    env:
+      # Public by design: IndexNow checks it against https://mindsecurity.org/<key>.txt (public/<key>.txt).
+      INDEXNOW_KEY: 26311cdcef15d68de328fb2872e6d8e9
+      SITE_HOST: mindsecurity.org
+      INDEXNOW_ALL: ${{ inputs.indexnow_all || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - uses: actions/download-artifact@v4
+        with:
+          name: prev-sitemap
+      # The query string skips Cloudflare's cache so this is the sitemap that was just deployed.
+      - run: curl -fsS --retry 5 --retry-delay 10 "https://mindsecurity.org/sitemap.xml?cb=${GITHUB_SHA}" -o sitemap.xml
+      - run: node scripts/indexnow.mjs prev-sitemap.xml sitemap.xml

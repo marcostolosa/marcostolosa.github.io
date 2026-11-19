@@ -1,5 +1,6 @@
 // Structured data (JSON-LD) and the list of indexable URLs. One place, so the sitemap, llms.txt and
 // the pages cannot disagree about what exists.
+import { execFileSync } from 'node:child_process';
 import { getCollection } from 'astro:content';
 import { htmlLang, locales, localize, slugOf, type Lang } from '../i18n/ui';
 import { links, profile } from './profile';
@@ -55,24 +56,40 @@ export const graph = (...nodes: object[]) => ({ '@context': 'https://schema.org'
 
 export type SitemapEntry = { path: string; lang: Lang; alternates: Partial<Record<Lang, string>>; lastmod?: Date };
 
+/** Date of the last commit that touched any of these files; undefined when the git history is not there. */
+function gitDate(...files: string[]): Date | undefined {
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...files], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return out ? new Date(out) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Every indexable page. Redirect stubs and the 404 are not here. */
 export async function sitemapEntries(): Promise<SitemapEntry[]> {
-  const both = (path: string): SitemapEntry[] => {
+  // <lastmod> only where it is true: a writeup's `updated` (or its date), and the commit date of the data behind
+  // the home, the writeups index and the tool pages. Search engines ignore a lastmod they cannot trust.
+  const homeMod = gitDate('src/data/profile.ts', 'src/components/Home.astro');
+  const toolMod = gitDate('src/data/toolpages.ts');
+  const both = (path: string, lastmod?: Date): SitemapEntry[] => {
     const alternates = Object.fromEntries(locales.map((l) => [l, localize(path, l)])) as Record<Lang, string>;
-    return locales.map((lang) => ({ path: alternates[lang], lang, alternates }));
+    return locales.map((lang) => ({ path: alternates[lang], lang, alternates, lastmod }));
   };
   const writeups = (await getCollection('writeups', (w) => !w.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   const ids = new Set(writeups.map((w) => w.id));
+  const mod = (w: (typeof writeups)[number]) => w.data.updated ?? w.data.date;
+  const newestWriteup = writeups.reduce<Date | undefined>((a, w) => (!a || mod(w) > a ? mod(w) : a), undefined);
   return [
-    ...both('/'),
-    ...both('/writeups/'),
+    ...both('/', homeMod),
+    ...both('/writeups/', newestWriteup),
     ...writeups.map((w) => {
       const lang = w.data.lang as Lang;
       const path = localize(`/writeups/${slugOf(w.id)}/`, lang);
       const other: Lang = lang === 'en' ? 'pt-br' : 'en';
       const pair = w.data.pair && ids.has(w.data.pair) ? { [other]: localize(`/writeups/${slugOf(w.data.pair)}/`, other) } : {};
-      return { path, lang, alternates: { [lang]: path, ...pair }, lastmod: w.data.date };
+      return { path, lang, alternates: { [lang]: path, ...pair }, lastmod: mod(w) };
     }),
-    ...Object.keys(toolPages).flatMap((tool) => both(`/${tool}/`)),
+    ...Object.keys(toolPages).flatMap((tool) => both(`/${tool}/`, toolMod)),
   ];
 }

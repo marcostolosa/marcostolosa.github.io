@@ -20,6 +20,9 @@ const writeups = defineCollection({
     seoTitle: z.string().max(60).optional(),
     description: z.string().max(160).optional(),
     date: z.coerce.date(),
+    // Set when the article changes in a way a reader would notice (new steps, corrected facts, not typos).
+    // It becomes the sitemap's <lastmod>; without it the publication date is used.
+    updated: z.coerce.date().optional(),
     lang: z.enum(['en', 'pt-br']).default('en'),
     target: z.string().optional(),
     cve: z.string().optional(),

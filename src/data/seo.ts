@@ -46,6 +46,19 @@ export const websiteSchema = (lang: Lang) => ({
   publisher: { '@id': PERSON_ID },
 });
 
+/** The consulting work itself, for pages that offer it. Worldwide, remote, English and Portuguese. */
+export const serviceSchema = (lang: Lang) => ({
+  '@type': 'ProfessionalService',
+  '@id': `${SITE}/#service`,
+  name: `${profile.name} (${profile.handle})`,
+  url: abs(localize('/', lang)),
+  description: profile.lede[lang],
+  provider: { '@id': PERSON_ID },
+  areaServed: 'Worldwide',
+  availableLanguage: ['en', 'pt-BR'],
+  serviceType: ['Penetration testing', 'Red team engagements', 'Bug bounty and vulnerability research', 'Active Directory security assessment'],
+});
+
 export const breadcrumbSchema = (trail: [name: string, path: string][]) => ({
   '@type': 'BreadcrumbList',
   itemListElement: trail.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: abs(path) })),

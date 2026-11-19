@@ -59,13 +59,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # What the live site lists today, before this deploy replaces it. The IndexNow job submits the difference.
-      # If the fetch fails the file is empty and every URL counts as new, which is harmless.
-      - run: curl -fsS --retry 3 "https://mindsecurity.org/sitemap.xml?cb=${GITHUB_SHA}" -o prev-sitemap.xml || echo '<urlset/>' > prev-sitemap.xml
+      # The sitemap that is about to go live, handed to the IndexNow job. The runner cannot fetch the public site:
+      # Cloudflare answers GitHub's datacenter addresses with 403.
       - uses: actions/upload-artifact@v4
         with:
-          name: prev-sitemap
-          path: prev-sitemap.xml
+          name: new-sitemap
+          path: dist/sitemap.xml
           retention-days: 1
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -101,10 +100,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: scripts
+          sparse-checkout: |
+            scripts
+            public
+          sparse-checkout-cone-mode: false
       - uses: actions/download-artifact@v4
         with:
-          name: prev-sitemap
-      # The query string skips Cloudflare's cache so this is the sitemap that was just deployed.
-      - run: curl -fsS --retry 5 --retry-delay 10 "https://mindsecurity.org/sitemap.xml?cb=${GITHUB_SHA}" -o sitemap.xml
-      - run: node scripts/indexnow.mjs prev-sitemap.xml sitemap.xml
+          name: new-sitemap
+      # The sitemap submitted last time. The cache is the memory between runs; the newest entry wins.
+      - uses: actions/cache/restore@v4
+        with:
+          path: indexnow-prev
+          key: indexnow-sitemap-${{ github.run_id }}
+          restore-keys: indexnow-sitemap-
+      - name: Submit what changed
+        run: |
+          mkdir -p indexnow-prev
+          [ -f indexnow-prev/sitemap.xml ] || echo '<urlset/>' > indexnow-prev/sitemap.xml
+          node scripts/indexnow.mjs indexnow-prev/sitemap.xml sitemap.xml
+      - name: Remember it
+        run: cp sitemap.xml indexnow-prev/sitemap.xml
+      - uses: actions/cache/save@v4
+        with:
+          path: indexnow-prev
+          key: indexnow-sitemap-${{ github.run_id }}

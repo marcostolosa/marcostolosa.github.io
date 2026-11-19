@@ -45,11 +45,13 @@ if (urlList.length === 0) {
 }
 if (process.env.DRY_RUN === '1') process.exit(0);
 
-// The key file has to be reachable before IndexNow will accept the batch.
+// IndexNow fetches the key file itself, so it has to ship with the site. Checked in the repo rather than over
+// the network: the CI runner cannot reach the public site (Cloudflare answers GitHub's addresses with 403).
 const keyLocation = `https://${host}/${key}.txt`;
-const live = await fetch(`${keyLocation}?cb=${Date.now()}`).catch(() => null);
-if (!live?.ok || (await live.text()).trim() !== key) {
-  console.error(`key file not served at ${keyLocation}; not submitting.`);
+let shipped = '';
+try { shipped = readFileSync(`public/${key}.txt`, 'utf8').trim(); } catch {}
+if (shipped !== key) {
+  console.error(`public/${key}.txt is missing or does not contain the key; not submitting.`);
   process.exit(1);
 }
 

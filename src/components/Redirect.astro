@@ -2,12 +2,18 @@
 // A page that only forwards: the site root, and every address from before pages moved under /en-us/ and /pt-br/.
 // GitHub Pages cannot send a 301, so this is a script (keeps ?query and #hash) with a meta refresh for no-JS clients.
 // Search engines read an instant meta refresh as a permanent redirect, so the old addresses carry no noindex.
+// Bing's URL Inspection flags a missing meta description and any meta refresh. The description is always set.
+// The root has no meta refresh at all (not even in <noscript>): it carries visible links to both languages,
+// so a visitor without JavaScript still gets through, and the root is the page people search for by name.
+import { profile } from '../data/profile';
+
 interface Props {
   to: string;
   /** Root only: a visitor who chose Portuguese, or whose browser is in Portuguese, goes here instead. */
   pt?: string;
 }
 const { to, pt } = Astro.props;
+const description = `${profile.name} (${profile.handle}). ${profile.lede.en}`;
 const abs = new URL(to, Astro.site);
 const pick = pt
   ? `var t=${JSON.stringify(to)};try{var p=localStorage.getItem('lang');if(p==='pt-br'||(!p&&/^pt\\b/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'')))t=${JSON.stringify(pt)}}catch(e){}`
@@ -18,13 +24,14 @@ const pick = pt
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Marcos Tolosa (Tr0p)</title>
+    <title>Marcos Tolosa (Tr0p): red team, pentest, bug bounty</title>
+    <meta name="description" content={description} />
     <link rel="canonical" href={abs} />
     {pt && <link rel="alternate" hreflang="en-US" href={abs} />}
     {pt && <link rel="alternate" hreflang="pt-BR" href={new URL(pt, Astro.site)} />}
     {pt && <link rel="alternate" hreflang="x-default" href={abs} />}
     <script is:inline set:html={`${pick}location.replace(t+location.search+location.hash);`} />
-    {pt ? <noscript><meta http-equiv="refresh" content={`0; url=${to}`} /></noscript> : <meta http-equiv="refresh" content={`0; url=${to}`} />}
+    {!pt && <meta http-equiv="refresh" content={`0; url=${to}`} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <style is:inline>html { background: #030604; color: #bfe9d2; font: 15px/1.6 ui-monospace, Menlo, monospace; } body { margin: 15vh 8vw; } h1 { font-size: 1rem; } a { color: #6dffb8; }</style>
   </head>

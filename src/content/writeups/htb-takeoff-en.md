@@ -95,7 +95,7 @@ I created and activated a workflow with an **Execute Command** node behind a web
 mountinfo: 8:4 /home/kpark /root rw,relatime - ext4 /dev/sda4 rw
 ```
 
-That handed over three things at once: the `user.txt` (`86b4af3547c5baf49287e3814a00b00c`), n8n's credential-encryption key, and a place to plant an `authorized_keys` that turns into SSH as `kpark` on the host. I tested the container's capabilities before going further: no `CAP_SYS_ADMIN`, no `docker.sock`, and the device cgroup blocked reading `/dev/sda4` directly. The container alone couldn't read `root.txt`; that needed one more step on the host.
+That handed over three things at once: the `user.txt` (value omitted), n8n's credential-encryption key, and a place to plant an `authorized_keys` that turns into SSH as `kpark` on the host. I tested the container's capabilities before going further: no `CAP_SYS_ADMIN`, no `docker.sock`, and the device cgroup blocked reading `/dev/sda4` directly. The container alone couldn't read `root.txt`; that needed one more step on the host.
 
 ## Root on the host: a SUID bit planted by whoever controls the bind mount
 
@@ -112,7 +112,7 @@ chown root:root /root/.x && chmod 4755 /root/.x
 # back as kpark, over SSH with the planted key:
 /home/kpark/.x -p -c "id; cat /root/root.txt"
 → uid=1001(kpark) gid=1001(kpark) euid=0(root)
-→ 4daee69e4e624786aa3aa05e1c422f5d
+→ [flag omitted]
 ```
 
 ![euid=0 through the planted SUID bash, root.txt read](/img/takeoff-05-root.webp)

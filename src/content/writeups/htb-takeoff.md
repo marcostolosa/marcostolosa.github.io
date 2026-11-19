@@ -95,7 +95,7 @@ Criei e ativei um workflow com um nó **Execute Command** por trás de um webhoo
 mountinfo: 8:4 /home/kpark /root rw,relatime - ext4 /dev/sda4 rw
 ```
 
-Isso deu três coisas de uma vez: a `user.txt` (`86b4af3547c5baf49287e3814a00b00c`), a chave de criptografia de credenciais do n8n, e um lugar para plantar um `authorized_keys` que vira SSH como `kpark` no host. Testei as caps do container antes de ir mais longe: sem `CAP_SYS_ADMIN`, sem `docker.sock`, e o device cgroup bloqueava leitura de `/dev/sda4` diretamente. O container sozinho não lia o `root.txt`; precisava de um passo a mais no host.
+Isso deu três coisas de uma vez: a `user.txt` (valor omitido), a chave de criptografia de credenciais do n8n, e um lugar para plantar um `authorized_keys` que vira SSH como `kpark` no host. Testei as caps do container antes de ir mais longe: sem `CAP_SYS_ADMIN`, sem `docker.sock`, e o device cgroup bloqueava leitura de `/dev/sda4` diretamente. O container sozinho não lia o `root.txt`; precisava de um passo a mais no host.
 
 ## Root no host: SUID plantado por quem controla o bind mount
 
@@ -112,7 +112,7 @@ chown root:root /root/.x && chmod 4755 /root/.x
 # de volta como kpark, por SSH com a chave plantada:
 /home/kpark/.x -p -c "id; cat /root/root.txt"
 → uid=1001(kpark) gid=1001(kpark) euid=0(root)
-→ 4daee69e4e624786aa3aa05e1c422f5d
+→ [flag omitida]
 ```
 
 ![euid=0 pela bash SUID plantada, root.txt lido](/img/takeoff-05-root.webp)

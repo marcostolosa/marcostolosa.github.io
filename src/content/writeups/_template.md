@@ -19,7 +19,7 @@ draft: true
 ## Exploitation
 
 ```bash
-# PoC — authorized lab only
+# PoC: authorized lab only
 ```
 
 ## Detection & fix

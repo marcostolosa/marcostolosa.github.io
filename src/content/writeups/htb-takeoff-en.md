@@ -13,7 +13,7 @@ pair: "htb-takeoff"
 draft: false
 ---
 
-Takeoff is a Hack The Box Linux box: one web application, "HTB Airways Booking", written in Go with Echo. No other host in scope, no writeup consulted — the whole chain was found and proven against the target itself. This writeup follows it in the order it happened, from reading a file to `euid=0` on the host.
+Takeoff is a Hack The Box Linux box: one web application, "HTB Airways Booking", written in Go with Echo. No other host in scope, no writeup consulted: the whole chain was found and proven against the target itself. This writeup follows it in the order it happened, from reading a file to `euid=0` on the host.
 
 The terminal outputs were arranged into readable panels from the session logs; the screenshots are real captures. Passwords, hashes and flags are redacted or edited.
 
@@ -23,38 +23,38 @@ The terminal outputs were arranged into readable panels from the session logs; t
 nmap -Pn -sT -p- --min-rate 400 -T4 --open 10.129.250.248
 ```
 
-Only two ports open: `22` (OpenSSH 10.0p2, Debian 13) and `80` (nginx in front of the Go app). No extra vhosts, no exposed admin routes. The session uses an HS256 JWT (`session_token`), strictly validated — neither `alg: none` nor a tampered token gets through.
+Only two ports open: `22` (OpenSSH 10.0p2, Debian 13) and `80` (nginx in front of the Go app). No extra vhosts, no exposed admin routes. The session uses an HS256 JWT (`session_token`), strictly validated: neither `alg: none` nor a tampered token gets through.
 
 ![nmap: only 22 and 80 open on the target](/img/takeoff-01-nmap.webp)
 
 ## SSTI in a ticket's notes field
 
-The app lets you annotate a ticket (`POST /tickets/{PNR}/notes`) and then preview or download it (`GET /tickets/{PNR}/preview`, `/download`). The preview renders the `notes` field with Go's `text/template` — the plain-text template package, not `html/template`, which at least would have escaped the HTML.
+The app lets you annotate a ticket (`POST /tickets/{PNR}/notes`) and then preview or download it (`GET /tickets/{PNR}/preview`, `/download`). The preview renders the `notes` field with Go's `text/template`, the plain-text template package, not `html/template`, which at least would have escaped the HTML.
 
 ```
 POST /tickets/XFQXYS/notes
-notes=SSTI proof — 7*7 = {{ printf "%d" 49 }}
+notes=SSTI proof: 7*7 = {{ printf "%d" 49 }}
       --- /etc/passwd ---
       {{ .File "/etc/passwd" }}
 
 GET /tickets/XFQXYS/preview
-→ "SSTI proof — 7*7 = 49 ... root:x:0:0:root:/root:/bin/bash daemon:x:1:1 ..."
+→ "SSTI proof: 7*7 = 49 ... root:x:0:0:root:/root:/bin/bash daemon:x:1:1 ..."
 ```
 
-One detail stood out: purely arithmetic expressions like `{{7*7}}` don't evaluate — they come back literal. What works is any function or method call on the context object, and the context has a `.File` method that reads whatever file the application process can read.
+One detail stood out: purely arithmetic expressions like `{{7*7}}` don't evaluate, they come back literal. What works is any function or method call on the context object, and the context has a `.File` method that reads whatever file the application process can read.
 
 ![SSTI reading /proc/self/environ through the ticket preview](/img/takeoff-02-ssti.webp)
 
 Pointing `.File` at `htb-air.service`'s `/proc/self/environ` returned the process's full environment, with two variables that decided the rest of the chain:
 
-- `TICKET_VALIDATION_TOKEN` — the HMAC-SHA256 key that signs check-in QR codes.
-- `N8N_API_KEY` — an API key for the internal n8n instance.
+- `TICKET_VALIDATION_TOKEN`: the HMAC-SHA256 key that signs check-in QR codes.
+- `N8N_API_KEY`: an API key for the internal n8n instance.
 
 I validated the first one right away: computed the HMAC of a real QR with the leaked key and it matched the QR's own signature byte for byte.
 
 ## RCE as www-data via a forged QR
 
-The check-in flow (`POST /api/check-in`) decodes a Go `gob` blob — `VerifyTicketAuthenticity{PNR, Name, NotifyCmd, ...}` — verifies the HMAC signature, then runs the `NotifyCmd` field through a shell. With the leaked key in hand, forging a valid QR with an arbitrary command is just arithmetic:
+The check-in flow (`POST /api/check-in`) decodes a Go `gob` blob, `VerifyTicketAuthenticity{PNR, Name, NotifyCmd, ...}`, verifies the HMAC signature, then runs the `NotifyCmd` field through a shell. With the leaked key in hand, forging a valid QR with an arbitrary command is just arithmetic:
 
 ```
 forged QR: VerifyTicketAuthenticity{ PNR: "XFQXYS", ..., NotifyCmd:
@@ -76,7 +76,7 @@ GET /tickets/XFQXYS/preview  (notes = {{ .File "/tmp/p" }})
 
 ![RCE confirmed: id returns www-data](/img/takeoff-03-rce.webp)
 
-`www-data` had no sudo, no exploitable SUID binaries, no interesting cron job, and `/home/kpark/user.txt` refused to be read directly — local enumeration needed another target. The `htb-air.service` process pointed to an n8n instance listening only on loopback, port `5678`.
+`www-data` had no sudo, no exploitable SUID binaries, no interesting cron job, and `/home/kpark/user.txt` refused to be read directly, local enumeration needed another target. The `htb-air.service` process pointed to an n8n instance listening only on loopback, port `5678`.
 
 ## n8n: owner key, Execute Command, container root
 
@@ -89,17 +89,17 @@ POST http://127.0.0.1:5678/webhook/q   {"cmd":"id;hostname;grep CapEff /proc/sel
 
 ![n8n API key authenticated, command running as root inside the container](/img/takeoff-04-n8n.webp)
 
-I created and activated a workflow with an **Execute Command** node behind a webhook; any request to it runs as `root` inside the n8n container. The first thing I checked was what that root could touch outside the container itself — and `/root` turned out to be a read-write bind mount of the host's `/home/kpark`:
+I created and activated a workflow with an **Execute Command** node behind a webhook; any request to it runs as `root` inside the n8n container. The first thing I checked was what that root could touch outside the container itself: `/root` turned out to be a read-write bind mount of the host's `/home/kpark`:
 
 ```
 mountinfo: 8:4 /home/kpark /root rw,relatime - ext4 /dev/sda4 rw
 ```
 
-That handed over three things at once: the `user.txt` (`86b4af3547c5baf49287e3814a00b00c`), n8n's credential-encryption key, and a place to plant an `authorized_keys` that turns into SSH as `kpark` on the host. I tested the container's capabilities before going further — no `CAP_SYS_ADMIN`, no `docker.sock`, and the device cgroup blocked reading `/dev/sda4` directly. The container alone couldn't read `root.txt`; that needed one more step on the host.
+That handed over three things at once: the `user.txt` (`86b4af3547c5baf49287e3814a00b00c`), n8n's credential-encryption key, and a place to plant an `authorized_keys` that turns into SSH as `kpark` on the host. I tested the container's capabilities before going further: no `CAP_SYS_ADMIN`, no `docker.sock`, and the device cgroup blocked reading `/dev/sda4` directly. The container alone couldn't read `root.txt`; that needed one more step on the host.
 
 ## Root on the host: a SUID bit planted by whoever controls the bind mount
 
-The same partition the container had mounted as `/root` is, on the host, `/home` on `/dev/sda4` — mounted **without `nosuid`**. That turns any write from the container's root into that directory into a SUID opportunity:
+The same partition the container had mounted as `/root` is, on the host, `/home` on `/dev/sda4`, mounted **without `nosuid`**. That turns any write from the container's root into that directory into a SUID opportunity:
 
 ```
 # as kpark, on the host:
@@ -123,13 +123,13 @@ The SUID binary created for the test (`/home/kpark/.x`) was removed at the end o
 
 ## What closed and what I'd take forward
 
-A minor finding fell by the wayside: `POST /api/check-in` accepts a check-in QR without requiring a session and without checking who owns the ticket. Since the HMAC signature still blocks forgery without the key, the impact is anonymous replay with PII exposure (passenger name, PNR, seat, email), not execution — but it's the same endpoint that, with the key leaked, became the RCE point.
+A minor finding fell by the wayside: `POST /api/check-in` accepts a check-in QR without requiring a session and without checking who owns the ticket. Since the HMAC signature still blocks forgery without the key, the impact is anonymous replay with PII exposure (passenger name, PNR, seat, email), not execution, but it's the same endpoint that, with the key leaked, became the RCE point.
 
-The lesson I'm taking from this one is about where a secret can live: `TICKET_VALIDATION_TOKEN` and `N8N_API_KEY` had no business sitting in the environment of a process that also has a reachable SSTI — a scoped secret manager would have killed the whole chain at step one. And the bind mount part is a reminder that "root inside the container" is only a real boundary once what the container can write to on the host is also treated as attack surface — `/home` without `nosuid`, plus a directory mounted as the `/root` of an automation service, is root on the host waiting to happen.
+The lesson I'm taking from this one is about where a secret can live: `TICKET_VALIDATION_TOKEN` and `N8N_API_KEY` had no business sitting in the environment of a process that also has a reachable SSTI: a scoped secret manager would have killed the whole chain at step one. And the bind mount part is a reminder that "root inside the container" is only a real boundary once what the container can write to on the host is also treated as attack surface. `/home` without `nosuid`, plus a directory mounted as the `/root` of an automation service, is root on the host waiting to happen.
 
 **Remediation, in order of impact:**
 
-1. Never render user input with `text/template`; for untrusted data, `html/template` alone still isn't enough — treat notes as plain text.
+1. Never render user input with `text/template`; for untrusted data, `html/template` alone still isn't enough; treat notes as plain text.
 2. Keep secrets out of the web process's environment; `TICKET_VALIDATION_TOKEN` should already be rotated.
 3. Check-in: require authentication and ticket ownership, nonce/expiry on the QR, and never derive shell commands from a payload that's only verified by HMAC.
 4. n8n: owner-scoped API keys shouldn't live in third-party services; disable or restrict *Execute Command*; run the container without root.

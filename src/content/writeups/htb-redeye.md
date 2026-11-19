@@ -11,7 +11,7 @@ pair: htb-redeye-en
 draft: false
 ---
 
-A RedEye é uma caixa multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo não é a borda, é o domínio. Este writeup segue a cadeia que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo — não só o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
+A RedEye é uma caixa multi-máquina do Hack The Box. O endereço que a plataforma entrega, `10.129.28.102`, é só a borda: atrás dele existem três máquinas, e o objetivo não é a borda, é o domínio. Este writeup segue a cadeia que funcionou, na ordem em que aconteceu, e explica o mecanismo de cada passo, não só o comando. No fim estão as rotas que fecharam e o que eu levaria para o próximo alvo.
 
 As saídas de terminal foram organizadas em painéis legíveis a partir dos registros da sessão; o print de RDP é uma captura real. Senhas, hashes e flags aparecem omitidos.
 
@@ -111,7 +111,7 @@ O formatter é um ZIP. O extrator usa o nome da entrada como caminho relativo e 
 ..\..\..\..\..\..\..\..\opt\geonetwork\apps\geonetwork\WEB-INF\classes\stage.sh
 ```
 
-`WEB-INF/classes` é o diretório onde a JVM procura classes e configuração. Escrever ali é escrever no classpath da aplicação. O upload devolve 500, mas grava o arquivo antes de reclamar — e o erro entrega o caminho resolvido:
+`WEB-INF/classes` é o diretório onde a JVM procura classes e configuração. Escrever ali é escrever no classpath da aplicação. O upload devolve 500, mas grava o arquivo antes de reclamar, e o erro entrega o caminho resolvido:
 
 ```json
 {"message":"/var/lib/geonetwork/data/formatter/formatter1/../../../../../../../../opt/geonetwork/apps/geonetwork/WEB-INF/classes/stage.sh","code":"runtime_exception"}
@@ -151,14 +151,14 @@ O arquivo não precisa ser um TIFF válido. Basta o nome:
 z";\! id > /tmp/gisops-id;-- .tif
 ```
 
-O `id` sai como `gisops` (uid 997). O próximo alvo estava no diretório ao lado: `/etc/airport-gis/notify.env`, `root:gisops` e modo 0640 — legível, portanto, pelo `gisops`.
+O `id` sai como `gisops` (uid 997). O próximo alvo estava no diretório ao lado: `/etc/airport-gis/notify.env`, `root:gisops` e modo 0640, legível, portanto, pelo `gisops`.
 
 ```text
 RC_USER=...
 RC_PASS=<redacted>
 ```
 
-A senha do Rocket.Chat era a senha de domínio de `gabby.t`. O bind LDAPS em 636 voltou `rc=0`, e o domínio tinha `lockoutThreshold=0` — sem bloqueio para quem quisesse testar.
+A senha do Rocket.Chat era a senha de domínio de `gabby.t`. O bind LDAPS em 636 voltou `rc=0`, e o domínio tinha `lockoutThreshold=0`, sem bloqueio para quem quisesse testar.
 
 ![O script do ingest, o nome que injeta SQL e a execução como gisops; a senha do chat aparece redigida](/img/redeye-04-gisops.webp)
 
@@ -192,7 +192,7 @@ O mesmo canal ainda aceita `watch.integrations` com `clientAction: inserted`, o 
 
 Com `gabby.t`, a enumeração do AD por LDAPS 636 (LDAP sobre TLS) foi direta: usuários, grupos, ACLs, zonas DNS e templates. Só LDAPS; a 389 não existia. Dois achados mudaram o mapa.
 
-O primeiro foi a zona ADIDNS `airwayhtb`. Zonas DNS podem viver dentro do AD, e essa concedia `CreateChild` a `Authenticated Users` — o direito de criar registros filhos. `gabby.t` criou um wildcard `*` apontando para `192.168.100.2`. O DNS do DC01 passou a servir esse A para qualquer nome inexistente em cerca de 30 segundos. É coerção NTLM passiva: qualquer serviço do DC01 que resolva um nome que não existe autentica para o GN01. Registros de host existentes não eram graváveis (`rc=50`) e update dinâmico não assinado era recusado (`rcode=9`). O relay para LDAPS e o RBCD chegaram a ser preparados, mas nenhum serviço do DC01 resolveu o nome inexistente na janela; a rota fechou.
+O primeiro foi a zona ADIDNS `airwayhtb`. Zonas DNS podem viver dentro do AD, e essa concedia `CreateChild` a `Authenticated Users`: o direito de criar registros filhos. `gabby.t` criou um wildcard `*` apontando para `192.168.100.2`. O DNS do DC01 passou a servir esse A para qualquer nome inexistente em cerca de 30 segundos. É coerção NTLM passiva: qualquer serviço do DC01 que resolva um nome que não existe autentica para o GN01. Registros de host existentes não eram graváveis (`rc=50`) e update dinâmico não assinado era recusado (`rcode=9`). O relay para LDAPS e o RBCD chegaram a ser preparados, mas nenhum serviço do DC01 resolveu o nome inexistente na janela; a rota fechou.
 
 O segundo foi `isabel.o`. A conta é membro **direto** de `BUILTIN\Administrators` no WKSTN01 (RID 1638):
 
@@ -209,7 +209,7 @@ ISABEL USER_TXT_LEN: 34
 GABBY C$: ERR 0xc0000022 STATUS_ACCESS_DENIED
 ```
 
-No DC01, `isabel.o` também tinha RDP, o grupo `GP Management` e acesso ao diretório de política do CA. A sessão RDP não era administrativa — a própria console avisa —, mas era uma sessão de domínio válida em cima do Domain Controller:
+No DC01, `isabel.o` também tinha RDP, o grupo `GP Management` e acesso ao diretório de política do CA. A sessão RDP não era administrativa (a própria console avisa), mas era uma sessão de domínio válida em cima do Domain Controller:
 
 ![Sessão RDP em DC01 com isabel.o: o sconfig mostra o domínio e o nome do DC, e a console avisa que a sessão não é administrativa](/img/redeye-06-rdp.webp)
 
@@ -221,7 +221,7 @@ O ADCS é a PKI da Microsoft. Uma autoridade certificadora emite certificados co
 
 O CA `AIRWAYS-DC01-CA` usa o `TameMyCerts.Policy`, um módulo de política de terceiros que reescreve o SAN e adiciona extensões customizadas a partir de um XML por template. O `PolicyDirectory` é `C:\PolicyFiles`, e o esquema é `<TemplateName>.xml` relido **a cada pedido**, sem restart do serviço.
 
-A ACL é o problema: `BUILTIN\Users` tem `(CI)(AD)` e `(CI)(WD)`, ou seja, pode criar arquivos novos. Os existentes, como `GroupPolicy_Audit.xml`, são imutáveis — o que dá a falsa sensação de que o diretório está protegido. O template `User` pode ser solicitado por Domain Users e tem EKU de client auth.
+A ACL é o problema: `BUILTIN\Users` tem `(CI)(AD)` e `(CI)(WD)`, ou seja, pode criar arquivos novos. Os existentes, como `GroupPolicy_Audit.xml`, são imutáveis, o que dá a falsa sensação de que o diretório está protegido. O template `User` pode ser solicitado por Domain Users e tem EKU de client auth.
 
 Criei `C:\PolicyFiles\User.xml` como `isabel.o`, com duas partes. A primeira limpa o SAN que o requerente já envia: as regras com `Value=""` e `Force=true` removem o UPN e o rfc822Name da isabel, e a regra seguinte injeta o UPN do Administrator. A segunda adiciona a extensão SID (`1.3.6.1.4.1.311.25.2`) com o DER do SID `-500`:
 
@@ -316,4 +316,4 @@ O segundo detalhe é o KDC. Um certificado com SID `-500` não é um certificado
 
 O terceiro é a fronteira. `127.0.0.1` não é autenticação depois que você tem código no host. O transporter do Moleculer, o cache de settings e o registro público formam uma cadeia de três passos que cria um admin do zero. O mesmo raciocínio vale para o `notify.env`: uma senha de serviço de chat era a senha de domínio de uma pessoa, e o domínio não tinha lockout.
 
-Por último, o `raster2pgsql`: nome de arquivo não é identificador confiável. O `\!` do psql transforma uma injeção de nome de tabela em shell. Se o serviço roda como uma conta de serviço, o banco é o menor dos problemas. E se a zona DNS do AD aceita `CreateChild` de qualquer usuário autenticado, a coerção NTLM vira uma questão de tempo — mesmo que nessa caixa ela não tenha fechado.
+Por último, o `raster2pgsql`: nome de arquivo não é identificador confiável. O `\!` do psql transforma uma injeção de nome de tabela em shell. Se o serviço roda como uma conta de serviço, o banco é o menor dos problemas. E se a zona DNS do AD aceita `CreateChild` de qualquer usuário autenticado, a coerção NTLM vira uma questão de tempo, mesmo que nessa caixa ela não tenha fechado.

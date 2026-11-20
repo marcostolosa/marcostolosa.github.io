@@ -68,6 +68,36 @@ const text = {
           var type = pageType.getAttribute('data-page-type') || 'content';
           emit('view_offer', { offer_name: type, page_language: d.documentElement.lang });
           if (clarity) window.clarity('set', 'page_type', type);
+
+          // How far the visitor got: each section seen once (event section_<name>, so it works as a funnel step
+          // without custom dimensions), scroll depth, and which FAQ questions get opened.
+          var lang = d.documentElement.lang;
+          if ('IntersectionObserver' in window) {
+            var seen = new IntersectionObserver(function (entries) {
+              entries.forEach(function (en) {
+                if (!en.isIntersecting) return;
+                seen.unobserve(en.target);
+                var id = (en.target.getAttribute('aria-labelledby') || en.target.className || 'section').replace(/-title$/, '').slice(0, 24);
+                emit('section_' + id.replace(/[^a-z0-9_]/gi, '_'), { section_id: id, offer_name: type, page_language: lang });
+              });
+            }, { threshold: 0.35 });
+            d.querySelectorAll('[data-page-type] section[aria-labelledby], [data-page-type] section.offer').forEach(function (s) { seen.observe(s); });
+          }
+          var marks = [25, 50, 75, 90], hit = {};
+          window.addEventListener('scroll', function () {
+            var h = d.documentElement.scrollHeight - window.innerHeight;
+            if (h <= 0) return;
+            var pct = (window.scrollY / h) * 100;
+            marks.forEach(function (m) {
+              if (pct >= m && !hit[m]) { hit[m] = 1; emit('scroll_depth_' + m, { percent: m, offer_name: type, page_language: lang }); }
+            });
+          }, { passive: true });
+          d.addEventListener('toggle', function (e) {
+            var t = e.target;
+            if (!t || t.tagName !== 'DETAILS' || !t.open || !t.closest('[data-page-type]')) return;
+            var s = t.querySelector('summary');
+            emit('faq_open', { question: s ? (s.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) : '', offer_name: type, page_language: lang });
+          }, true);
         }
         d.addEventListener('click', function (e) {
           var a = e.target && e.target.closest && e.target.closest('a[href]');
